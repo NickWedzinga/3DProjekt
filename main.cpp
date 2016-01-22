@@ -9,6 +9,10 @@
 #include <SimpleMath.inl>
 #include <DirectXMath.h>
 #include "bth_image.h"
+#include <sstream> //obj
+#include <fstream> //obj
+#include <vector> //obj
+
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 
@@ -41,6 +45,7 @@ float background[3]{0, 0, 0};
 
 using namespace DirectX::SimpleMath;
 using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
+using namespace std;
 
 float angle = 0;
 
@@ -154,6 +159,49 @@ void Texture()
 	resViewDesc.Texture2D.MostDetailedMip = 0;
 	hr = gDevice->CreateShaderResourceView(tex, &resViewDesc, &textureView);
 	tex->Release(); //Hur är det med release nu då
+}
+
+void OBJLoader()
+{
+	string myFile("cube.obj"), special;
+	string line2;
+	ifstream file(myFile);
+	istringstream inputString;
+	struct VertexPos { float x, y, z;  };
+	vector<VertexPos> vertices;
+	VertexPos vtx;
+	//skapa fler vertexpos för de andra vertexerna? vt, vn osv
+
+	while (getline(file, line2))
+	{
+		inputString.str(line2);
+		if (line2.substr(0, 2) == "v ")
+		{
+			inputString >> special >> vtx.x >> vtx.y >> vtx.z;
+			vertices.push_back(vtx);
+		}
+		if (line2.substr(0, 2) == "vn")
+		{
+			//normals?
+		}
+		if (line2.substr(0, 2) == "vt")
+		{
+			// ??
+		}
+		if (line2.substr(0, 2) == "f ")
+		{
+			//spara 1/2/3 på 3 olika? vad gör dessa?
+		}
+		if (line2.substr(0, 2) == "mtllib ")
+		{
+			//nästföljande ord är bilden, måste öppnas? kalla på en annan funktion som läser mtl fil
+		}
+		if (line2.substr(0, 2) == "usemtl ")
+		{
+			//load mtl image or something
+		}
+	}
+	file.close();
 }
 
 void CreateShaders()
@@ -328,6 +376,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		SetViewport(); //3. Sätt viewport
 
 		constantBuffer();
+		OBJLoader();
 
 		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
 		TwWindowSize(WIDTH,HEIGHT);
