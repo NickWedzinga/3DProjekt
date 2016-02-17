@@ -4,7 +4,7 @@ SamplerState sampAni;
 struct PS_IN
 {
 	float4 Pos : SV_POSITION;
-	float2 Uv : UV;
+	float2 Uv : UV; 
 	float3 Normal : NORMAL;
 	float3 WorldPos : WORLDPOS;
 };
@@ -12,6 +12,8 @@ struct PS_IN
 cbuffer CONSTANT_BUFFER : register(b0)
 {
 	matrix WorldMatrix;
+	matrix WorldMatrix2;
+	matrix WorldMatrix3;
 	matrix ViewMatrix;
 	matrix ProjMatrix;
 };

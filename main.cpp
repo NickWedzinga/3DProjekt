@@ -43,18 +43,24 @@ ID3D11ShaderResourceView* textureView;
 TwBar *gMyBar;
 float background[3]{0, 0, 0};
 
+//struct VertexData { float x, y, z, u, v, x2, y2, z2; }; 
+//vector<VertexData> triangleVertices;						
+
 using namespace DirectX::SimpleMath;
 using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
 using namespace std;
 
+float angleX = 0;
 float angle = 0;
+float angleZ = 0;
 
 struct CONSTANT_BUFFER 
 {
 	XMMATRIX WorldMatrix;
+	XMMATRIX WorldMatrix2;
+	XMMATRIX WorldMatrix3;
 	XMMATRIX ViewMatrix;
 	XMMATRIX ProjMatrix;
-	XMFLOAT4 Color = XMFLOAT4(1, 0, 0, 1);
 };
 
 CONSTANT_BUFFER cData;
@@ -62,6 +68,16 @@ CONSTANT_BUFFER cData;
 void CreateWorldMatrix()
 {
 	cData.WorldMatrix = XMMatrixRotationY(angle);
+}
+
+void CreateWorldMatrix2()
+{
+	cData.WorldMatrix2 = XMMatrixRotationX(angleX);
+}
+
+void CreateWorldMatrix3()
+{
+	cData.WorldMatrix3 = XMMatrixRotationZ(angleZ); 
 }
 
 void CreateViewMatrix()
@@ -89,6 +105,8 @@ void CreateProjMatrix()
 void constantBuffer()
 {
 	CreateWorldMatrix();
+	CreateWorldMatrix2();
+	CreateWorldMatrix3();
 	CreateViewMatrix();
 	CreateProjMatrix();
 
@@ -163,15 +181,28 @@ void Texture()
 
 void OBJLoader()
 {
-	string myFile("cube.obj"), special;
-	string line2;
+	string myFile("box.obj"), special, line2;
 	ifstream file(myFile);
 	istringstream inputString;
-	struct VertexPos { float x, y, z;  };
-	vector<VertexPos> vertices;
-	VertexPos vtx;
-	//skapa fler vertexpos för de andra vertexerna? vt, vn osv
+	struct VertexData { float x, y, z, u, v, x2, y2, z2; }; //en stor struct som används för att skicka information till VS
+	struct VertexV { float x, y, z; }; //skapar struct med x, y, z värden
+	struct VertexVT { float u, v; };
+	struct VertexVN { float x2, y2, z2; };
 
+	vector<VertexV> vertices;
+	vector<VertexVT> vertices2;
+	vector<VertexVN> vertices3;
+	VertexV vtx = { 0, 0, 0 };
+	VertexVT vtx2 = { 0, 0 };
+	VertexVN vtx3 = { 0, 0, 0 };
+
+	//vector<VertexData> triangleVertices;
+	VertexData triangleVertices[36]; //I DETTA FALLET, FIXA GENERELLT SENARE
+	int i = 0;
+	UINT valueV = 0;
+	UINT valueVT = 0;
+	UINT valueVN = 0;
+	char valueSlash = 0;
 	while (getline(file, line2))
 	{
 		inputString.str(line2);
@@ -180,28 +211,70 @@ void OBJLoader()
 			inputString >> special >> vtx.x >> vtx.y >> vtx.z;
 			vertices.push_back(vtx);
 		}
-		if (line2.substr(0, 2) == "vn")
+		else if (line2.substr(0, 3) == "vt ")
 		{
-			//normals?
+			inputString >> special >> vtx2.u >> vtx2.v;
+			vertices2.push_back(vtx2);
 		}
-		if (line2.substr(0, 2) == "vt")
+		else if (line2.substr(0, 3) == "vn ")
 		{
-			// ??
+			inputString >> special >> vtx3.x2 >> vtx3.y2 >> vtx3.z2;
+			vertices3.push_back(vtx3);
 		}
-		if (line2.substr(0, 2) == "f ")
+		else if (line2.substr(0, 2) == "f ")
 		{
-			//spara 1/2/3 på 3 olika? vad gör dessa?
-		}
-		if (line2.substr(0, 2) == "mtllib ")
-		{
-			//nästföljande ord är bilden, måste öppnas? kalla på en annan funktion som läser mtl fil
-		}
-		if (line2.substr(0, 2) == "usemtl ")
-		{
-			//load mtl image or something
-		}
+			for(int j = 0; j < 3; j++)
+			{
+				if (j == 0)
+				{
+					inputString >> special >> valueV >> valueSlash >> valueVT >> valueSlash >> valueVN;
+				}
+				if (j == 1 || j == 2)
+				{
+					inputString >> valueV >> valueSlash >> valueVT >> valueSlash >> valueVN;
+				}
+				triangleVertices[i].x = vertices.at(valueV - 1).x; //ballar ur här efter ändring av dynamisk array
+				triangleVertices[i].y = vertices.at(valueV - 1).y;
+				triangleVertices[i].z = vertices.at(valueV - 1).z;
+
+				if (valueVT != 0)
+				{
+					triangleVertices[i].u = vertices2.at(valueVT - 1).u;
+					triangleVertices[i].v = vertices2.at(valueVT - 1).v;
+				}
+				else if (valueVT == 0)
+				{
+					triangleVertices[i].u = 0.0f;
+					triangleVertices[i].v = 0.0f;
+				}
+				triangleVertices[i].x2 = vertices3.at(valueVN - 1).x2;
+				triangleVertices[i].y2 = vertices3.at(valueVN - 1).y2;
+				triangleVertices[i].z2 = vertices3.at(valueVN - 1).z2;
+				i++;
+			}
+		}		
+		inputString.clear();
+		//else if (line2.substr(0, 2) == "mtllib ")
+		//{
+		//	//nästföljande ord är bilden, måste öppnas? kalla på en annan funktion som läser mtl fil
+		//}
+		//else if (line2.substr(0, 2) == "usemtl ")
+		//{
+		//	//load mtl image or something
+		//}
 	}
-	file.close();
+	file.close(); //kanske flyttas under VB?
+	
+	D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = sizeof(triangleVertices);
+
+	D3D11_SUBRESOURCE_DATA vertexData;
+	//vertexData.pSysMem = triangleVertices.data();
+	vertexData.pSysMem = triangleVertices;
+	gDevice->CreateBuffer(&bufferDesc, &vertexData, &gVertexBuffer);
 }
 
 void CreateShaders()
@@ -227,8 +300,8 @@ void CreateShaders()
 	//create input layout (verified using vertex shader)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{"UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA,0}
-		//{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "UV", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12 /*kanske 12*/, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0 /*kanske 12?*/, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
@@ -273,33 +346,33 @@ void CreateShaders()
 	pGS->Release();
 }
 
-void CreateTriangleData()
+/*void CreateTriangleData()
 {
 	struct TriangleVertex
 	{
 		float x, y, z;
-		float u, v;
+		float u, v, w;
 	};
-
+	
 	TriangleVertex triangleVertices[6] =
 	{
 		0.5f, 0.5f, 0.0f,
-		1.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
 
 		0.5f, -0.5f, 0.0f,
-		1.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 
 
 		-0.5f, 0.5f, 0.0f,
-		0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 
 
 		-0.5f, 0.5f, 0.0f,
-		0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 
 
 		0.5f, -0.5f, 0.0f,
-		1.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 
 
 		-0.5f, -0.5f, 0.0f,
-		0.0f, 1.0f
+		0.0f, 1.0f, 0.0f
 	};
 
 	D3D11_BUFFER_DESC bufferDesc;
@@ -311,7 +384,7 @@ void CreateTriangleData()
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = triangleVertices;
 	gDevice->CreateBuffer(&bufferDesc, &data, &gVertexBuffer);
-}
+}*/
 
 void SetViewport()
 {
@@ -327,8 +400,9 @@ void SetViewport()
 
 void Update()
 {
-	angle += 0.0001;
 	CreateWorldMatrix();
+	CreateWorldMatrix2();
+	CreateWorldMatrix3();
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr2 = gDeviceContext->Map(gConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -351,7 +425,7 @@ void Render()
 
 	gDeviceContext->PSSetShaderResources(0, 1, &textureView); //Pipelina texturen
 
-	UINT32 vertexSize = sizeof(float) * 5;
+	UINT32 vertexSize = sizeof(float) * 8; //ändrades från 6
 	//UINT32 vertexSize = sizeof(TriangleVertex); //Hade varit snyggt, men hur kommer jag åt den?
 	UINT32 offset = 0;
 
@@ -361,7 +435,10 @@ void Render()
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
-	gDeviceContext->Draw(6, 0);
+	OBJLoader();
+
+	//gDeviceContext->Draw(triangleVertices.size(), 0);
+	gDeviceContext->Draw(36, 0);
 }
 
 int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
@@ -376,17 +453,20 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		SetViewport(); //3. Sätt viewport
 
 		constantBuffer();
-		OBJLoader();
 
 		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
 		TwWindowSize(WIDTH,HEIGHT);
 
 		gMyBar = TwNewBar("KekCity");
 		TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
+		TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
+		TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angle, "min=0.00001 max=360 step=0.1");
+		TwAddVarRW(gMyBar, "RotationZ", TW_TYPE_FLOAT, &angleZ, "min = 0.00001 max = 360 step = 0.1");
 
 		CreateShaders(); //4. Skapa vertex- och pixel-shaders
 
-		CreateTriangleData(); //5. Definiera triangelvertiser, 6. Skapa vertex buffer, 7. Skapa input layout
+		//CreateTriangleData(); //5. Definiera triangelvertiser, 6. Skapa vertex buffer, 7. Skapa input layout
+		//OBJLoader(); //5. Ersätter triangleData senare
 
 		Texture(); //texturladdaren
 		zbuffer(); //mad bufferz
