@@ -17,8 +17,6 @@ struct VS_OUT
 cbuffer CONSTANT_BUFFER : register(b0)
 {
 	matrix WorldMatrix;
-	matrix WorldMatrix2;
-	matrix WorldMatrix3;
 	matrix ViewMatrix;
 	matrix ProjMatrix;
 };
