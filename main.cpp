@@ -70,6 +70,8 @@ struct CONSTANT_BUFFER2
 	XMFLOAT4 KS;
 };
 
+
+
 struct LightBuffer
 {
 	XMVECTOR lightDirection;
@@ -134,6 +136,7 @@ void constantBuffer()
 	CreateViewMatrix();
 	CreateProjMatrix();
 	CreateLightBuffer();
+	
 
 	D3D11_BUFFER_DESC cbDesc;
 	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
@@ -148,6 +151,11 @@ void constantBuffer()
 	InitData.SysMemPitch = 0;
 	InitData.SysMemSlicePitch = 0;
 
+	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gConstantBuffer);
+}
+
+void lightbuffer()
+{
 	D3D11_BUFFER_DESC lightBufferDesc;
 	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	lightBufferDesc.ByteWidth = sizeof(LightBuffer);
@@ -158,11 +166,10 @@ void constantBuffer()
 
 	D3D11_SUBRESOURCE_DATA InitLightData;
 	InitLightData.pSysMem = &lData;
-	InitData.SysMemPitch = 0;
-	InitData.SysMemSlicePitch = 0;
+	InitLightData.SysMemPitch = 0;
+	InitLightData.SysMemSlicePitch = 0;
 
 	gDevice->CreateBuffer(&lightBufferDesc, &InitLightData, &gLightBuffer);
-	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gConstantBuffer);
 }
 
 void constantBuffer2()
@@ -265,22 +272,6 @@ void Texture(string material)
 	MultiByteToWideChar(CP_UTF8, 0, material.c_str(), -1, mat, sizeof(mat) / sizeof(wchar_t));
 
 	CreateWICTextureFromFile(gDevice, mat, NULL, &textureView);
-
-	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	samplerDesc.BorderColor[0] = 0;
-	samplerDesc.BorderColor[1] = 0;
-	samplerDesc.BorderColor[2] = 0;
-	samplerDesc.BorderColor[3] = 0;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	gDevice->CreateSamplerState(&samplerDesc, &sampleState);
 }
 
 void MTLLoader(string mtlfile)
@@ -521,7 +512,8 @@ void Render()
 	gDeviceContext->OMSetRenderTargets(2, gRTVA, gDepthStencilView);
 	// clear the back buffer to a deep blue
 	float clearColor[] = { background[0], background[1], background[2], 1 }; //Så att tweakbar kan användas?
-	for (int i = 0; i < 2;i++)
+	//float clearColor[] = { 0,0,0,0 };
+	for (int i = 0; i < 2; i++)
 		gDeviceContext->ClearRenderTargetView(gRTVA[i], clearColor); //Clear åt zbuffer
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 
@@ -549,7 +541,6 @@ void Render()
 
 	gDeviceContext->Draw(triangleVertices.size(), 0);
 	//gDeviceContext->Draw(36, 0);
-
 
 	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
@@ -581,11 +572,15 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		CreateDirect3DContext(wndHandle); //2. Skapa och koppla SwapChain, Device och Device Context
 
 		SetViewport(); //3. Sätt viewport
+		
+		OBJLoader();	//4. Ersätter triangleData
 
 		constantBuffer();
+		lightbuffer();
 		constantBuffer2();
 		CreateRenderTarget();
-		OBJLoader();	//4. Ersätter triangleData
+		
+		
 
 		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
 		TwWindowSize(WIDTH,HEIGHT);
