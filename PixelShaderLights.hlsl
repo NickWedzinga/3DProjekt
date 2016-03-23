@@ -29,6 +29,5 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	lightIntensity = saturate(dot(normals.xyz, lightDir));
 	outputColor = saturate(colors*lightIntensity);
 
-	//return float4(0,1,0,0);
 	return (outputColor);
 }
