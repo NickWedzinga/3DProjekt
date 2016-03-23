@@ -12,12 +12,14 @@
 #include <sstream> //obj
 #include <fstream> //obj
 #include <vector> //obj
+#include <DDSTextureLoader.h>
+#include <WICTextureLoader.h>
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 
-#define WIDTH 640
-#define HEIGHT 480
+#define WIDTH 640.0f
+#define HEIGHT 480.0f
 
 HWND InitWindow(HINSTANCE hInstance);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -32,57 +34,81 @@ ID3D11DepthStencilView* gDepthStencilView = nullptr;
 
 ID3D11Buffer* gVertexBuffer = nullptr;
 ID3D11Buffer* gConstantBuffer = nullptr;
+ID3D11Buffer* pConstantBuffer = nullptr;
 
 ID3D11InputLayout* gVertexLayout = nullptr;
 ID3D11VertexShader* gVertexShader = nullptr;
 ID3D11GeometryShader* gGeometryShader = nullptr;
 ID3D11PixelShader* gPixelShader = nullptr;
 
+ID3D11RenderTargetView* gRTVA[2];
+ID3D11Texture2D* gRTTA[2];
+ID3D11ShaderResourceView* gSRVA[2];
+ID3D11VertexShader* gVertexShaderLight;
+ID3D11PixelShader* gPixelShaderLight;
+ID3D11InputLayout* gLayoutLight;
+ID3D11Buffer* gLightBuffer;
+
+ID3D11SamplerState* sampleState = 0;
 ID3D11ShaderResourceView* textureView;
-
-TwBar *gMyBar;
-float background[3]{0, 0, 0};
-
-//struct VertexData { float x, y, z, u, v, x2, y2, z2; }; 
-//vector<VertexData> triangleVertices;						
 
 using namespace DirectX::SimpleMath;
 using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
 using namespace std;
 
-float angleX = 0;
-float angle = 0;
-float angleZ = 0;
-
-struct CONSTANT_BUFFER 
+struct CONSTANT_BUFFER
 {
 	XMMATRIX WorldMatrix;
-	XMMATRIX WorldMatrix2;
-	XMMATRIX WorldMatrix3;
 	XMMATRIX ViewMatrix;
 	XMMATRIX ProjMatrix;
 };
 
+struct CONSTANT_BUFFER2
+{
+	XMFLOAT4 KD;
+	XMFLOAT4 KA;
+	XMFLOAT4 KS;
+};
+
+struct LightBuffer
+{
+	XMVECTOR lightDirection;
+	float padding;
+};
+
+
+
+TwBar *gMyBar;
+float background[3]{0, 0, 0};
+
+struct VertexData { float x, y, z, u, v, x2, y2, z2; }; //behövs globalt så att draw kan sättas dynamiskt
+vector<VertexData> triangleVertices; //behövs globalt så att draw kan sättas dynamiskt					
+
+float scaleZ = -3;
+float angleX = 0;
+float angle = 0;
+float angleZ = 0;
+
+
+
 CONSTANT_BUFFER cData;
+CONSTANT_BUFFER2 materialData;
+LightBuffer lData;
+
+void CreateLightBuffer()
+{
+	XMFLOAT3 lightDir = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	lData.lightDirection = XMLoadFloat3(&lightDir);
+}
 
 void CreateWorldMatrix()
 {
-	cData.WorldMatrix = XMMatrixRotationY(angle);
-}
-
-void CreateWorldMatrix2()
-{
-	cData.WorldMatrix2 = XMMatrixRotationX(angleX);
-}
-
-void CreateWorldMatrix3()
-{
-	cData.WorldMatrix3 = XMMatrixRotationZ(angleZ); 
+	cData.WorldMatrix = XMMatrixRotationRollPitchYaw(angleX, angle, angleZ);
 }
 
 void CreateViewMatrix()
 {
-	XMFLOAT3 cam1 = XMFLOAT3(0, 0, -3);
+	XMFLOAT3 cam1 = XMFLOAT3(0, 0, scaleZ);
 	XMFLOAT3 eye1 = XMFLOAT3(0, 0, 0);
 	XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
 
@@ -105,10 +131,9 @@ void CreateProjMatrix()
 void constantBuffer()
 {
 	CreateWorldMatrix();
-	CreateWorldMatrix2();
-	CreateWorldMatrix3();
 	CreateViewMatrix();
 	CreateProjMatrix();
+	CreateLightBuffer();
 
 	D3D11_BUFFER_DESC cbDesc;
 	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
@@ -123,7 +148,39 @@ void constantBuffer()
 	InitData.SysMemPitch = 0;
 	InitData.SysMemSlicePitch = 0;
 
+	D3D11_BUFFER_DESC lightBufferDesc;
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBuffer);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA InitLightData;
+	InitLightData.pSysMem = &lData;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	gDevice->CreateBuffer(&lightBufferDesc, &InitLightData, &gLightBuffer);
 	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gConstantBuffer);
+}
+
+void constantBuffer2()
+{
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER2);
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = &materialData;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &pConstantBuffer);
 }
 
 void zbuffer()
@@ -131,8 +188,8 @@ void zbuffer()
 	HRESULT hr;
 	ID3D11Texture2D* gDepthStencilBuffer = NULL;
 	D3D11_TEXTURE2D_DESC depthDesc;
-	depthDesc.Width = 640.0f;
-	depthDesc.Height = 480.0f;
+	depthDesc.Width = WIDTH;
+	depthDesc.Height = HEIGHT;
 	depthDesc.MipLevels = 1;
 	depthDesc.ArraySize = 1;
 	depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -147,44 +204,126 @@ void zbuffer()
 	hr = gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &gDepthStencilView);
 }
 
-void Texture()
+void CreateRenderTarget()
 {
-	D3D11_TEXTURE2D_DESC texDesc;
-	ZeroMemory(&texDesc, sizeof(texDesc));
-	texDesc.Width = BTH_IMAGE_WIDTH;
-	texDesc.Height = BTH_IMAGE_HEIGHT;
-	texDesc.MipLevels = texDesc.ArraySize = 1;
-	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	texDesc.SampleDesc.Count = 1;
-	texDesc.SampleDesc.Quality = 0;
-	texDesc.Usage = D3D11_USAGE_DEFAULT;
-	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	texDesc.CPUAccessFlags = 0;
-	texDesc.MiscFlags = 0;
+	D3D11_TEXTURE2D_DESC textureDesc;
+	ZeroMemory(&textureDesc, sizeof(textureDesc));
+	textureDesc.Width = WIDTH;
+	textureDesc.Height = HEIGHT;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+	
+	for (int i = 0; i < 2; i++)
+		gDevice->CreateTexture2D(&textureDesc, NULL, &gRTTA[i]);
 
-	ID3D11Texture2D *tex = NULL;
-	D3D11_SUBRESOURCE_DATA texData;
-	ZeroMemory(&texData, sizeof(texData));
-	texData.pSysMem = (void*)BTH_IMAGE_DATA;
-	texData.SysMemPitch = BTH_IMAGE_WIDTH * 4 * sizeof(char);
+	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+	renderTargetViewDesc.Format = textureDesc.Format;
+	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-	HRESULT hr = gDevice->CreateTexture2D(&texDesc, &texData, &tex);
+	for (int i = 0; i < 2; i++)
+		gDevice->CreateRenderTargetView(gRTTA[i], &renderTargetViewDesc, &gRTVA[i]);
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC resViewDesc;
-	resViewDesc.Format = texDesc.Format;
-	resViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	resViewDesc.Texture2D.MipLevels = texDesc.MipLevels;
-	resViewDesc.Texture2D.MostDetailedMip = 0;
-	hr = gDevice->CreateShaderResourceView(tex, &resViewDesc, &textureView);
-	tex->Release(); //Hur är det med release nu då
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+	shaderResourceViewDesc.Format = textureDesc.Format;
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	for (int i = 0; i < 2; i++)
+		gDevice->CreateShaderResourceView(gRTTA[i], &shaderResourceViewDesc, &gSRVA[i]);
+
+}
+
+void InitializeLightShader()
+{
+	ID3D10Blob* pVS = nullptr;
+	ID3D10Blob* pPS = nullptr;
+	D3D11_SAMPLER_DESC samplerDesc;
+
+	D3DCompileFromFile(L"VertexShaderLights.hlsl", nullptr, nullptr, "LightVertexShader", "vs_4_0", 0, 0, &pVS, nullptr);
+
+	D3DCompileFromFile(L"PixelShaderLights.hlsl", nullptr, nullptr, "LightPixelShader", "ps_4_0", 0, 0, &pPS, nullptr);
+
+	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShaderLight);
+	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShaderLight);
+
+	pVS->Release();
+	pPS->Release();
+
+}
+
+void Texture(string material)
+{
+	wchar_t mat[20];
+	MultiByteToWideChar(CP_UTF8, 0, material.c_str(), -1, mat, sizeof(mat) / sizeof(wchar_t));
+
+	CreateWICTextureFromFile(gDevice, mat, NULL, &textureView);
+
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	gDevice->CreateSamplerState(&samplerDesc, &sampleState);
+}
+
+void MTLLoader(string mtlfile)
+{
+	//mtlfile was sent from OBJLOADER, mtlfile == "box.mtl"
+	string myfile(mtlfile), line2, special, material;
+	XMFLOAT4 Kd, Ka, Ks;
+	ifstream file(myfile);
+	istringstream inputString2;
+
+	while (getline(file, line2))
+	{
+		inputString2.str(line2);
+		if (line2.substr(0, 3) == "map")
+		{
+			inputString2 >> special >> material; //material == "cube_box.jpg"
+
+			Texture(material);
+		}
+		else if (line2.substr(0, 3) == "Kd ") //En material, RGB Diffuse
+		{
+			inputString2 >> special >> Kd.x >> Kd.y >> Kd.z;
+			materialData.KD = Kd;
+		}
+		else if (line2.substr(0, 3) == "Ka ")
+		{
+			inputString2 >> special >> Ka.x >> Ka.y >> Ka.z;
+			materialData.KA = Ka;
+		}
+		else if (line2.substr(0, 3) == "Ks ")
+		{
+			inputString2 >> special >> Ks.x >> Ks.y >> Ks.z;
+			materialData.KS = Ks;
+		}
+		inputString2.clear();
+	}
 }
 
 void OBJLoader()
 {
-	string myFile("box.obj"), special, line2;
+	string myFile("sphere1.obj"), special, line2, mtl;
 	ifstream file(myFile);
 	istringstream inputString;
-	struct VertexData { float x, y, z, u, v, x2, y2, z2; }; //en stor struct som används för att skicka information till VS
 	struct VertexV { float x, y, z; }; //skapar struct med x, y, z värden
 	struct VertexVT { float u, v; };
 	struct VertexVN { float x2, y2, z2; };
@@ -196,8 +335,6 @@ void OBJLoader()
 	VertexVT vtx2 = { 0, 0 };
 	VertexVN vtx3 = { 0, 0, 0 };
 
-	//vector<VertexData> triangleVertices;
-	VertexData triangleVertices[36]; //I DETTA FALLET, FIXA GENERELLT SENARE
 	int i = 0;
 	UINT valueV = 0;
 	UINT valueVT = 0;
@@ -214,6 +351,8 @@ void OBJLoader()
 		else if (line2.substr(0, 3) == "vt ")
 		{
 			inputString >> special >> vtx2.u >> vtx2.v;
+			vtx2.u = 1 - vtx2.u; //Because "Maya"
+			vtx2.v = 1 - vtx2.v; //Because "Maya"
 			vertices2.push_back(vtx2);
 		}
 		else if (line2.substr(0, 3) == "vn ")
@@ -223,7 +362,8 @@ void OBJLoader()
 		}
 		else if (line2.substr(0, 2) == "f ")
 		{
-			for(int j = 0; j < 3; j++)
+			VertexData temp;
+			for (int j = 0; j < 3; j++)
 			{
 				if (j == 0)
 				{
@@ -233,48 +373,51 @@ void OBJLoader()
 				{
 					inputString >> valueV >> valueSlash >> valueVT >> valueSlash >> valueVN;
 				}
-				triangleVertices[i].x = vertices.at(valueV - 1).x; //ballar ur här efter ändring av dynamisk array
-				triangleVertices[i].y = vertices.at(valueV - 1).y;
-				triangleVertices[i].z = vertices.at(valueV - 1).z;
+				temp.x = vertices.at(valueV - 1).x;
+				temp.y = vertices.at(valueV - 1).y;
+				temp.z = vertices.at(valueV - 1).z;
 
 				if (valueVT != 0)
 				{
-					triangleVertices[i].u = vertices2.at(valueVT - 1).u;
-					triangleVertices[i].v = vertices2.at(valueVT - 1).v;
+					temp.u = vertices2.at(valueVT - 1).u;
+					temp.v = vertices2.at(valueVT - 1).v;
 				}
 				else if (valueVT == 0)
 				{
-					triangleVertices[i].u = 0.0f;
-					triangleVertices[i].v = 0.0f;
+					temp.u = 0.0f;
+					temp.v = 0.0f;
 				}
-				triangleVertices[i].x2 = vertices3.at(valueVN - 1).x2;
-				triangleVertices[i].y2 = vertices3.at(valueVN - 1).y2;
-				triangleVertices[i].z2 = vertices3.at(valueVN - 1).z2;
+				temp.x2 = vertices3.at(valueVN - 1).x2;
+				temp.y2 = vertices3.at(valueVN - 1).y2;
+				temp.z2 = vertices3.at(valueVN - 1).z2;
+				//pushback
+				triangleVertices.push_back(temp);
 				i++;
 			}
-		}		
+		}
+		else if (line2.substr(0, 7) == "mtllib ")
+		{
+			inputString >> special >> mtl;
+			MTLLoader(mtl);
+		}
 		inputString.clear();
-		//else if (line2.substr(0, 2) == "mtllib ")
-		//{
-		//	//nästföljande ord är bilden, måste öppnas? kalla på en annan funktion som läser mtl fil
-		//}
-		//else if (line2.substr(0, 2) == "usemtl ")
-		//{
-		//	//load mtl image or something
-		//}
+
 	}
-	file.close(); //kanske flyttas under VB?
-	
+	file.close();
+
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(triangleVertices);
+	bufferDesc.ByteWidth = sizeof(VertexData)*triangleVertices.size();
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = 0;
+	bufferDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA vertexData;
-	//vertexData.pSysMem = triangleVertices.data();
-	vertexData.pSysMem = triangleVertices;
+	vertexData.pSysMem = triangleVertices.data();
 	gDevice->CreateBuffer(&bufferDesc, &vertexData, &gVertexBuffer);
+
 }
 
 void CreateShaders()
@@ -285,7 +428,7 @@ void CreateShaders()
 		L"Vertex.hlsl", // filename
 		nullptr,		// optional macros
 		nullptr,		// optional include files
-		"VS_main",		// entry point
+		"VS_main",			// entry point
 		"vs_4_0",		// shader model (target)
 		0,				// shader compile options
 		0,				// effect compile options
@@ -344,47 +487,9 @@ void CreateShaders()
 	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShader);
 
 	pGS->Release();
+
+
 }
-
-/*void CreateTriangleData()
-{
-	struct TriangleVertex
-	{
-		float x, y, z;
-		float u, v, w;
-	};
-	
-	TriangleVertex triangleVertices[6] =
-	{
-		0.5f, 0.5f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-
-		0.5f, -0.5f, 0.0f,
-		1.0f, 1.0f, 0.0f, 
-
-		-0.5f, 0.5f, 0.0f,
-		0.0f, 0.0f, 0.0f, 
-
-		-0.5f, 0.5f, 0.0f,
-		0.0f, 0.0f, 0.0f, 
-
-		0.5f, -0.5f, 0.0f,
-		1.0f, 1.0f, 0.0f, 
-
-		-0.5f, -0.5f, 0.0f,
-		0.0f, 1.0f, 0.0f
-	};
-
-	D3D11_BUFFER_DESC bufferDesc;
-	memset(&bufferDesc, 0, sizeof(bufferDesc));
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(triangleVertices);
-
-	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = triangleVertices;
-	gDevice->CreateBuffer(&bufferDesc, &data, &gVertexBuffer);
-}*/
 
 void SetViewport()
 {
@@ -401,30 +506,35 @@ void SetViewport()
 void Update()
 {
 	CreateWorldMatrix();
-	CreateWorldMatrix2();
-	CreateWorldMatrix3();
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr2 = gDeviceContext->Map(gConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cData, sizeof(cData));
 	gDeviceContext->Unmap(gConstantBuffer, 0);
+	HRESULT hr3 = gDeviceContext->Map(pConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &materialData, sizeof(materialData));
+	gDeviceContext->Unmap(pConstantBuffer, 0);
 }
 
 void Render()
 {
+	gDeviceContext->OMSetRenderTargets(2, gRTVA, gDepthStencilView);
 	// clear the back buffer to a deep blue
 	float clearColor[] = { background[0], background[1], background[2], 1 }; //Så att tweakbar kan användas?
-	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor); //Clear åt zbuffer
+	for (int i = 0; i < 2;i++)
+		gDeviceContext->ClearRenderTargetView(gRTVA[i], clearColor); //Clear åt zbuffer
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
+
+	
 
 	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-
+	
 	gDeviceContext->PSSetShaderResources(0, 1, &textureView); //Pipelina texturen
-
+	
 	UINT32 vertexSize = sizeof(float) * 8; //ändrades från 6
 	//UINT32 vertexSize = sizeof(TriangleVertex); //Hade varit snyggt, men hur kommer jag åt den?
 	UINT32 offset = 0;
@@ -434,11 +544,29 @@ void Render()
 	gDeviceContext->IASetInputLayout(gVertexLayout);
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
+	gDeviceContext->PSSetConstantBuffers(0, 1, &pConstantBuffer);
+	
 
-	OBJLoader();
+	gDeviceContext->Draw(triangleVertices.size(), 0);
+	//gDeviceContext->Draw(36, 0);
 
-	//gDeviceContext->Draw(triangleVertices.size(), 0);
-	gDeviceContext->Draw(36, 0);
+
+	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
+	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+
+	gDeviceContext->VSSetShader(gVertexShaderLight, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(gPixelShaderLight, nullptr, 0);
+
+	gDeviceContext->PSSetShaderResources(0, 2, gSRVA);
+
+	gDeviceContext->PSSetConstantBuffers(0, 1, &gLightBuffer);
+
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	gDeviceContext->Draw(4, 0);
 }
 
 int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
@@ -448,11 +576,16 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 	
 	if (wndHandle)
 	{
+		CoInitializeEx(NULL, COINIT_MULTITHREADED);
+
 		CreateDirect3DContext(wndHandle); //2. Skapa och koppla SwapChain, Device och Device Context
 
 		SetViewport(); //3. Sätt viewport
 
 		constantBuffer();
+		constantBuffer2();
+		CreateRenderTarget();
+		OBJLoader();	//4. Ersätter triangleData
 
 		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
 		TwWindowSize(WIDTH,HEIGHT);
@@ -463,14 +596,11 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angle, "min=0.00001 max=360 step=0.1");
 		TwAddVarRW(gMyBar, "RotationZ", TW_TYPE_FLOAT, &angleZ, "min = 0.00001 max = 360 step = 0.1");
 
-		CreateShaders(); //4. Skapa vertex- och pixel-shaders
+		CreateShaders(); //5. Skapa vertex- och pixel-shaders
+		InitializeLightShader();
 
-		//CreateTriangleData(); //5. Definiera triangelvertiser, 6. Skapa vertex buffer, 7. Skapa input layout
-		//OBJLoader(); //5. Ersätter triangleData senare
-
-		Texture(); //texturladdaren
 		zbuffer(); //mad bufferz
-		gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
+		
 
 		ShowWindow(wndHandle, nCmdShow);
 
@@ -490,7 +620,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 				gSwapChain->Present(0, 0); //9. Växla front- och back-buffer
 			}
 		}
-
+		
 		gVertexBuffer->Release();
 		//gConstantBuffer->Release(); ??
 		gVertexLayout->Release();
@@ -574,7 +704,7 @@ HRESULT CreateDirect3DContext(HWND wndHandle)
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		NULL,
+		D3D11_CREATE_DEVICE_DEBUG,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,
