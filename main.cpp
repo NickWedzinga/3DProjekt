@@ -33,8 +33,8 @@ ID3D11RenderTargetView* gBackbufferRTV = nullptr;
 ID3D11DepthStencilView* gDepthStencilView = nullptr;
 
 ID3D11Buffer* gVertexBuffer = nullptr;
-ID3D11Buffer* gConstantBuffer = nullptr;
-ID3D11Buffer* pConstantBuffer = nullptr;
+ID3D11Buffer* gWorldViewProjBuffer = nullptr;
+ID3D11Buffer* gMaterialBuffer = nullptr;
 
 ID3D11InputLayout* gVertexLayout = nullptr;
 ID3D11VertexShader* gVertexShader = nullptr;
@@ -44,7 +44,7 @@ ID3D11PixelShader* gPixelShader = nullptr;
 ID3D11RenderTargetView* gRTVA[2];
 ID3D11Texture2D* gRTTA[2];
 ID3D11ShaderResourceView* gSRVA[2];
-ID3D11VertexShader* gVertexShaderLight;
+ID3D11VertexShader* gVertexShaderLight = nullptr;
 ID3D11PixelShader* gPixelShaderLight;
 ID3D11InputLayout* gLayoutLight;
 ID3D11Buffer* gLightBuffer;
@@ -70,15 +70,11 @@ struct CONSTANT_BUFFER2
 	XMFLOAT4 KS;
 };
 
-
-
 struct LightBuffer
 {
 	XMVECTOR lightDirection;
 	float padding;
 };
-
-
 
 TwBar *gMyBar;
 float background[3]{0, 0, 0};
@@ -88,10 +84,8 @@ vector<VertexData> triangleVertices; //behövs globalt så att draw kan sättas dyn
 
 float scaleZ = -3;
 float angleX = 0;
-float angle = 0;
+float angleY = 0;
 float angleZ = 0;
-
-
 
 CONSTANT_BUFFER cData;
 CONSTANT_BUFFER2 materialData;
@@ -105,7 +99,7 @@ void CreateLightBuffer()
 
 void CreateWorldMatrix()
 {
-	cData.WorldMatrix = XMMatrixRotationRollPitchYaw(angleX, angle, angleZ);
+	cData.WorldMatrix = XMMatrixRotationRollPitchYaw(angleX, angleY, angleZ);
 }
 
 void CreateViewMatrix()
@@ -151,7 +145,7 @@ void constantBuffer()
 	InitData.SysMemPitch = 0;
 	InitData.SysMemSlicePitch = 0;
 
-	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gConstantBuffer);
+	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gWorldViewProjBuffer);
 }
 
 void lightbuffer()
@@ -187,7 +181,7 @@ void constantBuffer2()
 	InitData.SysMemPitch = 0;
 	InitData.SysMemSlicePitch = 0;
 
-	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &pConstantBuffer);
+	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gMaterialBuffer);
 }
 
 void zbuffer()
@@ -312,7 +306,7 @@ void MTLLoader(string mtlfile)
 
 void OBJLoader()
 {
-	string myFile("sphere1.obj"), special, line2, mtl;
+	string myFile("box.obj"), special, line2, mtl;
 	ifstream file(myFile);
 	istringstream inputString;
 	struct VertexV { float x, y, z; }; //skapar struct med x, y, z värden
@@ -476,10 +470,7 @@ void CreateShaders()
 		);
 
 	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShader);
-
 	pGS->Release();
-
-
 }
 
 void SetViewport()
@@ -499,25 +490,23 @@ void Update()
 	CreateWorldMatrix();
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	HRESULT hr2 = gDeviceContext->Map(gConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	HRESULT hr2 = gDeviceContext->Map(gWorldViewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cData, sizeof(cData));
-	gDeviceContext->Unmap(gConstantBuffer, 0);
-	HRESULT hr3 = gDeviceContext->Map(pConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	gDeviceContext->Unmap(gWorldViewProjBuffer, 0);
+	HRESULT hr3 = gDeviceContext->Map(gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &materialData, sizeof(materialData));
-	gDeviceContext->Unmap(pConstantBuffer, 0);
+	gDeviceContext->Unmap(gMaterialBuffer, 0);
 }
 
 void Render()
 {
+	//Pipeline 1
 	gDeviceContext->OMSetRenderTargets(2, gRTVA, gDepthStencilView);
-	// clear the back buffer to a deep blue
 	float clearColor[] = { background[0], background[1], background[2], 1 }; //Så att tweakbar kan användas?
-	//float clearColor[] = { 0,0,0,0 };
 	for (int i = 0; i < 2; i++)
 		gDeviceContext->ClearRenderTargetView(gRTVA[i], clearColor); //Clear åt zbuffer
-	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 
-	
+	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 
 	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
@@ -527,21 +516,20 @@ void Render()
 	
 	gDeviceContext->PSSetShaderResources(0, 1, &textureView); //Pipelina texturen
 	
-	UINT32 vertexSize = sizeof(float) * 8; //ändrades från 6
-	//UINT32 vertexSize = sizeof(TriangleVertex); //Hade varit snyggt, men hur kommer jag åt den?
+	UINT32 vertexSize = sizeof(triangleVertices[0]); //Hade varit snyggt, men hur kommer jag åt den?
 	UINT32 offset = 0;
 
 	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	gDeviceContext->IASetInputLayout(gVertexLayout);
 
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
-	gDeviceContext->PSSetConstantBuffers(0, 1, &pConstantBuffer);
-	
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 
 	gDeviceContext->Draw(triangleVertices.size(), 0);
-	//gDeviceContext->Draw(36, 0);
 
+
+
+	//Pipeline 2
 	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
@@ -552,8 +540,9 @@ void Render()
 	gDeviceContext->PSSetShader(gPixelShaderLight, nullptr, 0);
 
 	gDeviceContext->PSSetShaderResources(0, 2, gSRVA);
-
+	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &gLightBuffer);
+	gDeviceContext->PSSetConstantBuffers(1, 1, &gMaterialBuffer);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
@@ -588,7 +577,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		gMyBar = TwNewBar("KekCity");
 		TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
 		TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
-		TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angle, "min=0.00001 max=360 step=0.1");
+		TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
 		TwAddVarRW(gMyBar, "RotationZ", TW_TYPE_FLOAT, &angleZ, "min = 0.00001 max = 360 step = 0.1");
 
 		CreateShaders(); //5. Skapa vertex- och pixel-shaders
@@ -617,7 +606,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		}
 		
 		gVertexBuffer->Release();
-		//gConstantBuffer->Release(); ??
+		//gWorldViewProjBuffer->Release(); ??
 		gVertexLayout->Release();
 		gVertexShader->Release();
 		gPixelShader->Release();
