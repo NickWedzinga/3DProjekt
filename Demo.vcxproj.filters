@@ -13,25 +13,46 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{57525b10-3301-4c2b-b581-64fe42441179}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OBJLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DeferredRendering.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Fragment.hlsl">
-      <Filter>Source Files</Filter>
-    </FxCompile>
-    <FxCompile Include="Vertex.hlsl">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="GeometryShader.hlsl">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderLights.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Vertex.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShaderLights.hlsl">
+      <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bth_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OBJLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredRendering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

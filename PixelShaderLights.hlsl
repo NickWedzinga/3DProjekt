@@ -39,17 +39,17 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float3 lightvec = normalize(-lightDirection);	
 
 	//Calculate Ambient Light
-	float3 LA = KA; //KA comment because material gives it 0
+	float3 LA = KA.xyz; //KA comment because material gives it 0
 
 	//Calculate Diffuse Light
 	float angle = dot(normals, lightvec); //infallsvinkel
-	float3 LD = KD * saturate(angle); //KD comment because material gives it 0
+	float3 LD = KD.xyz * saturate(angle); //KD comment because material gives it 0
 
 	//calculate specular intensity
 	float3 n = dot(normals, lightvec) * normals;
 	float3 r = (2 * n) - lightvec;
 	float3 rv = dot(r, viewDirection);
-	float3 LS = KS * pow(rv, shiny); //KS comment because material gives it 0
+	float3 LS = KS.xyz * pow(rv, shiny); //KS comment because material gives it 0
 
 	float3 result = (colors.xyz*LA) + (colors.xyz*LD) + (colors.xyz*LS);
 
