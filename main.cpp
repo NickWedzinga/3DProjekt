@@ -44,7 +44,6 @@ ID3D11RenderTargetView* gBackbufferRTV = nullptr;
 ID3D11DepthStencilView* gDepthStencilView = nullptr;
 
 ID3D11Buffer* gWorldViewProjBuffer = nullptr;
-ID3D11Buffer* gMaterialBuffer = nullptr;
 
 ID3D11InputLayout* gVertexLayout = nullptr;
 ID3D11VertexShader* gVertexShader = nullptr;
@@ -56,9 +55,6 @@ using namespace DirectX::SimpleMath;
 using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
 using namespace std;
 
-
-Object cube;
-DeferredRendering deferred;
 
 struct CONSTANT_BUFFER
 {
@@ -75,7 +71,10 @@ float angleX = 0;
 float angleY = 0;
 float angleZ = 0;
 
+Object cube;
+DeferredRendering deferred;
 CONSTANT_BUFFER cData;
+
 
 void CreateWorldMatrix()
 {
@@ -125,24 +124,6 @@ void constantBuffer()
 	InitData.SysMemSlicePitch = 0;
 
 	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gWorldViewProjBuffer);
-}
-
-void materialCB()
-{
-	D3D11_BUFFER_DESC cbDesc;
-	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER2);
-	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbDesc.MiscFlags = 0;
-	cbDesc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = &cube.materialData;
-	InitData.SysMemPitch = 0;
-	InitData.SysMemSlicePitch = 0;
-
-	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gMaterialBuffer);
 }
 
 void zbuffer()
@@ -255,9 +236,9 @@ void Update()
 	HRESULT hr2 = gDeviceContext->Map(gWorldViewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cData, sizeof(cData));
 	gDeviceContext->Unmap(gWorldViewProjBuffer, 0);
-	HRESULT hr3 = gDeviceContext->Map(gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	HRESULT hr3 = gDeviceContext->Map(cube.gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cube.materialData, sizeof(cube.materialData));
-	gDeviceContext->Unmap(gMaterialBuffer, 0);
+	gDeviceContext->Unmap(cube.gMaterialBuffer, 0);
 }
 
 void Render()
@@ -304,7 +285,7 @@ void Render()
 	gDeviceContext->PSSetShaderResources(0, 2, deferred.gSRVA);
 	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
-	gDeviceContext->PSSetConstantBuffers(1, 1, &gMaterialBuffer);
+	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
@@ -328,7 +309,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 		constantBuffer();
 		deferred.lightbuffer(gDevice);
-		materialCB();
+		cube.materialCB(gDevice);
 		deferred.CreateRenderTargets(gDevice);
 		
 		

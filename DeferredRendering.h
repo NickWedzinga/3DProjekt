@@ -11,16 +11,14 @@
 #define WIDTH 640.0f
 #define HEIGHT 480.0f
 
+class DeferredRendering
+{
+private:
 struct LightBuffer
 {
 	DirectX::XMVECTOR lightDirection;
 	float padding;
 };
-
-
-
-class DeferredRendering
-{
 public:
 	void CreateLightBuffer();
 	void lightbuffer(ID3D11Device* gDevice);

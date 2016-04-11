@@ -94,6 +94,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DeferredRendering.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OBJLoader.cpp" />
   </ItemGroup>
@@ -141,6 +142,7 @@
   <ItemGroup>
     <ClInclude Include="bth_image.h" />
     <ClInclude Include="DeferredRendering.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="OBJLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

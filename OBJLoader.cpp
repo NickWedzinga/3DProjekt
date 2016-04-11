@@ -114,6 +114,24 @@ void Object::LoadObject(ID3D11Device* gDevice)
 	return;
 }
 
+void Object::materialCB(ID3D11Device * gDevice)
+{
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER2);
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = &materialData;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gMaterialBuffer);
+}
+
 void Object::MTLLoader(string mtlfile, ID3D11Device* gDevice)
 {
 	//mtlfile was sent from OBJLOADER, mtlfile == "box.mtl"
