@@ -1,9 +1,11 @@
 #include "camera.h"
+#include "includes.h"
 
 Camera::Camera()
 {
 	pos = XMFLOAT3(0, 0, 0);
-	mouse = XMFLOAT2(0, 0);
+	mouse = XMFLOAT2(XPOS, YPOS);
+	SetCursorPos(mouse.x, mouse.y);
 	camDir = XMFLOAT3(0, 0, 0);
 }
 
@@ -27,7 +29,7 @@ void Camera::Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection, XMVECTOR &
 			XMMATRIX rotation = XMMatrixRotationY(x);
 			XMStoreFloat3(&camDir, (XMVector3Transform(XMVECTOR(XMLoadFloat3(&camDir)), rotation)));
 			mouse.x = GET_X_LPARAM(msg->lParam);
-			//mouse.x = 320;
+			//mouse.x = 320; //ökar hastigheten istället för låst position ish
 		}
 		if ((y = (mouse.y - GET_Y_LPARAM(msg->lParam))) != 0)
 		{
@@ -37,6 +39,8 @@ void Camera::Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection, XMVECTOR &
 			mouse.y = GET_Y_LPARAM(msg->lParam);
 			//mouse.y = 240;
 		}
+		if (mouse.x > 3 * WIDTH / 4 || mouse.x < WIDTH / 4 || mouse.y > 3 * HEIGHT / 4 || mouse.y < HEIGHT / 4)
+			SetCursorPos(XPOS, YPOS);
 
 	case WM_KEYDOWN:
 		switch (msg->wParam)

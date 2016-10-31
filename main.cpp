@@ -27,13 +27,10 @@
 #include "DeferredRendering.h"
 #include "Terrain.h"
 #include "camera.h"
+#include "includes.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
-
-#define WIDTH 640.0f
-#define HEIGHT 480.0f
-RECT rc = { 0, 0, WIDTH, HEIGHT };
 
 HWND InitWindow(HINSTANCE hInstance);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -327,6 +324,7 @@ void Render()
 int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
 {
 	MSG msg = { 0 };
+	ShowCursor(false);
 	HWND wndHandle = InitWindow(hInstance); //1. Skapa fönster
 	
 	if (wndHandle)
@@ -367,7 +365,6 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 		zbuffer(); //mad bufferz
 		
-
 		ShowWindow(wndHandle, nCmdShow);
 
 		while (WM_QUIT != msg.message)
@@ -377,7 +374,6 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 				camera->Update(&msg, cData.ViewMatrix, cData.camDirection, cData.camPosition);
-				//ClipCursor(&rc);
 			}
 			else
 			{
@@ -388,7 +384,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 				gSwapChain->Present(0, 0); //9. Växla front- och back-buffer
 			}
 		}
-		
+
 		cube.VertexBuffer->Release();
 		//gWorldViewProjBuffer->Release(); ??
 		gVertexLayout->Release();
@@ -419,14 +415,15 @@ HWND InitWindow(HINSTANCE hInstance)
 	if (!RegisterClassEx(&wcex))
 		return false;
 
+	RECT rc = { 0, 0, WIDTH, HEIGHT };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
 	HWND handle = CreateWindow(
 		L"BTH_D3D_DEMO",
 		L"BTH Direct3D Demo",
 		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
+		XPOS - WIDTH/2,
+		YPOS - HEIGHT/2,
 		rc.right - rc.left,
 		rc.bottom - rc.top,
 		nullptr,

@@ -157,6 +157,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="includes.h" />
     <ClInclude Include="bth_image.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="DeferredRendering.h" />
