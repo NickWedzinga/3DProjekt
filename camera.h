@@ -14,7 +14,7 @@ class Camera
 public:
 	Camera();
 	~Camera();
-	void Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection);
+	void Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection, XMVECTOR &camPosition);
 
 	void Init(XMMATRIX &view, XMVECTOR &camDirection);
 

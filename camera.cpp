@@ -11,7 +11,7 @@ Camera::~Camera()
 {
 }
 
-void Camera::Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection)
+void Camera::Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection, XMVECTOR &camPosition)
 {
 	float x, y;
 	XMFLOAT3 rightf, forward;
@@ -27,6 +27,7 @@ void Camera::Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection)
 			XMMATRIX rotation = XMMatrixRotationY(x);
 			XMStoreFloat3(&camDir, (XMVector3Transform(XMVECTOR(XMLoadFloat3(&camDir)), rotation)));
 			mouse.x = GET_X_LPARAM(msg->lParam);
+			//mouse.x = 320;
 		}
 		if ((y = (mouse.y - GET_Y_LPARAM(msg->lParam))) != 0)
 		{
@@ -34,7 +35,9 @@ void Camera::Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection)
 			XMMATRIX rotation = XMMatrixRotationAxis(rightv, y);
 			XMStoreFloat3(&camDir, (XMVector3Transform(XMVECTOR(XMLoadFloat3(&camDir)), rotation)));
 			mouse.y = GET_Y_LPARAM(msg->lParam);
+			//mouse.y = 240;
 		}
+
 	case WM_KEYDOWN:
 		switch (msg->wParam)
 		{
@@ -64,6 +67,7 @@ void Camera::Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection)
 			pos.y -= 0.15;
 			break;
 		}
+		camPosition = XMLoadFloat3(&pos);
 	}
 	CreateViewMatrix(view, camDirection);
 }

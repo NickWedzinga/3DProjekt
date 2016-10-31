@@ -44,11 +44,13 @@ float3 CalculatefaceNormal(GS_IN input[3])
 void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 {
 	GS_OUT Output;
+	float PI = 3.14159265f;
 
 	float3 worldnormal = CalculatefaceNormal(input);
 	float angle = dot(camDirection, worldnormal); //För examination: Ändra camDirection till camDirection1
+	float fov = cos((180.0f - 135.0f) * PI / 180.0f);
 
-	if (angle <= 0.0f)
+	if (angle <= (0.0f + (fov / 2.0f)))
 	{
 		for (uint i = 0; i < 3; i++)
 		{

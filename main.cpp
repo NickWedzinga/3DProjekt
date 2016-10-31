@@ -33,6 +33,7 @@
 
 #define WIDTH 640.0f
 #define HEIGHT 480.0f
+RECT rc = { 0, 0, WIDTH, HEIGHT };
 
 HWND InitWindow(HINSTANCE hInstance);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -64,6 +65,7 @@ struct CONSTANT_BUFFER
 	XMMATRIX ViewMatrix;
 	XMMATRIX ProjMatrix;
 	XMVECTOR camDirection;
+	XMVECTOR camPosition;
 };
 
 TwBar *gMyBar;
@@ -374,7 +376,8 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
-				camera->Update(&msg, cData.ViewMatrix, cData.camDirection);
+				camera->Update(&msg, cData.ViewMatrix, cData.camDirection, cData.camPosition);
+				//ClipCursor(&rc);
 			}
 			else
 			{
@@ -416,7 +419,6 @@ HWND InitWindow(HINSTANCE hInstance)
 	if (!RegisterClassEx(&wcex))
 		return false;
 
-	RECT rc = { 0, 0, WIDTH, HEIGHT };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
 	HWND handle = CreateWindow(
@@ -433,6 +435,7 @@ HWND InitWindow(HINSTANCE hInstance)
 		nullptr);
 
 	return handle;
+
 }
 
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
