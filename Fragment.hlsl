@@ -11,8 +11,8 @@ struct PS_IN
 
 struct PS_OUT
 {
-	float4 color : SV_Target0;
-	float4 normal : SV_Target1;
+	float4 color : SV_Target1;
+	float4 normal : SV_Target2;
 };
 
 PS_OUT PS_main(PS_IN input) : SV_Target

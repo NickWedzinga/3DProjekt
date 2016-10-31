@@ -25,6 +25,8 @@
 
 #include "OBJLoader.h"
 #include "DeferredRendering.h"
+#include "Terrain.h"
+#include "camera.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
@@ -61,19 +63,25 @@ struct CONSTANT_BUFFER
 	XMMATRIX WorldMatrix;
 	XMMATRIX ViewMatrix;
 	XMMATRIX ProjMatrix;
+	XMVECTOR camDirection;
 };
 
 TwBar *gMyBar;
 float background[3]{0, 0, 0};					
 
-float scaleZ = -3;
 float angleX = 0;
 float angleY = 0;
 float angleZ = 0;
 
+float tempx = 0;
+float tempz = 0;
+
+
 Object cube;
 DeferredRendering deferred;
 CONSTANT_BUFFER cData;
+Terrain* terrain = new Terrain;
+Camera* camera = new Camera;
 
 
 void CreateWorldMatrix()
@@ -81,23 +89,10 @@ void CreateWorldMatrix()
 	cData.WorldMatrix = XMMatrixRotationRollPitchYaw(angleX, angleY, angleZ);
 }
 
-void CreateViewMatrix()
-{
-	XMFLOAT3 cam1 = XMFLOAT3(0, 0, scaleZ);
-	XMFLOAT3 eye1 = XMFLOAT3(0, 0, 0);
-	XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
-
-	XMVECTOR cam = XMLoadFloat3(&cam1);
-	XMVECTOR eye = XMLoadFloat3(&eye1);
-	XMVECTOR up = XMLoadFloat3(&at1);
-
-	cData.ViewMatrix = XMMatrixLookAtLH(cam, eye, up);
-}
-
 void CreateProjMatrix()
 {
 	float Near = 0.5;
-	float Far = 20;
+	float Far = 200;
 	float FOV = XM_PI * 0.45;
 
 	cData.ProjMatrix = XMMatrixPerspectiveFovLH(FOV, WIDTH/HEIGHT, Near, Far);
@@ -106,7 +101,7 @@ void CreateProjMatrix()
 void constantBuffer()
 {
 	CreateWorldMatrix();
-	CreateViewMatrix();
+	camera->Init(cData.ViewMatrix, cData.camDirection);
 	CreateProjMatrix();
 	deferred.CreateLightBuffer();
 
@@ -171,8 +166,8 @@ void CreateShaders()
 	//create input layout (verified using vertex shader)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "UV", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12 /*kanske 12*/, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0 /*kanske 12?*/, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "UV", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
@@ -216,6 +211,11 @@ void CreateShaders()
 	pGS->Release();
 }
 
+void CreateTerrain()
+{
+	terrain->Initialize(gDevice);
+}
+
 void SetViewport()
 {
 	D3D11_VIEWPORT vp;
@@ -239,30 +239,55 @@ void Update()
 	HRESULT hr3 = gDeviceContext->Map(cube.gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cube.materialData, sizeof(cube.materialData));
 	gDeviceContext->Unmap(cube.gMaterialBuffer, 0);
+	tempx = camera->getPos().x;
+	tempz = camera->getPos().z;
 }
 
 void Render()
 {
-	//Pipeline 1
-	gDeviceContext->OMSetRenderTargets(2, deferred.gRTVA, gDepthStencilView);
 	float clearColor[] = { background[0], background[1], background[2], 1 }; //Så att tweakbar kan användas?
-	for (int i = 0; i < 2; i++)
+
+
+	//Pipeline 1
+	gDeviceContext->OMSetRenderTargets(1, &deferred.gRTVA[0]/*&gBackbufferRTV*/, gDepthStencilView);
+	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0]/*gBackbufferRTV*/, clearColor);
+	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
+
+	gDeviceContext->VSSetShader(terrain->gVertexShaderT, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->GSSetShader(terrain->gGeometryShaderT, nullptr, 0);
+	gDeviceContext->PSSetShader(terrain->gPixelShaderT, nullptr, 0);
+
+	terrain->Render(gDeviceContext);
+
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
+
+	gDeviceContext->Draw(terrain->vecVertices.size()/*sizeof(terrain->vertices)*/, 0);
+
+
+	//Pipeline 2
+	gDeviceContext->OMSetRenderTargets(3, deferred.gRTVA, gDepthStencilView);
+	for (int i = 1; i < 3; i++)
 		gDeviceContext->ClearRenderTargetView(deferred.gRTVA[i], clearColor); //Clear åt zbuffer
 
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
+
+
 
 	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-	
+
 	gDeviceContext->PSSetShaderResources(0, 1, &cube.textureView); //Pipelina texturen
-	
+
 	UINT32 vertexSize = sizeof(cube.triangleVertices[0]);
 	UINT32 offset = 0;
 
 	gDeviceContext->IASetVertexBuffers(0, 1, &cube.VertexBuffer, &vertexSize, &offset);
+
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	gDeviceContext->IASetInputLayout(gVertexLayout);
 
@@ -271,10 +296,11 @@ void Render()
 	gDeviceContext->Draw(cube.triangleVertices.size(), 0);
 
 
+	//Pipeline 3
 
-	//Pipeline 2
+	
 	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
-	//gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
 	gDeviceContext->VSSetShader(deferred.gVertexShaderLight, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
@@ -282,14 +308,18 @@ void Render()
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(deferred.gPixelShaderLight, nullptr, 0);
 
-	gDeviceContext->PSSetShaderResources(0, 2, deferred.gSRVA);
+	gDeviceContext->PSSetShaderResources(0, 3, deferred.gSRVA);
+	//gDeviceContext->PSSetShaderResources(0, 1, &deferred.gSRVA[2]);
 	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
+	gDeviceContext->PSSetConstantBuffers(2, 1, &gWorldViewProjBuffer);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	gDeviceContext->Draw(4, 0);
+
+	
 }
 
 int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
@@ -307,11 +337,11 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		
 		cube.LoadObject(gDevice);	//4. Ersätter triangleData
 
+		CreateTerrain();
 		constantBuffer();
 		deferred.lightbuffer(gDevice);
 		cube.materialCB(gDevice);
 		deferred.CreateRenderTargets(gDevice);
-		
 		
 
 		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
@@ -322,9 +352,16 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
 		TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
 		TwAddVarRW(gMyBar, "RotationZ", TW_TYPE_FLOAT, &angleZ, "min = 0.00001 max = 360 step = 0.1");
+		/*float tempx = camera->getPos().x;
+		float tempz = camera->getPos().z;*/
+
+		TwAddVarRW(gMyBar, "Z", TW_TYPE_FLOAT, &tempz, "min=-360 max=360 step=1");
+		TwAddVarRW(gMyBar, "X", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
+		TwAddVarRW(gMyBar, "MouseX", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
 
 		CreateShaders(); //5. Skapa vertex- och pixel-shaders
 		deferred.InitializeLightShader(gDevice);
+		terrain->InitializeTerrainShaders(gDevice);
 
 		zbuffer(); //mad bufferz
 		
@@ -337,6 +374,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
+				camera->Update(&msg, cData.ViewMatrix, cData.camDirection);
 			}
 			else
 			{
@@ -359,6 +397,9 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		gDevice->Release();
 		gDeviceContext->Release();
 		DestroyWindow(wndHandle);
+
+		delete camera;
+		delete terrain;
 	}
 
 	return (int) msg.wParam;
