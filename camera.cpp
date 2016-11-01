@@ -1,5 +1,4 @@
 #include "camera.h"
-#include "includes.h"
 
 Camera::Camera()
 {
@@ -7,13 +6,14 @@ Camera::Camera()
 	mouse = XMFLOAT2(XPOS, YPOS);
 	SetCursorPos(mouse.x, mouse.y);
 	camDir = XMFLOAT3(0, 0, 0);
+	arbitraryFloat2 = XMFLOAT2(0, 0);
 }
 
 Camera::~Camera()
 {
 }
 
-void Camera::Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection, XMVECTOR &camPosition)
+void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer)
 {
 	float x, y;
 	XMFLOAT3 rightf, forward;
@@ -23,43 +23,144 @@ void Camera::Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection, XMVECTOR &
 	switch (msg->message)
 	{
 	case WM_MOUSEMOVE: //om muspekaren flyttats
-		if ((x = (mouse.x - GET_X_LPARAM(msg->lParam))) != 0)
+		if ((x = (mouse.x - GET_X_LPARAM(float(msg->lParam)))) != 0)
 		{
-			x = -x / (2 * XM_PI * 150);
+			x = -x / 3750; //(1 / 3750) is an arbitrary scalar to slow down camera swivel speed
 			XMMATRIX rotation = XMMatrixRotationY(x);
 			XMStoreFloat3(&camDir, (XMVector3Transform(XMVECTOR(XMLoadFloat3(&camDir)), rotation)));
 			mouse.x = GET_X_LPARAM(msg->lParam);
-			//mouse.x = 320; //ökar hastigheten istället för låst position ish
 		}
 		if ((y = (mouse.y - GET_Y_LPARAM(msg->lParam))) != 0)
 		{
-			y = -y / (2 * XM_PI * 150);
+			y = -y / 5000; //(1 / 5000) is an arbitrary scalar to slow down camera swivel speed
+			arbitraryFloat2.y += y;
 			XMMATRIX rotation = XMMatrixRotationAxis(rightv, y);
 			XMStoreFloat3(&camDir, (XMVector3Transform(XMVECTOR(XMLoadFloat3(&camDir)), rotation)));
 			mouse.y = GET_Y_LPARAM(msg->lParam);
-			//mouse.y = 240;
 		}
 		if (mouse.x > 3 * WIDTH / 4 || mouse.x < WIDTH / 4 || mouse.y > 3 * HEIGHT / 4 || mouse.y < HEIGHT / 4)
+		{
 			SetCursorPos(XPOS, YPOS);
-
+			mouse = XMFLOAT2(WIDTH / 2, HEIGHT / 2);
+		}
 	case WM_KEYDOWN:
 		switch (msg->wParam)
 		{
 		case 0x57: //w
-			pos.z += 0.15 * forward.z;
-			pos.x += 0.15 * forward.x;
+			if (GetAsyncKeyState(0x41)) //a
+			{
+				pos.z += 0.15 * forward.z * cos(XM_PI/4);
+				pos.x += 0.15 * forward.x * cos(XM_PI / 4);
+				pos.z -= 0.15 * rightf.z * cos(XM_PI / 4);
+				pos.x -= 0.15 * rightf.x * cos(XM_PI / 4);
+			}
+			else if (GetAsyncKeyState(0x44)) //d
+			{
+				pos.z += 0.15 * forward.z * cos(XM_PI / 4);
+				pos.x += 0.15 * forward.x * cos(XM_PI / 4);
+				pos.z += 0.15 * rightf.z * cos(XM_PI / 4);
+				pos.x += 0.15 * rightf.x * cos(XM_PI / 4);
+			}
+			else
+			{
+				pos.z += 0.15 * forward.z;
+				pos.x += 0.15 * forward.x;
+			}
+			if (GetAsyncKeyState(VK_SPACE)) // space
+			{
+				pos.y += 0.15;
+			}
+			else if (GetAsyncKeyState(0x60)) //z
+			{
+				pos.y -= 0.15;
+			}
 			break;
 		case 0x41: //a
-			pos.z -= 0.15 * rightf.z;
-			pos.x -= 0.15 * rightf.x;
+			if (GetAsyncKeyState(0x57)) //w
+			{
+				pos.z += 0.15 * forward.z * cos(XM_PI / 4);
+				pos.x += 0.15 * forward.x * cos(XM_PI / 4);
+				pos.z -= 0.15 * rightf.z * cos(XM_PI / 4);
+				pos.x -= 0.15 * rightf.x * cos(XM_PI / 4);
+			}
+			else if (GetAsyncKeyState(0x53)) //s
+			{
+				pos.z -= 0.15 * forward.z * cos(XM_PI / 4);
+				pos.x -= 0.15 * forward.x * cos(XM_PI / 4);
+				pos.z -= 0.15 * rightf.z * cos(XM_PI / 4);
+				pos.x -= 0.15 * rightf.x * cos(XM_PI / 4);
+			}
+			else
+			{
+				pos.z -= 0.15 * rightf.z;
+				pos.x -= 0.15 * rightf.x;
+			}
+			if (GetAsyncKeyState(VK_SPACE)) // space
+			{
+				pos.y += 0.15;
+			}
+			else if (GetAsyncKeyState(0x60)) //z
+			{
+				pos.y -= 0.15;
+			}
 			break;
 		case 0x53: //s
-			pos.z -= 0.15 * forward.z;
-			pos.x -= 0.15 * forward.x;
+			if (GetAsyncKeyState(0x41)) //a
+			{
+				pos.z -= 0.15 * forward.z * cos(XM_PI / 4);
+				pos.x -= 0.15 * forward.x * cos(XM_PI / 4);
+				pos.z -= 0.15 * rightf.z * cos(XM_PI / 4);
+				pos.x -= 0.15 * rightf.x * cos(XM_PI / 4);
+			}
+			else if (GetAsyncKeyState(0x44)) //d
+			{
+				pos.z -= 0.15 * forward.z * cos(XM_PI / 4);
+				pos.x -= 0.15 * forward.x * cos(XM_PI / 4);
+				pos.z += 0.15 * rightf.z * cos(XM_PI / 4);
+				pos.x += 0.15 * rightf.x * cos(XM_PI / 4);
+			}
+			else
+			{
+				pos.z -= 0.15 * forward.z;
+				pos.x -= 0.15 * forward.x;
+			}
+			if (GetAsyncKeyState(VK_SPACE)) // space
+			{
+				pos.y += 0.15;
+			}
+			else if (GetAsyncKeyState(0x60)) //z
+			{
+				pos.y -= 0.15;
+			}
 			break;
 		case 0x44: //d
-			pos.z += 0.15 * rightf.z;
-			pos.x += 0.15 * rightf.x;
+			if (GetAsyncKeyState(0x57)) //w
+			{
+				pos.z += 0.15 * forward.z * cos(XM_PI / 4);
+				pos.x += 0.15 * forward.x * cos(XM_PI / 4);
+				pos.z += 0.15 * rightf.z * cos(XM_PI / 4);
+				pos.x += 0.15 * rightf.x * cos(XM_PI / 4);
+			}
+			else if (GetAsyncKeyState(0x53)) //s
+			{
+				pos.z -= 0.15 * forward.z * cos(XM_PI / 4);
+				pos.x -= 0.15 * forward.x * cos(XM_PI / 4);
+				pos.z += 0.15 * rightf.z * cos(XM_PI / 4);
+				pos.x += 0.15 * rightf.x * cos(XM_PI / 4);
+			}
+			else
+			{
+				pos.z += 0.15 * rightf.z;
+				pos.x += 0.15 * rightf.x;
+			}
+			if (GetAsyncKeyState(VK_SPACE)) // space
+			{
+				pos.y += 0.15;
+			}
+			else if (GetAsyncKeyState(0x60)) //z
+			{
+				pos.y -= 0.15;
+			}
 			break;
 		case VK_ESCAPE: //esc
 			msg->message = WM_QUIT;
@@ -67,13 +168,14 @@ void Camera::Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection, XMVECTOR &
 		case VK_SPACE: //space
 			pos.y += 0.15;
 			break;
-		case 0x58:  //x
+		case 0x5A:  //z
 			pos.y -= 0.15;
 			break;
+		
 		}
-		camPosition = XMLoadFloat3(&pos);
+		cBuffer.camPosition = XMLoadFloat3(&pos);
 	}
-	CreateViewMatrix(view, camDirection);
+	CreateViewMatrix(cBuffer.ViewMatrix, cBuffer.camDirection);
 }
 
 void Camera::Init(XMMATRIX &view, XMVECTOR &camDirection)

@@ -161,6 +161,7 @@
     <ClInclude Include="bth_image.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="DeferredRendering.h" />
+    <ClInclude Include="mesh.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="OBJLoader.h" />
   </ItemGroup>

@@ -4,6 +4,7 @@ cbuffer CONSTANT_BUFFER : register(b0)
 	matrix ViewMatrix;
 	matrix ProjMatrix;
 	float3 camDirection;
+	float3 camPosition;
 };
 
 struct GS_IN
@@ -47,10 +48,10 @@ void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 	float PI = 3.14159265f;
 
 	float3 worldnormal = CalculatefaceNormal(input);
-	float angle = dot(camDirection, worldnormal);
-	float fov = cos((180.0f - 135.0f) * PI / 180.0f);
+	float3 vec = normalize(input[0].Pos - camPosition);
+	float angle = dot(vec, worldnormal);
 
-	if (angle <= (0.0f + (fov / 2.0f)))
+	if (angle <= 0.0f)
 	{
 		for (uint i = 0; i < 3; i++)
 		{

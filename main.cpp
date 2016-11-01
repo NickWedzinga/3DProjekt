@@ -19,7 +19,6 @@
 
 #include <windows.h>
 #include <AntTweakBar.h>
-#include <DirectXMath.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
@@ -55,16 +54,6 @@ using namespace DirectX::SimpleMath;
 using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
 using namespace std;
 
-
-struct CONSTANT_BUFFER
-{
-	XMMATRIX WorldMatrix;
-	XMMATRIX ViewMatrix;
-	XMMATRIX ProjMatrix;
-	XMVECTOR camDirection;
-	XMVECTOR camPosition;
-};
-
 TwBar *gMyBar;
 float background[3]{0, 0, 0};					
 
@@ -92,9 +81,8 @@ void CreateProjMatrix()
 {
 	float Near = 0.5;
 	float Far = 200;
-	float FOV = XM_PI * 0.45;
 
-	cData.ProjMatrix = XMMatrixPerspectiveFovLH(FOV, WIDTH/HEIGHT, Near, Far);
+	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH/HEIGHT, Near, Far);
 }
 
 void constantBuffer()
@@ -373,7 +361,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
-				camera->Update(&msg, cData.ViewMatrix, cData.camDirection, cData.camPosition);
+				camera->Update(&msg, cData);
 			}
 			else
 			{

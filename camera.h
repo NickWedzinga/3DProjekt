@@ -5,6 +5,7 @@
 #include <Windowsx.h>
 #include <DirectXMath.h>
 #include <d3d11.h>
+#include "includes.h"
 #pragma comment (lib, "d3d11.lib")
 
 using namespace DirectX;
@@ -14,7 +15,7 @@ class Camera
 public:
 	Camera();
 	~Camera();
-	void Update(MSG* msg, XMMATRIX &view, XMVECTOR &camDirection, XMVECTOR &camPosition);
+	void Update(MSG* msg, CONSTANT_BUFFER &cBuffer);
 
 	void Init(XMMATRIX &view, XMVECTOR &camDirection);
 
@@ -29,6 +30,7 @@ private:
 	XMFLOAT3 pos;
 	XMFLOAT2 mouse;
 	XMFLOAT3 camDir;
+	XMFLOAT2 arbitraryFloat2;
 
 };
 
