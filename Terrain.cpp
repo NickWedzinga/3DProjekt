@@ -10,6 +10,7 @@ Terrain::Terrain()
 	this->indexBuffer = 0;
 	this->terrainHeight = 0;
 	this->terrainWidth = 0;
+	this->scaleFactor = 0.4;
 }
 
 Terrain::~Terrain()
@@ -75,7 +76,7 @@ void Terrain::LoadHeightMap()
 		{
 			index = (terrainHeight*j) + i;
 			height = bitmapImage[k];
-			heightMap[index].y = float(height)/ 32/*(256 / 2)*/;
+			heightMap[index].y = float(height)/ 8/*(256 / 2)*/;
 			k += 1;
 		}
 
@@ -117,16 +118,18 @@ void Terrain::InitializeTerrainShaders(ID3D11Device* gDevice)
 int Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
 {
 	float height;
-	int x = cord.x;
-	float decX = cord.x - x;
-	int z = cord.y;
-	float decZ = cord.y - z;
-	z *= 256;
+	int x = cord.x/ scaleFactor;
+	//float decX = cord.x - x;
+	int z = cord.y/ scaleFactor;
+	//float decZ = cord.y - z;
+	
 	if (x < 0 || x > 256 || z < 0 || z > 256)
 		height = -1;
 	else
-		height = heightMap[z + x].y;
-	//return this->heightMap[]->y;
+	{
+		z *= 256;
+		height = scaleFactor * heightMap[z + x].y;
+	}
 	return height;
 }
 
@@ -139,7 +142,6 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 	int index1, index2, index3, index4;		//Array? int index[4];
 
 	vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 6;
-	//vertexCount = 8 * 8 * 6;
 	indexCount = vertexCount;
 
 	indices = new unsigned long[indexCount];
@@ -157,46 +159,48 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			upperZ = float(j + 1);
 			bottomZ = float(j);
 
+
+
 			//Triangle (1)
 			//Upper left
-			temp.pos = 0.2*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y/*this->heightMap[index].y*/, upperZ);
-			temp.color = XMFLOAT4(/*1.0f**/this->heightMap[int((terrainHeight*upperZ) + leftX)].y, 1.0f, 1.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y, upperZ);
+			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
 			indices[index] = index;
 			index++;
 
 			//Bottom right
-			temp.pos = 0.2*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y/*this->heightMap[index].y*/, bottomZ);
-			temp.color = XMFLOAT4(/*1.0f**/this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, 1.0f, 1.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, bottomZ);
+			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
 			indices[index] = index;
 			index++;
 
 			//Bottom left
-			temp.pos = 0.2*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y/*this->heightMap[index].y*/, bottomZ);
-			temp.color = XMFLOAT4(/*1.0f**/this->heightMap[int((terrainHeight*bottomZ) + leftX)].y, 1.0f, 1.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y, bottomZ);
+			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
 			indices[index] = index;
 			index++;
 
 			//Triangle (2)
 			//Upper left
-			temp.pos = 0.2*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y/*this->heightMap[index].y*/, upperZ);
-			temp.color = XMFLOAT4(/*1.0f**/this->heightMap[int((terrainHeight*bottomZ) + leftX)].y, 1.0f, 1.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y, upperZ);
+			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
 			indices[index] = index;
 			index++;
 
 			//Upper right
-			temp.pos = 0.2*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*upperZ) + rightX)].y/*this->heightMap[index].y*/, upperZ);
-			temp.color = XMFLOAT4(/*1.0f**/ this->heightMap[int((terrainHeight*upperZ) + rightX)].y, 1.0f, 1.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*upperZ) + rightX)].y, upperZ);
+			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*upperZ) + rightX)].y / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
 			indices[index] = index;
 			index++;
 
 			//Bottom right
-			temp.pos = 0.2*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y/*this->heightMap[index].y*/, bottomZ);
-			temp.color = XMFLOAT4(/*1.0f**/this->heightMap[int((terrainHeight*bottomZ) + rightX)].y , 1.0f, 1.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, bottomZ);
+			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
 			indices[index] = index;
 			index++;

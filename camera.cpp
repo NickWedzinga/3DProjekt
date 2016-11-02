@@ -212,7 +212,7 @@ void Camera::setMouse(XMFLOAT2 mouse)
 
 void Camera::CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection)
 {
-	XMFLOAT3 cam1 = XMFLOAT3(pos.x, pos.y, pos.z);
+	XMFLOAT3 cam1 = XMFLOAT3(pos.x, pos.y+2, pos.z);
 	XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
 
 	XMVECTOR cam = XMLoadFloat3(&cam1);

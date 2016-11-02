@@ -54,6 +54,7 @@ private:
 	int vertexCount, indexCount;
 	HeightMapCord* heightMap;
 	ID3D11Buffer *vertexBuffer, *indexBuffer;
+	float scaleFactor;
 	
 };
 
