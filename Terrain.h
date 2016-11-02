@@ -43,7 +43,7 @@ public:
 	ID3D11GeometryShader* gGeometryShaderT = nullptr;
 	ID3D11PixelShader* gPixelShaderT = nullptr;
 	ID3D11InputLayout* gVertexLayoutT = nullptr;
-	
+
 private:
 	void InitializeBuffers(ID3D11Device* gDevice);
 	void ShutDownBuffers();

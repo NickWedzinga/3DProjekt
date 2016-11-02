@@ -250,7 +250,7 @@ void Render()
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 
-	gDeviceContext->Draw(terrain->vecVertices.size()/*sizeof(terrain->vertices)*/, 0);
+	gDeviceContext->Draw(terrain->vecVertices.size() /*sizeof(terrain->vertices)*/, 0);
 
 
 	//Pipeline 2
