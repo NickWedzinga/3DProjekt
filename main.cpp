@@ -361,7 +361,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
-				camera->Update(&msg, cData);
+				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
 			}
 			else
 			{

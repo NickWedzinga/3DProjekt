@@ -114,6 +114,22 @@ void Terrain::InitializeTerrainShaders(ID3D11Device* gDevice)
 	pPS->Release();
 }
 
+int Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
+{
+	float height;
+	int x = cord.x;
+	float decX = cord.x - x;
+	int z = cord.y;
+	float decZ = cord.y - z;
+	z *= 256;
+	if (x < 0 || x > 256 || z < 0 || z > 256)
+		height = -1;
+	else
+		height = heightMap[z + x].y;
+	//return this->heightMap[]->y;
+	return height;
+}
+
 void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 {
 	

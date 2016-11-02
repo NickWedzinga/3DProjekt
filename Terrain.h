@@ -36,6 +36,7 @@ public:
 	void LoadHeightMap();
 	int getVertexCount();
 	void InitializeTerrainShaders(ID3D11Device* gDevice);
+	int getHeightMapY(DirectX::XMFLOAT2 cord);
 
 	std::vector<VertexData> vecVertices;
 

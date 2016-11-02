@@ -13,7 +13,7 @@ Camera::~Camera()
 {
 }
 
-void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer)
+void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 {
 	float x, y;
 	XMFLOAT3 rightf, forward;
@@ -66,11 +66,11 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer)
 				pos.z += 0.15 * forward.z;
 				pos.x += 0.15 * forward.x;
 			}
-			if (GetAsyncKeyState(VK_SPACE)) // space
+			if (GetAsyncKeyState(VK_SPACE) && heightY == -1) // space
 			{
 				pos.y += 0.15;
 			}
-			else if (GetAsyncKeyState(0x60)) //z
+			else if (GetAsyncKeyState(0x60) && heightY == -1) //z
 			{
 				pos.y -= 0.15;
 			}
@@ -95,11 +95,11 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer)
 				pos.z -= 0.15 * rightf.z;
 				pos.x -= 0.15 * rightf.x;
 			}
-			if (GetAsyncKeyState(VK_SPACE)) // space
+			if (GetAsyncKeyState(VK_SPACE) && heightY == -1) // space
 			{
 				pos.y += 0.15;
 			}
-			else if (GetAsyncKeyState(0x60)) //z
+			else if (GetAsyncKeyState(0x60) && heightY == -1) //z
 			{
 				pos.y -= 0.15;
 			}
@@ -124,11 +124,11 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer)
 				pos.z -= 0.15 * forward.z;
 				pos.x -= 0.15 * forward.x;
 			}
-			if (GetAsyncKeyState(VK_SPACE)) // space
+			if (GetAsyncKeyState(VK_SPACE) && heightY == -1) // space
 			{
 				pos.y += 0.15;
 			}
-			else if (GetAsyncKeyState(0x60)) //z
+			else if (GetAsyncKeyState(0x60) && heightY == -1) //z
 			{
 				pos.y -= 0.15;
 			}
@@ -153,11 +153,11 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer)
 				pos.z += 0.15 * rightf.z;
 				pos.x += 0.15 * rightf.x;
 			}
-			if (GetAsyncKeyState(VK_SPACE)) // space
+			if (GetAsyncKeyState(VK_SPACE) && heightY == -1) // space
 			{
 				pos.y += 0.15;
 			}
-			else if (GetAsyncKeyState(0x60)) //z
+			else if (GetAsyncKeyState(0x60) && heightY == -1) //z
 			{
 				pos.y -= 0.15;
 			}
@@ -166,15 +166,19 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer)
 			msg->message = WM_QUIT;
 			break;
 		case VK_SPACE: //space
-			pos.y += 0.15;
+			if(heightY == -1)
+				pos.y += 0.15;
 			break;
 		case 0x5A:  //z
-			pos.y -= 0.15;
+			if(heightY == -1)
+				pos.y -= 0.15;
 			break;
 		
 		}
 		cBuffer.camPosition = XMLoadFloat3(&pos);
 	}
+	if (heightY != -1)
+		pos.y = heightY;
 	CreateViewMatrix(cBuffer.ViewMatrix, cBuffer.camDirection);
 }
 
