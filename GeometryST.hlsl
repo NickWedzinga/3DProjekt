@@ -9,13 +9,13 @@ cbuffer CONSTANT_BUFFER : register(b0)
 struct GS_IN
 {
 	float4 Pos : SV_POSITION;
-	float4 Color : COLOR;
+	float2 uv : UV;
 };
 
 struct GSOutput
 {
 	float4 pos : SV_POSITION;
-	float4 color : COLOR;
+	float2 uv : UV;
 };
 
 [maxvertexcount(48)]
@@ -30,7 +30,7 @@ void GS_main(triangle GS_IN input[3], inout TriangleStream< GSOutput > output)
 		poss = mul(ViewMatrix, poss);
 		poss = mul(ProjMatrix, poss);
 		element.pos = poss;
-		element.color = input[i].Color;
+		element.uv = input[i].uv;
 		output.Append(element);
 	}
 }

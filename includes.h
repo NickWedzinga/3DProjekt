@@ -4,6 +4,7 @@
 
 #include <DirectXMath.h>
 
+
 #define WIDTH 640.0f
 #define HEIGHT 480.0f
 #define XPOS 800.0f //middle of screen (currently)

@@ -19,17 +19,20 @@
 
 #include <windows.h>
 #include <AntTweakBar.h>
-#include <d3d11.h>
-#include <d3dcompiler.h>
-
 #include "OBJLoader.h"
 #include "DeferredRendering.h"
 #include "Terrain.h"
 #include "camera.h"
 #include "includes.h"
 
+#include <d3d11.h>
+#include <d3dcompiler.h>
+
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
+
+//#pragma comment (lib, "d3d11.lib")
+//#pragma comment (lib, "d3dcompiler.lib")
 
 HWND InitWindow(HINSTANCE hInstance);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

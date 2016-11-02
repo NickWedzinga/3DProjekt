@@ -9,7 +9,6 @@
 #include <sstream> //obj
 #include <fstream> //obj
 #include <vector> //obj
-#include <DDSTextureLoader.h>
 #include <WICTextureLoader.h>
 
 

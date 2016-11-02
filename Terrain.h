@@ -1,27 +1,29 @@
+#pragma once
 #ifndef HEIGHMAP_H
 #define HEIGHMAP_H
 
-#include <d3d11.h>
-#include <d3dcompiler.h>
+#include "mesh.h"
+//#include <d3d11.h>
+//#include <d3dcompiler.h>
 #include <SimpleMath.h>
 #include <SimpleMath.inl>
 #include <stdio.h>
 #include <vector>
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3dcompiler.lib")
+//#pragma comment (lib, "d3d11.lib")
+//#pragma comment (lib, "d3dcompiler.lib")
 
 
-class Terrain
+class Terrain : public mesh
 {
 private:
-	struct VertexData
-	{
-		DirectX::XMFLOAT3 pos;
-		//DirectX::XMFLOAT3 uv;
-		//DirectX::XMFLOAT3 normal;
-		DirectX::XMFLOAT4 color;
-		
-	};
+	//struct VertexData
+	//{
+	//	DirectX::XMFLOAT3 pos;
+	//	//DirectX::XMFLOAT3 uv;
+	//	//DirectX::XMFLOAT3 normal;
+	//	DirectX::XMFLOAT4 color;
+	//	
+	//};
 	struct HeightMapCord
 	{
 		float x, y, z;
