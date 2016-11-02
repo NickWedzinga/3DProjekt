@@ -22,10 +22,6 @@ private:
 		DirectX::XMFLOAT4 color;
 		
 	};
-	struct HeightMapCord
-	{
-		float x, y, z;
-	};
 public:
 	Terrain();
 	~Terrain();
@@ -36,7 +32,7 @@ public:
 	void LoadHeightMap();
 	int getVertexCount();
 	void InitializeTerrainShaders(ID3D11Device* gDevice);
-	int getHeightMapY(DirectX::XMFLOAT2 cord);
+	float getHeightMapY(DirectX::XMFLOAT2 cord);
 
 	std::vector<VertexData> vecVertices;
 
@@ -52,7 +48,7 @@ private:
 
 	int terrainWidth, terrainHeight;
 	int vertexCount, indexCount;
-	HeightMapCord* heightMap;
+	float *heightMap;
 	ID3D11Buffer *vertexBuffer, *indexBuffer;
 	float scaleFactor;
 	

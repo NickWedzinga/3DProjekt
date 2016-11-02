@@ -15,6 +15,7 @@ Terrain::Terrain()
 
 Terrain::~Terrain()
 {
+	delete[] heightMap;
 }
 
 void Terrain::Initialize(ID3D11Device* gDevice)
@@ -40,11 +41,9 @@ void Terrain::LoadHeightMap()
 {
 	char* filename = "objs/firstheightmap.bmp";
 	FILE* filePtr;
-	//int error;
-	unsigned int count;
 	BITMAPFILEHEADER bitmapFileHeader;
 	BITMAPINFOHEADER bitmapInfoHeader;
-	int imageSize, i, j, k, index;
+	int imageSize, i, j, k;
 	unsigned char* bitmapImage;
 	unsigned char height;
 
@@ -63,20 +62,19 @@ void Terrain::LoadHeightMap()
 	fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
 
 	//Reading the data in the file
-	count = fread(bitmapImage, 1, imageSize, filePtr);
+	fread(bitmapImage, 1, imageSize, filePtr);
 
 	fclose(filePtr);
 	
 	
 	
-	heightMap = new HeightMapCord[terrainWidth*terrainHeight];
+	heightMap = new float[terrainWidth*terrainHeight];
 	k = 0;
 	for (j = 0; j < terrainHeight; j++)
 		for (i = 0; i < terrainWidth; i++)
 		{
-			index = (terrainHeight*j) + i;
 			height = bitmapImage[k];
-			heightMap[index].y = float(height)/ 8/*(256 / 2)*/;
+			heightMap[k] = float(height)/ 8;
 			k += 1;
 		}
 
@@ -115,7 +113,7 @@ void Terrain::InitializeTerrainShaders(ID3D11Device* gDevice)
 	pPS->Release();
 }
 
-int Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
+float Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
 {
 	float height;
 	int x = cord.x/ scaleFactor;
@@ -128,23 +126,20 @@ int Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
 	else
 	{
 		z *= 256;
-		height = scaleFactor * heightMap[z + x].y;
+		height = scaleFactor * heightMap[z + x];
 	}
 	return height;
 }
 
 void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 {
-	
-	unsigned long* indices;
 	int index, i, j;
 	float leftX, rightX, upperZ, bottomZ;
-	int index1, index2, index3, index4;		//Array? int index[4];
+	float upperLeftY, upperRightY, bottomLeftY, bottomRightY;
+	//int index1, index2, index3, index4;		//Array? int index[4];
 
 	vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 6;
 	indexCount = vertexCount;
-
-	indices = new unsigned long[indexCount];
 
 	index = 0;
 
@@ -159,50 +154,47 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			upperZ = float(j + 1);
 			bottomZ = float(j);
 
-
+			upperLeftY = this->heightMap[int((terrainHeight*upperZ) + leftX)];
+			upperRightY = this->heightMap[int((terrainHeight*upperZ) + rightX)];
+			bottomLeftY = this->heightMap[int((terrainHeight*bottomZ) + leftX)];
+			bottomRightY = this->heightMap[int((terrainHeight*bottomZ) + rightX)];
 
 			//Triangle (1)
 			//Upper left
-			temp.pos = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y, upperZ);
-			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, 0.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(leftX, upperLeftY, upperZ);
+			temp.color = XMFLOAT4(0.0f, upperLeftY / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
-			indices[index] = index;
 			index++;
 
 			//Bottom right
-			temp.pos = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, bottomZ);
-			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, 0.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(rightX, bottomRightY, bottomZ);
+			temp.color = XMFLOAT4(0.0f, bottomRightY / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
-			indices[index] = index;
 			index++;
 
 			//Bottom left
-			temp.pos = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y, bottomZ);
-			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y / 32, 0.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(leftX, bottomLeftY, bottomZ);
+			temp.color = XMFLOAT4(0.0f, bottomLeftY / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
-			indices[index] = index;
 			index++;
 
 			//Triangle (2)
 			//Upper left
-			temp.pos = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y, upperZ);
-			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, 0.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(leftX, upperLeftY, upperZ);
+			temp.color = XMFLOAT4(0.0f, upperLeftY / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
-			indices[index] = index;
 			index++;
 
 			//Upper right
-			temp.pos = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*upperZ) + rightX)].y, upperZ);
-			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*upperZ) + rightX)].y / 32, 0.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(rightX, upperRightY, upperZ);
+			temp.color = XMFLOAT4(0.0f, upperRightY / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
-			indices[index] = index;
 			index++;
 
 			//Bottom right
-			temp.pos = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, bottomZ);
-			temp.color = XMFLOAT4(0.0f, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, 0.0f, 1.0f);
+			temp.pos = scaleFactor*XMFLOAT3(rightX, bottomRightY, bottomZ);
+			temp.color = XMFLOAT4(0.0f, bottomRightY / 32, 0.0f, 1.0f);
 			vecVertices.push_back(temp);
-			indices[index] = index;
 			index++;
 		}
 	}
@@ -211,14 +203,12 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 	memset(&vertexBufferDesc, 0, sizeof(vertexBufferDesc));
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	//vertexBufferDesc.ByteWidth = /*sizeof(VertexData)*sizeof(vertices)*/;
 	vertexBufferDesc.ByteWidth = sizeof(VertexData)*vecVertices.size();
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA vertexData;
-	//vertexData.pSysMem = vertices;
 	vertexData.pSysMem = vecVertices.data();
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
@@ -234,16 +224,10 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 	indexBufferDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA indexData;
-	indexData.pSysMem = /*indices*/vecVertices.data();
+	indexData.pSysMem = vecVertices.data();
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 	gDevice->CreateBuffer(&indexBufferDesc, &indexData, &indexBuffer);
-
-	/*delete[] vertices;
-	vertices = 0;*/
-
-	delete[] indices;
-	indices = 0;
 
 	return;
 }
