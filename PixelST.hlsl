@@ -7,5 +7,5 @@ struct PS_IN
 
 float4 PS_main(PS_IN input) : SV_Target0
 {
-	return (input.UV, 0, 1);
+	return float4(input.UV, 0, 1);
 }
