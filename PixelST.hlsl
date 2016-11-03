@@ -1,12 +1,11 @@
 struct PS_IN
 {
-	float4 Pos : SV_POSITION;
-	float2 uv : UV;
+	float2 UV : UV;
+	float4 normal : NORMAL;
+	float4 pos : SV_POSITION;
 };
 
 float4 PS_main(PS_IN input) : SV_Target0
 {
-
-	return (input.uv, 0, 1);
-	//return float4(0.0f, 0.0f, 1.0f, 0.0f);
+	return (input.UV, 0, 1);
 }

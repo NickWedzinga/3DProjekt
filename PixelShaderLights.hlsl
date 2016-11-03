@@ -23,6 +23,7 @@ cbuffer CONSTANT_BUFFER : register (b2)
 	matrix ViewMatrix;
 	matrix ProjMatrix;
 	float3 camDirection;
+	float3 camPosition;
 }
 
 struct PixelInputType

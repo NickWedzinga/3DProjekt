@@ -8,14 +8,16 @@ cbuffer CONSTANT_BUFFER : register(b0)
 
 struct GS_IN
 {
-	float4 Pos : SV_POSITION;
-	float2 uv : UV;
+	float2 UV : UV;
+	float4 normal : NORMAL;
+	float4 pos : SV_POSITION;
 };
 
 struct GSOutput
 {
+	float2 UV : UV;
+	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
-	float2 uv : UV;
 };
 
 [maxvertexcount(48)]
@@ -25,12 +27,17 @@ void GS_main(triangle GS_IN input[3], inout TriangleStream< GSOutput > output)
 
 	for (uint i = 0; i < 3; i++)
 	{
-		float4 poss = input[i].Pos;
+		float4 poss = input[i].pos;
 		poss = mul(WorldMatrix, poss);
 		poss = mul(ViewMatrix, poss);
 		poss = mul(ProjMatrix, poss);
 		element.pos = poss;
-		element.uv = input[i].uv;
+		float4 normal = input[i].normal;
+		normal = mul(WorldMatrix, normal);
+		normal = mul(ViewMatrix, normal);
+		normal = mul(ProjMatrix, normal);
+		element.normal = normal;
+		element.UV = input[i].UV;
 		output.Append(element);
 	}
 }

@@ -38,9 +38,9 @@ public:
 	void LoadHeightMap();
 	int getVertexCount();
 	void InitializeTerrainShaders(ID3D11Device* gDevice);
-	int getHeightMapY(DirectX::XMFLOAT2 cord);
+	float getHeightMapY(DirectX::XMFLOAT2 cord);
 
-	std::vector<VertexData> vecVertices;
+	//std::vector<VertexData> vecVertices;
 
 	ID3D11VertexShader* gVertexShaderT = nullptr;
 	ID3D11GeometryShader* gGeometryShaderT = nullptr;
@@ -53,7 +53,7 @@ private:
 	void RenderBuffers(ID3D11DeviceContext* gDeviceContext);
 
 	int terrainWidth, terrainHeight;
-	int vertexCount, indexCount;
+	int vertexCount;
 	HeightMapCord* heightMap;
 	ID3D11Buffer *vertexBuffer, *indexBuffer;
 	float scaleFactor;

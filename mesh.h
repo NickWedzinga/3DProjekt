@@ -18,16 +18,16 @@ protected:
 	struct VertexData
 	{
 		XMFLOAT2 UV;
-		XMFLOAT3 Normal;
+		XMFLOAT3 normal;
 		XMFLOAT3 position;
 	};
-	vector<VertexData> vertices;
+	
 	XMFLOAT3 worldPosition;
 	string textureName;
 	//ID3D11Buffer* VertexBuffer = nullptr;
 
 public:
-
+	vector<VertexData> vertices;
 
 };
 

@@ -2,14 +2,16 @@
 
 struct VS_IN
 {
-	float3 Pos : POSITION;
-	float2 uv : UV;
+	float2 UV : UV;
+	float3 normal : NORMAL;
+	float3 pos : POSITION;
 };
 
 struct VS_OUT
 {
-	float4 Pos : SV_POSITION;
-	float2 uv : UV;
+	float2 UV : UV;
+	float4 normal : NORMAL;
+	float4 pos : SV_POSITION;
 };
 
 
@@ -17,8 +19,9 @@ VS_OUT VS_main(VS_IN input)
 {
 	VS_OUT output;
 
-	output.Pos = float4(input.Pos, 1);
-	output.uv = input.uv;
+	output.pos = float4(input.pos, 1);
+	output.normal = float4(input.normal, 0);
+	output.UV = input.UV;
 
 	return output;
 }

@@ -18,7 +18,7 @@
 #pragma comment (lib, "d3dcompiler.lib")*/
 
 #include <windows.h>
-#include <AntTweakBar.h>
+//#include <AntTweakBar.h>
 #include "OBJLoader.h"
 #include "DeferredRendering.h"
 #include "Terrain.h"
@@ -57,7 +57,7 @@ using namespace DirectX::SimpleMath;
 using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
 using namespace std;
 
-TwBar *gMyBar;
+//TwBar *gMyBar;
 float background[3]{0, 0, 0};					
 
 float angleX = 0;
@@ -253,7 +253,7 @@ void Render()
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 
-	gDeviceContext->Draw(terrain->vecVertices.size() /*sizeof(terrain->vertices)*/, 0);
+	gDeviceContext->Draw(terrain->vertices.size(), 0);
 
 
 	//Pipeline 2
@@ -335,20 +335,18 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		deferred.CreateRenderTargets(gDevice);
 		
 
-		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
-		TwWindowSize(WIDTH,HEIGHT);
+		//TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
+		//TwWindowSize(WIDTH,HEIGHT);
 
-		gMyBar = TwNewBar("KekCity");
-		TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
-		TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
-		TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
-		TwAddVarRW(gMyBar, "RotationZ", TW_TYPE_FLOAT, &angleZ, "min = 0.00001 max = 360 step = 0.1");
-		/*float tempx = camera->getPos().x;
-		float tempz = camera->getPos().z;*/
+		//gMyBar = TwNewBar("KekCity");
+		//TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
+		//TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
+		//TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
+		//TwAddVarRW(gMyBar, "RotationZ", TW_TYPE_FLOAT, &angleZ, "min = 0.00001 max = 360 step = 0.1");
 
-		TwAddVarRW(gMyBar, "Z", TW_TYPE_FLOAT, &tempz, "min=-360 max=360 step=1");
-		TwAddVarRW(gMyBar, "X", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
-		TwAddVarRW(gMyBar, "MouseX", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
+		//TwAddVarRW(gMyBar, "Z", TW_TYPE_FLOAT, &tempz, "min=-360 max=360 step=1");
+		//TwAddVarRW(gMyBar, "X", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
+		//TwAddVarRW(gMyBar, "MouseX", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
 
 		CreateShaders(); //5. Skapa vertex- och pixel-shaders
 		deferred.InitializeLightShader(gDevice);
@@ -370,7 +368,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			{
 				Update(); //8.1 Update
 				Render(); //8.2 Rendera
-				TwDraw();
+				//TwDraw();
 
 				gSwapChain->Present(0, 0); //9. Växla front- och back-buffer
 			}
@@ -429,8 +427,8 @@ HWND InitWindow(HINSTANCE hInstance)
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	//Hur fungerar denna?
-	if (TwEventWin(hWnd, message, wParam, lParam)) // send event message to AntTweakBar
-		return 0; // event has been handled by AntTweakBar
+	//if (TwEventWin(hWnd, message, wParam, lParam)) // send event message to AntTweakBar
+		//return 0; // event has been handled by AntTweakBar
 	
 	switch (message) 
 	{

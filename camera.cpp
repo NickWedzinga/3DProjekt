@@ -178,13 +178,13 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 		cBuffer.camPosition = XMLoadFloat3(&pos);
 	}
 	if (heightY != -1)
-		pos.y = heightY;
+		pos.y = heightY + 2;
 	CreateViewMatrix(cBuffer.ViewMatrix, cBuffer.camDirection);
 }
 
 void Camera::Init(XMMATRIX &view, XMVECTOR &camDirection)
 {
-	pos = XMFLOAT3(0, 0, -10);
+	pos = XMFLOAT3(0, 2, -10);
 	mouse = XMFLOAT2(320, 240);
 	camDir = XMFLOAT3(0, 0, 1);
 	CreateViewMatrix(view, camDirection);
@@ -212,7 +212,7 @@ void Camera::setMouse(XMFLOAT2 mouse)
 
 void Camera::CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection)
 {
-	XMFLOAT3 cam1 = XMFLOAT3(pos.x, pos.y+2, pos.z);
+	XMFLOAT3 cam1 = XMFLOAT3(pos.x, pos.y, pos.z);
 	XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
 
 	XMVECTOR cam = XMLoadFloat3(&cam1);

@@ -104,8 +104,9 @@ void Terrain::InitializeTerrainShaders(ID3D11Device* gDevice)
 	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShaderT);
 
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayoutT);
 
@@ -115,7 +116,7 @@ void Terrain::InitializeTerrainShaders(ID3D11Device* gDevice)
 	pPS->Release();
 }
 
-int Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
+float Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
 {
 	float height;
 	int x = cord.x/ scaleFactor;
@@ -139,12 +140,8 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 	unsigned long* indices;
 	int index, i, j;
 	float leftX, rightX, upperZ, bottomZ;
-	int index1, index2, index3, index4;		//Array? int index[4];
 
 	vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 6;
-	indexCount = vertexCount;
-
-	indices = new unsigned long[indexCount];
 
 	index = 0;
 
@@ -154,6 +151,7 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 		{
 			index = (terrainHeight*j) + i;
 			VertexData temp;
+			temp.normal = XMFLOAT3(0, 0, 0);
 			leftX = float(i);
 			rightX = float(i + 1);
 			upperZ = float(j + 1);
@@ -165,44 +163,38 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			//Upper left
 			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y, upperZ);
 			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32);
-			vecVertices.push_back(temp);
-			indices[index] = index;
+			vertices.push_back(temp);
 			index++;
 
 			//Bottom right
 			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, bottomZ);
 			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32);
-			vecVertices.push_back(temp);
-			indices[index] = index;
+			vertices.push_back(temp);
 			index++;
 
 			//Bottom left
 			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y, bottomZ);
 			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y / 32);
-			vecVertices.push_back(temp);
-			indices[index] = index;
+			vertices.push_back(temp);
 			index++;
 
 			//Triangle (2)
 			//Upper left
 			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y, upperZ);
 			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32);
-			vecVertices.push_back(temp);
-			indices[index] = index;
+			vertices.push_back(temp);
 			index++;
 
 			//Upper right
 			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*upperZ) + rightX)].y, upperZ);
 			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + rightX)].y / 32);
-			vecVertices.push_back(temp);
-			indices[index] = index;
+			vertices.push_back(temp);
 			index++;
 
 			//Bottom right
 			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, bottomZ);
 			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32);
-			vecVertices.push_back(temp);
-			indices[index] = index;
+			vertices.push_back(temp);
 			index++;
 		}
 	}
@@ -211,15 +203,13 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 	memset(&vertexBufferDesc, 0, sizeof(vertexBufferDesc));
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	//vertexBufferDesc.ByteWidth = /*sizeof(VertexData)*sizeof(vertices)*/;
-	vertexBufferDesc.ByteWidth = sizeof(VertexData)*vecVertices.size();
+	vertexBufferDesc.ByteWidth = sizeof(VertexData)*vertices.size();
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA vertexData;
-	//vertexData.pSysMem = vertices;
-	vertexData.pSysMem = vecVertices.data();
+	vertexData.pSysMem = vertices.data();
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 	gDevice->CreateBuffer(&vertexBufferDesc, &vertexData, &vertexBuffer);
@@ -227,23 +217,17 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(VertexData)*vecVertices.size();
+	indexBufferDesc.ByteWidth = sizeof(VertexData)*vertices.size();
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
 	indexBufferDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA indexData;
-	indexData.pSysMem = /*indices*/vecVertices.data();
+	indexData.pSysMem = vertices.data();
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 	gDevice->CreateBuffer(&indexBufferDesc, &indexData, &indexBuffer);
-
-	/*delete[] vertices;
-	vertices = 0;*/
-
-	delete[] indices;
-	indices = 0;
 
 	return;
 }
@@ -271,7 +255,7 @@ void Terrain::RenderBuffers(ID3D11DeviceContext *gDeviceContext)
 
 	//stride = sizeof(VertexData);
 	//stride = sizeof(vertices[0]);
-	stride = sizeof(vecVertices[0]);
+	stride = sizeof(vertices[0]);
 	offset = 0;
 
 	gDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
