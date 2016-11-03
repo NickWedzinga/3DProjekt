@@ -8,6 +8,7 @@ void DeferredRendering::CreateLightBuffer()
 {
 	XMFLOAT3 lightDir = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	lData.lightDirection = XMLoadFloat3(&lightDir);
+	lData.ID = 1;
 }
 
 void DeferredRendering::lightbuffer(ID3D11Device* gDevice)
@@ -78,4 +79,9 @@ void DeferredRendering::InitializeLightShader(ID3D11Device* gDevice)
 
 	pVS->Release();
 	pPS->Release();
+}
+
+unsigned int DeferredRendering::Picking()
+{
+	return lData.ID;
 }

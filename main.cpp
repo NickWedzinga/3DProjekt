@@ -355,6 +355,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		zbuffer(); //mad bufferz
 		
 		ShowWindow(wndHandle, nCmdShow);
+		unsigned int ID = -1;
 
 		while (WM_QUIT != msg.message)
 		{
@@ -362,7 +363,10 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
+				if (WM_LBUTTONUP == msg.message)
+					ID = deferred.Picking();
 				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
+
 			}
 			else
 			{

@@ -17,6 +17,7 @@ private:
 struct LightBuffer
 {
 	DirectX::XMVECTOR lightDirection;
+	unsigned int ID;
 	float padding;
 };
 public:
@@ -24,6 +25,7 @@ public:
 	void lightbuffer(ID3D11Device* gDevice);
 	void CreateRenderTargets(ID3D11Device* gDevice);
 	void InitializeLightShader(ID3D11Device* gDevice);
+	unsigned int Picking();
 
 	LightBuffer lData;
 	ID3D11Buffer* gLightBuffer;

@@ -22,6 +22,7 @@ protected:
 		XMFLOAT3 position;
 	};
 	
+	unsigned int ID;
 	XMFLOAT3 worldPosition;
 	string textureName;
 	//ID3D11Buffer* VertexBuffer = nullptr;
