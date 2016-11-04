@@ -3,16 +3,10 @@
 #define MESH_H
 
 #include "includes.h"
-#include <d3d11.h>
-#include <d3dcompiler.h>
-
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3dcompiler.lib")
-#include <vector>
 
 using namespace std;
 
-class mesh
+class Mesh
 {
 protected:
 	struct VertexData

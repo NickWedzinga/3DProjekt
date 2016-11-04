@@ -17,22 +17,12 @@
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")*/
 
-#include <windows.h>
 //#include <AntTweakBar.h>
 #include "OBJLoader.h"
 #include "DeferredRendering.h"
 #include "Terrain.h"
 #include "camera.h"
 #include "includes.h"
-
-#include <d3d11.h>
-#include <d3dcompiler.h>
-
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3dcompiler.lib")
-
-//#pragma comment (lib, "d3d11.lib")
-//#pragma comment (lib, "d3dcompiler.lib")
 
 HWND InitWindow(HINSTANCE hInstance);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -155,9 +145,9 @@ void CreateShaders()
 	
 	//create input layout (verified using vertex shader)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "UV", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "UV", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
@@ -273,7 +263,8 @@ void Render()
 
 	gDeviceContext->PSSetShaderResources(0, 1, &cube.textureView); //Pipelina texturen
 
-	UINT32 vertexSize = sizeof(cube.triangleVertices[0]);
+	UINT32 vertexSize = sizeof(cube.vertices[0]);
+	//UINT32 vertexSize = sizeof(cube.triangleVertices[0]);
 	UINT32 offset = 0;
 
 	gDeviceContext->IASetVertexBuffers(0, 1, &cube.VertexBuffer, &vertexSize, &offset);
@@ -283,7 +274,8 @@ void Render()
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 
-	gDeviceContext->Draw(cube.triangleVertices.size(), 0);
+	gDeviceContext->Draw(cube.vertices.size(), 0);
+	//gDeviceContext->Draw(cube.triangleVertices.size(), 0);
 
 
 	//Pipeline 3

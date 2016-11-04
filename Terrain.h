@@ -4,26 +4,13 @@
 
 #include "mesh.h"
 //#include <d3d11.h>
-//#include <d3dcompiler.h>
-#include <SimpleMath.h>
-#include <SimpleMath.inl>
+#pragma once
+#include "mesh.h"
 #include <stdio.h>
-#include <vector>
-//#pragma comment (lib, "d3d11.lib")
-//#pragma comment (lib, "d3dcompiler.lib")
 
-
-class Terrain : public mesh
+class Terrain : public Mesh
 {
 private:
-	//struct VertexData
-	//{
-	//	DirectX::XMFLOAT3 pos;
-	//	//DirectX::XMFLOAT3 uv;
-	//	//DirectX::XMFLOAT3 normal;
-	//	DirectX::XMFLOAT4 color;
-	//	
-	//};
 	struct HeightMapCord
 	{
 		float x, y, z;
@@ -39,8 +26,6 @@ public:
 	int getVertexCount();
 	void InitializeTerrainShaders(ID3D11Device* gDevice);
 	float getHeightMapY(DirectX::XMFLOAT2 cord);
-
-	//std::vector<VertexData> vecVertices;
 
 	ID3D11VertexShader* gVertexShaderT = nullptr;
 	ID3D11GeometryShader* gGeometryShaderT = nullptr;
