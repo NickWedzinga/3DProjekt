@@ -1,14 +1,12 @@
+#pragma once
 #ifndef OBJLOADER_H
 #define OBJLOADER_H
 
 #include "Mesh.h"
-#include <SimpleMath.h>
-#include <SimpleMath.inl>
 
 //#include "bth_image.h"
 #include <sstream> //obj
 #include <fstream> //obj
-#include <vector> //obj
 
 
 

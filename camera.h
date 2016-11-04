@@ -1,12 +1,11 @@
+#pragma once
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include "includes.h"
+
 #include <windows.h>
 #include <Windowsx.h>
-#include <DirectXMath.h>
-#include <d3d11.h>
-#include "includes.h"
-#pragma comment (lib, "d3d11.lib")
 
 using namespace DirectX;
 

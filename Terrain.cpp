@@ -129,22 +129,21 @@ float Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
 
 void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 {
-	int index, i, j;
+	int i, j;
 	float leftX, rightX, upperZ, bottomZ;
 	float upperLeftY, upperRightY, bottomLeftY, bottomRightY;
 	//int index1, index2, index3, index4;		//Array? int index[4];
 
 	vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 6;
 
-	index = 0;
-
 	for (j = 0; j < terrainHeight - 1; j++)
 	{
 		for (i = 0; i < terrainWidth - 1; i++)
 		{
-			index = (terrainHeight*j) + i;
-			VertexData temp;
-			temp.normal = XMFLOAT3(0, 0, 0);
+			VertexData temp1, temp2, temp3;
+			XMVECTOR vec1, vec2, normal;
+			XMFLOAT3 norm;
+			//temp.normal = XMFLOAT3(0, 1, 0);
 			leftX = float(i);
 			rightX = float(i + 1);
 			upperZ = float(j + 1);
@@ -159,47 +158,68 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 
 			//Triangle (1)
 			//Upper left
-			temp.position = scaleFactor*XMFLOAT3(leftX, upperLeftY, upperZ);
+			temp1.position = scaleFactor*XMFLOAT3(leftX, upperLeftY, upperZ);
 			//temp.UV = XMFLOAT2(upperLeftY / 32, upperLeftY / 32);
-			temp.UV = XMFLOAT2(leftX / 256, 1 - (upperZ / 256));
-			vertices.push_back(temp);
-			index++;
+			temp1.UV = XMFLOAT2(leftX / 256, 1 - (upperZ / 256));
+			//vertices.push_back(temp);
 
 			//Bottom right
-			temp.position = scaleFactor*XMFLOAT3(rightX, bottomRightY, bottomZ);
+			temp2.position = scaleFactor*XMFLOAT3(rightX, bottomRightY, bottomZ);
 			/*temp.UV = XMFLOAT2(bottomRightY / 32, bottomRightY / 32);*/
-			temp.UV = XMFLOAT2(rightX / 256, 1 - (bottomZ / 256));
-			vertices.push_back(temp);
-			index++;
+			temp2.UV = XMFLOAT2(rightX / 256, 1 - (bottomZ / 256));
+			//vertices.push_back(temp);
 
 			//Bottom left
-			temp.position = scaleFactor*XMFLOAT3(leftX, bottomLeftY, bottomZ);
+			temp3.position = scaleFactor*XMFLOAT3(leftX, bottomLeftY, bottomZ);
 			/*temp.UV = XMFLOAT2(bottomLeftY / 32, bottomLeftY / 32);*/
-			temp.UV = XMFLOAT2(leftX / 256, 1 - (bottomZ / 256));
-			vertices.push_back(temp);
-			index++;
+			temp3.UV = XMFLOAT2(leftX / 256, 1 - (bottomZ / 256));
+			//vertices.push_back(temp);
+			
+			vec1 = temp1.position - temp2.position;
+			vec2 = temp3.position - temp2.position;
+			normal = XMVector3Cross(vec1, vec2);
+			XMStoreFloat3(&norm, normal);
+			temp1.normal = norm;
+			temp2.normal = norm;
+			temp3.normal = norm;
+
+			vertices.push_back(temp1);
+			vertices.push_back(temp2);
+			vertices.push_back(temp3);
+
 
 			//Triangle (2)
 			//Upper left
-			temp.position= scaleFactor*XMFLOAT3(leftX, upperLeftY, upperZ);
+			temp1.position= scaleFactor*XMFLOAT3(leftX, upperLeftY, upperZ);
 			/*temp.UV = XMFLOAT2(upperLeftY / 32, upperLeftY / 32);*/
-			temp.UV = XMFLOAT2(leftX / 256, 1 - (upperZ / 256));
-			vertices.push_back(temp);
-			index++;
+			temp1.UV = XMFLOAT2(leftX / 256, 1 - (upperZ / 256));
+			//vertices.push_back(temp);
 
 			//Upper right
-			temp.position= scaleFactor*XMFLOAT3(rightX, upperRightY, upperZ);
+			temp2.position= scaleFactor*XMFLOAT3(rightX, upperRightY, upperZ);
 			/*temp.UV = XMFLOAT2(upperRightY / 32, upperRightY / 32);*/
-			temp.UV = XMFLOAT2(rightX / 256, 1 - (upperZ / 256));
-			vertices.push_back(temp);
-			index++;
+			temp2.UV = XMFLOAT2(rightX / 256, 1 - (upperZ / 256));
+			//vertices.push_back(temp);
 
 			//Bottom right
-			temp.position= scaleFactor*XMFLOAT3(rightX, bottomRightY, bottomZ);
+			temp3.position= scaleFactor*XMFLOAT3(rightX, bottomRightY, bottomZ);
 			/*temp.UV = XMFLOAT2(bottomRightY / 32, bottomRightY / 32);*/
-			temp.UV = XMFLOAT2(rightX / 256, 1 - (bottomZ / 256));
-			vertices.push_back(temp);
-			index++;
+			temp3.UV = XMFLOAT2(rightX / 256, 1 - (bottomZ / 256));
+			//vertices.push_back(temp);
+
+			vec1 = temp1.position - temp2.position;
+			vec2 = temp3.position - temp2.position;
+			normal = XMVector3Cross(vec1, vec2);
+			XMStoreFloat3(&norm, normal);
+			temp1.normal = norm;
+			temp2.normal = norm;
+			temp3.normal = norm;
+
+			vertices.push_back(temp1);
+			vertices.push_back(temp2);
+			vertices.push_back(temp3);
+
+
 		}
 	}
 

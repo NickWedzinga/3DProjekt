@@ -1,12 +1,7 @@
 #ifndef DEFERREDRENDERING_H
 #define DEFERREDRENDERING_H
 
-#include <d3d11.h>
-#include <d3dcompiler.h>
-#include <SimpleMath.h>
-#include <SimpleMath.inl>
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3dcompiler.lib")
+#include "includes.h"
 
 #define WIDTH 640.0f
 #define HEIGHT 480.0f

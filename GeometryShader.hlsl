@@ -37,7 +37,7 @@ float3 CalculatefaceNormal(GS_IN input[3])
 	return worldnormal;
 }
 
-[maxvertexcount(36)]
+[maxvertexcount(48)]
 
 //-----------------------------------------------------------------------------------------
 // GeometryShader: GSScene

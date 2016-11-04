@@ -3,6 +3,13 @@
 #define INCLUDES_H
 
 #include <DirectXMath.h>
+#include <SimpleMath.h>
+#include <SimpleMath.inl>
+#include <d3d11.h>
+#include <d3dcompiler.h>
+
+#pragma comment (lib, "d3d11.lib")
+#pragma comment (lib, "d3dcompiler.lib")
 
 
 #define WIDTH 640.0f

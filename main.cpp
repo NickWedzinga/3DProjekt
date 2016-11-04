@@ -23,16 +23,8 @@
 #include "DeferredRendering.h"
 #include "Terrain.h"
 #include "camera.h"
-#include "includes.h"
+//#include "includes.h"
 
-#include <d3d11.h>
-#include <d3dcompiler.h>
-
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3dcompiler.lib")
-
-//#pragma comment (lib, "d3d11.lib")
-//#pragma comment (lib, "d3dcompiler.lib")
 
 HWND InitWindow(HINSTANCE hInstance);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -248,7 +240,7 @@ void Render()
 
 
 	//Pipeline 2
-	gDeviceContext->OMSetRenderTargets(3, deferred.gRTVA, gDepthStencilView);
+	gDeviceContext->OMSetRenderTargets(2, deferred.gRTVA, gDepthStencilView);
 	for (int i = 0; i < 2; i++)
 		gDeviceContext->ClearRenderTargetView(deferred.gRTVA[i], clearColor); //Clear åt zbuffer
 
@@ -288,7 +280,7 @@ void Render()
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(deferred.gPixelShaderLight, nullptr, 0);
 
-	gDeviceContext->PSSetShaderResources(0, 3, deferred.gSRVA);
+	gDeviceContext->PSSetShaderResources(0, 2, deferred.gSRVA);
 	//gDeviceContext->PSSetShaderResources(0, 1, &deferred.gSRVA[2]);
 	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
@@ -370,9 +362,9 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 		cube.VertexBuffer->Release();
 		//gWorldViewProjBuffer->Release(); ??
-		gVertexLayout->Release();
-		gVertexShader->Release();
-		gPixelShader->Release();
+		//gVertexLayout->Release();
+		//gVertexShader->Release();
+		//gPixelShader->Release();
 		//gGeometryShader->Release(); ??
 		gBackbufferRTV->Release();
 		gSwapChain->Release();
