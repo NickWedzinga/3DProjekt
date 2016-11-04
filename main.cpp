@@ -79,9 +79,6 @@ void CreateWorldMatrix()
 
 void CreateProjMatrix()
 {
-	//float Near = 0.5;
-	//float Far = 200;
-
 	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH/HEIGHT, NEAR, FAR);
 }
 
