@@ -15,18 +15,14 @@ Terrain::Terrain()
 
 Terrain::~Terrain()
 {
+	ShutDownBuffers();
+	delete[] heightMap;
 }
 
 void Terrain::Initialize(ID3D11Device* gDevice)
 {
 	LoadHeightMap();
 	InitializeBuffers(gDevice);
-	return;
-}
-
-void Terrain::ShutDown()
-{
-	ShutDownBuffers();
 	return;
 }
 
@@ -40,11 +36,9 @@ void Terrain::LoadHeightMap()
 {
 	char* filename = "objs/firstheightmap.bmp";
 	FILE* filePtr;
-	//int error;
-	unsigned int count;
 	BITMAPFILEHEADER bitmapFileHeader;
 	BITMAPINFOHEADER bitmapInfoHeader;
-	int imageSize, i, j, k, index;
+	int imageSize, i, j, k;
 	unsigned char* bitmapImage;
 	unsigned char height;
 
@@ -63,7 +57,7 @@ void Terrain::LoadHeightMap()
 	fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
 
 	//Reading the data in the file
-	count = fread(bitmapImage, 1, imageSize, filePtr);
+	fread(bitmapImage, 1, imageSize, filePtr);
 
 	fclose(filePtr);
 	
@@ -74,9 +68,8 @@ void Terrain::LoadHeightMap()
 	for (j = 0; j < terrainHeight; j++)
 		for (i = 0; i < terrainWidth; i++)
 		{
-			index = (terrainHeight*j) + i;
 			height = bitmapImage[k];
-			heightMap[index] = float(height)/ 8/*(256 / 2)*/;
+			heightMap[k] = float(height)/ 8;
 			k += 1;
 		}
 
@@ -89,32 +82,32 @@ int Terrain::getVertexCount()
 	return vertexCount;
 }
 
-void Terrain::InitializeTerrainShaders(ID3D11Device* gDevice)
-{
-	ID3D10Blob* pVS = nullptr;
-	ID3D10Blob* pGS = nullptr;
-	ID3D10Blob* pPS = nullptr;
-
-	D3DCompileFromFile(L"VertexST.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, nullptr);
-	D3DCompileFromFile(L"GeometryST.hlsl", nullptr, nullptr, "GS_main", "gs_4_0", 0, 0, &pGS, nullptr);
-	D3DCompileFromFile(L"PixelST.hlsl", nullptr, nullptr, "PS_main", "ps_4_0", 0, 0, &pPS, nullptr);
-
-	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShaderT);
-	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShaderT);
-	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShaderT);
-
-	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
-		{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
-	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayoutT);
-
-
-	pVS->Release();
-	pGS->Release();
-	pPS->Release();
-}
+//void Terrain::InitializeTerrainShaders(ID3D11Device* gDevice)
+//{
+//	ID3D10Blob* pVS = nullptr;
+//	ID3D10Blob* pGS = nullptr;
+//	ID3D10Blob* pPS = nullptr;
+//
+//	D3DCompileFromFile(L"VertexST.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, nullptr);
+//	D3DCompileFromFile(L"GeometryST.hlsl", nullptr, nullptr, "GS_main", "gs_4_0", 0, 0, &pGS, nullptr);
+//	D3DCompileFromFile(L"PixelST.hlsl", nullptr, nullptr, "PS_main", "ps_4_0", 0, 0, &pPS, nullptr);
+//
+//	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShaderT);
+//	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShaderT);
+//	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShaderT);
+//
+//	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
+//		{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+//		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+//		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+//	};
+//	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayoutT);
+//
+//
+//	pVS->Release();
+//	pGS->Release();
+//	pPS->Release();
+//}
 
 float Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
 {
@@ -136,10 +129,10 @@ float Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
 
 void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 {
-	
-	unsigned long* indices;
 	int index, i, j;
 	float leftX, rightX, upperZ, bottomZ;
+	float upperLeftY, upperRightY, bottomLeftY, bottomRightY;
+	//int index1, index2, index3, index4;		//Array? int index[4];
 
 	vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 6;
 
@@ -157,42 +150,48 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			upperZ = float(j + 1);
 			bottomZ = float(j);
 
+			upperLeftY = this->heightMap[int((terrainHeight*upperZ) + leftX)];
+			upperRightY = this->heightMap[int((terrainHeight*upperZ) + rightX)];
+			bottomLeftY = this->heightMap[int((terrainHeight*bottomZ) + leftX)];
+			bottomRightY = this->heightMap[int((terrainHeight*bottomZ) + rightX)];
+
+
 
 			//Triangle (1)
 			//Upper left
-			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)], upperZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + leftX)] / 32, this->heightMap[int((terrainHeight*upperZ) + leftX)] / 32);
+			temp.position = scaleFactor*XMFLOAT3(leftX, upperLeftY, upperZ);
+			temp.UV = XMFLOAT2(upperLeftY / 32, upperLeftY / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom right
-			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)], bottomZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + rightX)] / 32, this->heightMap[int((terrainHeight*bottomZ) + rightX)] / 32);
+			temp.position = scaleFactor*XMFLOAT3(rightX, bottomRightY, bottomZ);
+			temp.UV = XMFLOAT2(bottomRightY / 32, bottomRightY / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom left
-			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*bottomZ) + leftX)], bottomZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + leftX)] / 32, this->heightMap[int((terrainHeight*bottomZ) + leftX)] / 32);
+			temp.position = scaleFactor*XMFLOAT3(leftX, bottomLeftY, bottomZ);
+			temp.UV = XMFLOAT2(bottomLeftY / 32, bottomLeftY / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Triangle (2)
 			//Upper left
-			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)], upperZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + leftX)] / 32, this->heightMap[int((terrainHeight*upperZ) + leftX)] / 32);
+			temp.position= scaleFactor*XMFLOAT3(leftX, upperLeftY, upperZ);
+			temp.UV = XMFLOAT2(upperLeftY / 32, upperLeftY / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Upper right
-			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*upperZ) + rightX)], upperZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + rightX)] / 32, this->heightMap[int((terrainHeight*upperZ) + rightX)] / 32);
+			temp.position= scaleFactor*XMFLOAT3(rightX, upperRightY, upperZ);
+			temp.UV = XMFLOAT2(upperRightY / 32, upperRightY / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom right
-			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)], bottomZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + rightX)] / 32, this->heightMap[int((terrainHeight*bottomZ) + rightX)] / 32);
+			temp.position= scaleFactor*XMFLOAT3(rightX, bottomRightY, bottomZ);
+			temp.UV = XMFLOAT2(bottomRightY / 32, bottomRightY / 32);
 			vertices.push_back(temp);
 			index++;
 		}
@@ -260,7 +259,7 @@ void Terrain::RenderBuffers(ID3D11DeviceContext *gDeviceContext)
 	gDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	gDeviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->IASetInputLayout(gVertexLayoutT);
+	gDeviceContext->IASetInputLayout(mVertexLayout);
 
 	return;
 }

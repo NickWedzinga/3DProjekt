@@ -42,10 +42,9 @@ float3 CalculatefaceNormal(GS_IN input[3])
 //-----------------------------------------------------------------------------------------
 // GeometryShader: GSScene
 //-----------------------------------------------------------------------------------------
-void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
+void GS_main(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 {
 	GS_OUT Output;
-	float PI = 3.14159265f;
 
 	float3 worldnormal = CalculatefaceNormal(input);
 	float3 vec = normalize(input[0].Pos - camPosition);

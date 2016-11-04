@@ -186,7 +186,7 @@ void CreateShaders()
 		L"GeometryShader.hlsl", // filename
 		nullptr,		// optional macros
 		nullptr,		// optional include files
-		"GS",			// entry point
+		"GS_main",			// entry point
 		"gs_4_0",		// shader model (target)
 		0,				// shader compile options
 		0,				// effect compile options
@@ -236,37 +236,30 @@ void Render()
 
 
 	//Pipeline 1
-	gDeviceContext->OMSetRenderTargets(1, &deferred.gRTVA[0]/*&gBackbufferRTV*/, gDepthStencilView);
-	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0]/*gBackbufferRTV*/, clearColor);
-	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
-
-	gDeviceContext->VSSetShader(terrain->gVertexShaderT, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->GSSetShader(terrain->gGeometryShaderT, nullptr, 0);
-	gDeviceContext->PSSetShader(terrain->gPixelShaderT, nullptr, 0);
+	//gDeviceContext->OMSetRenderTargets(1, &deferred.gRTVA[0]/*&gBackbufferRTV*/, gDepthStencilView);
+	//gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0]/*gBackbufferRTV*/, clearColor);
+	//gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 
 	terrain->Render(gDeviceContext);
 
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
+	//gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 
 	gDeviceContext->Draw(terrain->vertices.size(), 0);
 
 
 	//Pipeline 2
 	gDeviceContext->OMSetRenderTargets(3, deferred.gRTVA, gDepthStencilView);
-	for (int i = 1; i < 3; i++)
+	for (int i = 0; i < 2; i++)
 		gDeviceContext->ClearRenderTargetView(deferred.gRTVA[i], clearColor); //Clear åt zbuffer
 
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
+	
 
-
-
-	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
-	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+	//gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
+	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 
 	gDeviceContext->PSSetShaderResources(0, 1, &cube.textureView); //Pipelina texturen
 
@@ -345,9 +338,9 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		//TwAddVarRW(gMyBar, "X", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
 		//TwAddVarRW(gMyBar, "MouseX", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
 
-		CreateShaders(); //5. Skapa vertex- och pixel-shaders
+		//CreateShaders(); //5. Skapa vertex- och pixel-shaders
 		deferred.InitializeLightShader(gDevice);
-		terrain->InitializeTerrainShaders(gDevice);
+		terrain->InitShaders(gDevice);
 
 		zbuffer(); //mad bufferz
 		

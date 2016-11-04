@@ -44,7 +44,7 @@ void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
 
-	for (int i = 0; i < 3/*2*/; i++)
+	for (int i = 0; i < 2; i++)
 		gDevice->CreateTexture2D(&textureDesc, NULL, &gRTTA[i]);
 
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
@@ -52,7 +52,7 @@ void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-	for (int i = 0; i < 3/*2*/; i++)
+	for (int i = 0; i < 2; i++)
 		gDevice->CreateRenderTargetView(gRTTA[i], &renderTargetViewDesc, &gRTVA[i]);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
@@ -61,7 +61,7 @@ void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
-	for (int i = 0; i < 3/*2*/; i++)
+	for (int i = 0; i < 2; i++)
 		gDevice->CreateShaderResourceView(gRTTA[i], &shaderResourceViewDesc, &gSRVA[i]);
 }
 

@@ -1,7 +1,7 @@
 #ifndef OBJLOADER_H
 #define OBJLOADER_H
 
-
+#include "Mesh.h"
 #include <SimpleMath.h>
 #include <SimpleMath.inl>
 
@@ -14,7 +14,7 @@
 
 
 
-class Object
+class Object : public Mesh
 {
 private:
 struct CONSTANT_BUFFER2
@@ -37,7 +37,7 @@ public:
 	std::vector<VertexData> triangleVertices; //behövs globalt så att draw kan sättas dynamiskt	
 	CONSTANT_BUFFER2 materialData;
 	ID3D11Buffer* VertexBuffer = nullptr;
-	ID3D11ShaderResourceView* textureView = nullptr;
+	//ID3D11ShaderResourceView* textureView = nullptr;
 	ID3D11Buffer* gMaterialBuffer = nullptr;
 private:
    void MTLLoader(std::string mtlfile, ID3D11Device* gDevice);

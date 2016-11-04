@@ -1,6 +1,6 @@
-Texture2D colorTex : register(t1);
-Texture2D normalTex : register(t2);
-Texture2D terrainTex : register(t0);
+Texture2D colorTex : register(t0);
+Texture2D normalTex : register(t1);
+//\Texture2D terrainTex : register(t0);
 SamplerState SampleTypePoint : register(s0);
 
 cbuffer LightBuffer : register(b0)
@@ -36,7 +36,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 {
 	float4 colors;
 	float4 normals;
-	float4 terrain;
+	//float4 terrain;
 	//float lightIntensity;
 	//float4 outputColor;
 
@@ -45,7 +45,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	colors = colorTex.Sample(SampleTypePoint, input.uv);
 	normals = normalTex.Sample(SampleTypePoint, input.uv);
-	terrain = terrainTex.Sample(SampleTypePoint, input.uv);
+	//terrain = terrainTex.Sample(SampleTypePoint, input.uv);
 	//normals = float4(0.0f, 1.0f, 0.0f, 1.0f);
 
 	//float3 lightvec = -lightDirection;
@@ -65,7 +65,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float3 rv = dot(r, camDirection/*viewDirection*/);
 	float3 LS = KS.xyz * pow(rv, shiny); //KS comment because material gives it 0
 
-	float3 result = (colors.xyz*LA) + terrain.xyz + (colors.xyz*LD) + (colors.xyz*LS);
+	float3 result = (colors.xyz*LA) + /*terrain.xyz +*/ (colors.xyz*LD) + (colors.xyz*LS);
 
 	return float4(result, 1);
 	//return terrain;

@@ -178,7 +178,7 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 		cBuffer.camPosition = XMLoadFloat3(&pos);
 	}
 	if (heightY != -1)
-		pos.y = heightY + 2;
+		pos.y = heightY + 2;	//Offset to not walk in terrain
 	CreateViewMatrix(cBuffer.ViewMatrix, cBuffer.camDirection);
 }
 
