@@ -132,10 +132,20 @@ void Object::materialCB(ID3D11Device * gDevice)
 	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gMaterialBuffer);
 }
 
+void Object::SetBuffersAndResources(ID3D11DeviceContext * gDeviceContext)
+{
+	gDeviceContext->PSSetShaderResources(0, 1, &textureView); //Pipelina texturen
+
+	UINT32 vertexSize = sizeof(triangleVertices[0]);
+	UINT32 offset = 0;
+
+	gDeviceContext->IASetVertexBuffers(0, 1, &VertexBuffer, &vertexSize, &offset);
+}
+
 void Object::MTLLoader(string mtlfile, ID3D11Device* gDevice)
 {
 	//mtlfile was sent from OBJLOADER, mtlfile == "box.mtl"
-	string myfile(mtlfile), line2, special, material;
+	string myfile(mtlfile), line2, special;
 	XMFLOAT4 Kd, Ka, Ks;
 	ifstream file(myfile);
 	istringstream inputString2;
@@ -145,9 +155,9 @@ void Object::MTLLoader(string mtlfile, ID3D11Device* gDevice)
 		inputString2.str(line2);
 		if (line2.substr(0, 3) == "map")
 		{
-			inputString2 >> special >> material; //material == "cube_box.jpg"
+			inputString2 >> special >> textureName; //material == "cube_box.jpg"
 
-			Texture(material, gDevice);
+			Texture(gDevice);
 		}
 		else if (line2.substr(0, 3) == "Kd ") //En material, RGB Diffuse
 		{
@@ -169,11 +179,11 @@ void Object::MTLLoader(string mtlfile, ID3D11Device* gDevice)
 	return;
 }
 
-void Object::Texture(string material, ID3D11Device* gDevice)
-{
-	wchar_t mat[20];
-	MultiByteToWideChar(CP_UTF8, 0, material.c_str(), -1, mat, sizeof(mat) / sizeof(wchar_t));
-
-	CreateWICTextureFromFile(gDevice, mat, NULL, &textureView);
-	return;
-}
+//void Object::Texture(string material, ID3D11Device* gDevice)
+//{
+//	wchar_t mat[20];
+//	MultiByteToWideChar(CP_UTF8, 0, material.c_str(), -1, mat, sizeof(mat) / sizeof(wchar_t));
+//
+//	CreateWICTextureFromFile(gDevice, mat, NULL, &textureView);
+//	return;
+//}

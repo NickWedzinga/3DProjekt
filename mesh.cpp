@@ -35,3 +35,18 @@ void Mesh::SetShaders(ID3D11DeviceContext * gDeviceContext)
 	gDeviceContext->GSSetShader(mGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(mPixelShader, nullptr, 0);
 }
+
+void Mesh::SetLayoutAndTopology(ID3D11DeviceContext * gDeviceContext)
+{
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	gDeviceContext->IASetInputLayout(mVertexLayout);
+}
+
+void Mesh::Texture(ID3D11Device * gDevice)
+{
+	wchar_t mat[20];
+	MultiByteToWideChar(CP_UTF8, 0, textureName.c_str(), -1, mat, sizeof(mat) / sizeof(wchar_t));
+
+	CreateWICTextureFromFile(gDevice, mat, NULL, &textureView);
+	return;
+}

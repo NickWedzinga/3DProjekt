@@ -240,11 +240,11 @@ void Render()
 	//gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0]/*gBackbufferRTV*/, clearColor);
 	//gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 
-	terrain->Render(gDeviceContext);
+	//terrain->Render(gDeviceContext);
 
 	//gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 
-	gDeviceContext->Draw(terrain->vertices.size(), 0);
+	//gDeviceContext->Draw(terrain->vertices.size(), 0);
 
 
 	//Pipeline 2
@@ -254,26 +254,26 @@ void Render()
 
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 	
-
+	terrain->Render(gDeviceContext);
 	//gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	//gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+	terrain->SetShaders(gDeviceContext);
+	terrain->SetLayoutAndTopology(gDeviceContext);
 
-	gDeviceContext->PSSetShaderResources(0, 1, &cube.textureView); //Pipelina texturen
-
-	UINT32 vertexSize = sizeof(cube.triangleVertices[0]);
-	UINT32 offset = 0;
-
-	gDeviceContext->IASetVertexBuffers(0, 1, &cube.VertexBuffer, &vertexSize, &offset);
-
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->IASetInputLayout(gVertexLayout);
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 
-	gDeviceContext->Draw(cube.triangleVertices.size(), 0);
+	
+
+	gDeviceContext->Draw(terrain->vertices.size(), 0);
+
+
+
+	//cube.SetBuffersAndResources(gDeviceContext);
+	//gDeviceContext->Draw(cube.triangleVertices.size(), 0);
 
 
 	//Pipeline 3

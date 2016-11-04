@@ -160,38 +160,44 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			//Triangle (1)
 			//Upper left
 			temp.position = scaleFactor*XMFLOAT3(leftX, upperLeftY, upperZ);
-			temp.UV = XMFLOAT2(upperLeftY / 32, upperLeftY / 32);
+			//temp.UV = XMFLOAT2(upperLeftY / 32, upperLeftY / 32);
+			temp.UV = XMFLOAT2(leftX / 256, 1 - (upperZ / 256));
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom right
 			temp.position = scaleFactor*XMFLOAT3(rightX, bottomRightY, bottomZ);
-			temp.UV = XMFLOAT2(bottomRightY / 32, bottomRightY / 32);
+			/*temp.UV = XMFLOAT2(bottomRightY / 32, bottomRightY / 32);*/
+			temp.UV = XMFLOAT2(rightX / 256, 1 - (bottomZ / 256));
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom left
 			temp.position = scaleFactor*XMFLOAT3(leftX, bottomLeftY, bottomZ);
-			temp.UV = XMFLOAT2(bottomLeftY / 32, bottomLeftY / 32);
+			/*temp.UV = XMFLOAT2(bottomLeftY / 32, bottomLeftY / 32);*/
+			temp.UV = XMFLOAT2(leftX / 256, 1 - (bottomZ / 256));
 			vertices.push_back(temp);
 			index++;
 
 			//Triangle (2)
 			//Upper left
 			temp.position= scaleFactor*XMFLOAT3(leftX, upperLeftY, upperZ);
-			temp.UV = XMFLOAT2(upperLeftY / 32, upperLeftY / 32);
+			/*temp.UV = XMFLOAT2(upperLeftY / 32, upperLeftY / 32);*/
+			temp.UV = XMFLOAT2(leftX / 256, 1 - (upperZ / 256));
 			vertices.push_back(temp);
 			index++;
 
 			//Upper right
 			temp.position= scaleFactor*XMFLOAT3(rightX, upperRightY, upperZ);
-			temp.UV = XMFLOAT2(upperRightY / 32, upperRightY / 32);
+			/*temp.UV = XMFLOAT2(upperRightY / 32, upperRightY / 32);*/
+			temp.UV = XMFLOAT2(rightX / 256, 1 - (upperZ / 256));
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom right
 			temp.position= scaleFactor*XMFLOAT3(rightX, bottomRightY, bottomZ);
-			temp.UV = XMFLOAT2(bottomRightY / 32, bottomRightY / 32);
+			/*temp.UV = XMFLOAT2(bottomRightY / 32, bottomRightY / 32);*/
+			temp.UV = XMFLOAT2(rightX / 256, 1 - (bottomZ / 256));
 			vertices.push_back(temp);
 			index++;
 		}
@@ -227,6 +233,8 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 	indexData.SysMemSlicePitch = 0;
 	gDevice->CreateBuffer(&indexBufferDesc, &indexData, &indexBuffer);
 
+	LoadTexture(gDevice);
+
 	return;
 }
 
@@ -258,8 +266,11 @@ void Terrain::RenderBuffers(ID3D11DeviceContext *gDeviceContext)
 
 	gDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	gDeviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->IASetInputLayout(mVertexLayout);
-
 	return;
+}
+
+void Terrain::LoadTexture(ID3D11Device* gDevice)
+{
+	textureName = "objs/firstheightmap.jpg";
+	Texture(gDevice);
 }

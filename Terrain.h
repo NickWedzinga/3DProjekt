@@ -37,7 +37,7 @@ private:
 	void InitializeBuffers(ID3D11Device* gDevice);
 	void ShutDownBuffers();
 	void RenderBuffers(ID3D11DeviceContext* gDeviceContext);
-
+	void LoadTexture(ID3D11Device* gDevice);
 	float* heightMap;
 
 	int terrainWidth, terrainHeight;

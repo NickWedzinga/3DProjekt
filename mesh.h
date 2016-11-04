@@ -5,10 +5,11 @@
 #include "includes.h"
 #include <d3d11.h>
 #include <d3dcompiler.h>
+#include <WICTextureLoader.h>
+#include <vector>
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
-#include <vector>
 
 using namespace std;
 
@@ -33,12 +34,14 @@ protected:
 	XMFLOAT3 worldPosition;
 	string textureName;
 	//ID3D11Buffer* VertexBuffer = nullptr;
+	void Texture(ID3D11Device* gDevice);
 
 public:
 	vector<VertexData> vertices;
 
 	void InitShaders(ID3D11Device* gDevice);
 	void SetShaders(ID3D11DeviceContext* gDeviceContext);
+	void SetLayoutAndTopology(ID3D11DeviceContext* gDeviceContext);
 };
 
 #endif

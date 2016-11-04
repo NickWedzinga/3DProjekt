@@ -9,7 +9,6 @@
 #include <sstream> //obj
 #include <fstream> //obj
 #include <vector> //obj
-#include <WICTextureLoader.h>
 
 
 
@@ -33,6 +32,7 @@ public:
 
 	void LoadObject(ID3D11Device* gDevice);
 	void materialCB(ID3D11Device* gDevice);
+	void SetBuffersAndResources(ID3D11DeviceContext * gDeviceContext);
 
 	std::vector<VertexData> triangleVertices; //behövs globalt så att draw kan sättas dynamiskt	
 	CONSTANT_BUFFER2 materialData;
@@ -41,7 +41,7 @@ public:
 	ID3D11Buffer* gMaterialBuffer = nullptr;
 private:
    void MTLLoader(std::string mtlfile, ID3D11Device* gDevice);
-   void Texture(std::string material, ID3D11Device* gDevice);
+   //void Texture(std::string material, ID3D11Device* gDevice);
 };
 
 #endif
