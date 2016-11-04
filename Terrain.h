@@ -15,19 +15,6 @@
 
 class Terrain : public mesh
 {
-private:
-	//struct VertexData
-	//{
-	//	DirectX::XMFLOAT3 pos;
-	//	//DirectX::XMFLOAT3 uv;
-	//	//DirectX::XMFLOAT3 normal;
-	//	DirectX::XMFLOAT4 color;
-	//	
-	//};
-	struct HeightMapCord
-	{
-		float x, y, z;
-	};
 public:
 	Terrain();
 	~Terrain();
@@ -52,9 +39,10 @@ private:
 	void ShutDownBuffers();
 	void RenderBuffers(ID3D11DeviceContext* gDeviceContext);
 
+	float* heightMap;
+
 	int terrainWidth, terrainHeight;
 	int vertexCount;
-	HeightMapCord* heightMap;
 	ID3D11Buffer *vertexBuffer, *indexBuffer;
 	float scaleFactor;
 	
