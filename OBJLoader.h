@@ -19,18 +19,20 @@ struct CONSTANT_BUFFER2
 	DirectX::XMFLOAT4 KA;
 	DirectX::XMFLOAT4 KS;
 };
-//struct VertexData
-//{
-//	float x, y, z, u, v, x2, y2, z2;
-//};
+
 public:
+	/*ID3D11VertexShader* vertexShader = nullptr;
+	ID3D11GeometryShader* geometryShader = nullptr;
+	ID3D11PixelShader* pixelShader = nullptr;
+	ID3D11InputLayout* vertexLayout = nullptr;*/
+
 	Object();
 	~Object();
 
 	void LoadObject(ID3D11Device* gDevice);
 	void materialCB(ID3D11Device* gDevice);
+	void InitializeObjectShaders(ID3D11Device * gDevice);
 
-	//std::vector<VertexData> triangleVertices; //behövs globalt så att draw kan sättas dynamiskt	
 	CONSTANT_BUFFER2 materialData;
 	ID3D11Buffer* VertexBuffer = nullptr;
 	ID3D11ShaderResourceView* textureView = nullptr;

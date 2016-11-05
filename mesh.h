@@ -22,7 +22,14 @@ protected:
 	//ID3D11Buffer* VertexBuffer = nullptr;
 
 public:
+	ID3D11VertexShader* vertexShader = nullptr;
+	ID3D11GeometryShader* geometryShader = nullptr;
+	ID3D11PixelShader* pixelShader = nullptr;
+	ID3D11InputLayout* vertexLayout = nullptr;
+
+
 	vector<VertexData> vertices;
+	void InitializeShaders(ID3D11Device* gDevice);
 
 };
 

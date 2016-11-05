@@ -1,27 +1,13 @@
 //--------------------------------------------------------------------------------------
 // BTH - Stefan Petersson 2014.
 //--------------------------------------------------------------------------------------
-/*#include <windows.h>
-#include <d3d11.h>
-#include <d3dcompiler.h>
-#include <AntTweakBar.h>
-#include <SimpleMath.h>
-#include <SimpleMath.inl>
-#include <DirectXMath.h>
-#include "bth_image.h"
-#include <sstream> //obj
-#include <fstream> //obj
-#include <vector> //obj
-#include <DDSTextureLoader.h>
-#include <WICTextureLoader.h>
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3dcompiler.lib")*/
 
-//#include <AntTweakBar.h>
+#include <AntTweakBar.h>
 #include "OBJLoader.h"
 #include "DeferredRendering.h"
 #include "Terrain.h"
 #include "camera.h"
+#include "Billboard.h"
 #include "includes.h"
 
 HWND InitWindow(HINSTANCE hInstance);
@@ -37,22 +23,17 @@ ID3D11DepthStencilView* gDepthStencilView = nullptr;
 
 ID3D11Buffer* gWorldViewProjBuffer = nullptr;
 
-ID3D11InputLayout* gVertexLayout = nullptr;
-ID3D11VertexShader* gVertexShader = nullptr;
-ID3D11GeometryShader* gGeometryShader = nullptr;
-ID3D11PixelShader* gPixelShader = nullptr;
-
-
 using namespace DirectX::SimpleMath;
 using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
 using namespace std;
 
-//TwBar *gMyBar;
+TwBar *gMyBar;
 float background[3]{0, 0, 0};					
 
 float angleX = 0;
 float angleY = 0;
 float angleZ = 0;
+float ID = -1;
 
 float tempx = 0;
 float tempz = 0;
@@ -63,6 +44,7 @@ DeferredRendering deferred;
 CONSTANT_BUFFER cData;
 Terrain* terrain = new Terrain;
 Camera* camera = new Camera;
+Billboard* billboard = nullptr;
 
 
 void CreateWorldMatrix()
@@ -120,75 +102,6 @@ void zbuffer()
 
 	hr = gDevice->CreateTexture2D(&depthDesc, NULL, &gDepthStencilBuffer);
 	hr = gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &gDepthStencilView);
-}
-
-
-void CreateShaders()
-{
-	//create vertex shader
-	ID3DBlob* pVS = nullptr;
-	D3DCompileFromFile(
-		L"Vertex.hlsl", // filename
-		nullptr,		// optional macros
-		nullptr,		// optional include files
-		"VS_main",			// entry point
-		"vs_4_0",		// shader model (target)
-		0,				// shader compile options
-		0,				// effect compile options
-		&pVS,			// double pointer to ID3DBlob		
-		nullptr			// pointer for Error Blob messages.
-		// how to use the Error blob, see here
-		// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
-		);
-
-	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShader);
-	
-	//create input layout (verified using vertex shader)
-	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
-		{ "UV", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
-	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
-	// we do not need anymore this COM object, so we release it.
-	pVS->Release();
-
-	//create pixel shader
-	ID3DBlob* pPS = nullptr;
-	D3DCompileFromFile(
-		L"Fragment.hlsl", // filename
-		nullptr,		// optional macros
-		nullptr,		// optional include files
-		"PS_main",		// entry point
-		"ps_4_0",		// shader model (target)
-		0,				// shader compile options
-		0,				// effect compile options
-		&pPS,			// double pointer to ID3DBlob		
-		nullptr			// pointer for Error Blob messages.
-		// how to use the Error blob, see here
-		// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
-		);
-
-	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShader);
-	// we do not need anymore this COM object, so we release it.
-	pPS->Release();
-
-	//create GEOMETRY shader
-	ID3DBlob* pGS = nullptr;
-	D3DCompileFromFile(
-		L"GeometryShader.hlsl", // filename
-		nullptr,		// optional macros
-		nullptr,		// optional include files
-		"GS",			// entry point
-		"gs_4_0",		// shader model (target)
-		0,				// shader compile options
-		0,				// effect compile options
-		&pGS,			// double pointer to ID3DBlob		
-		nullptr			// pointer for Error Blob messages.
-		);
-
-	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShader);
-	pGS->Release();
 }
 
 void CreateTerrain()
@@ -254,12 +167,14 @@ void Render()
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 
 
-
-	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+	gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
+	//gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
-	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+	gDeviceContext->GSSetShader(cube.geometryShader, nullptr, 0);
+	//gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
+	gDeviceContext->PSSetShader(cube.pixelShader, nullptr, 0);
+	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 
 	gDeviceContext->PSSetShaderResources(0, 1, &cube.textureView); //Pipelina texturen
 
@@ -270,17 +185,17 @@ void Render()
 	gDeviceContext->IASetVertexBuffers(0, 1, &cube.VertexBuffer, &vertexSize, &offset);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->IASetInputLayout(gVertexLayout);
+	//gDeviceContext->IASetInputLayout(gVertexLayout);
+	gDeviceContext->IASetInputLayout(cube.vertexLayout);
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 	//gDeviceContext->Draw(cube.triangleVertices.size(), 0);
 
+	//Pipeline 3 Billboard
 
-	//Pipeline 3
-
-	
+	//Pipeline 4 Deferred
 	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
@@ -327,10 +242,12 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		deferred.CreateRenderTargets(gDevice);
 		
 
-		//TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
-		//TwWindowSize(WIDTH,HEIGHT);
+		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
+		TwWindowSize(WIDTH,HEIGHT);
 
-		//gMyBar = TwNewBar("KekCity");
+		gMyBar = TwNewBar("KekCity");
+		if (ID != -1)
+			TwAddVarRW(gMyBar, "ID: ", TW_TYPE_FLOAT, &ID, "min=0 max=1 step=1");
 		//TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
 		//TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
 		//TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
@@ -340,14 +257,15 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		//TwAddVarRW(gMyBar, "X", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
 		//TwAddVarRW(gMyBar, "MouseX", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
 
-		CreateShaders(); //5. Skapa vertex- och pixel-shaders
+		//CreateShaders(); //5. Skapa vertex- och pixel-shaders
 		deferred.InitializeLightShader(gDevice);
 		terrain->InitializeTerrainShaders(gDevice);
+		cube.InitializeObjectShaders(gDevice);
+		billboard->InitializeShaders(gDevice);
 
 		zbuffer(); //mad bufferz
 		
 		ShowWindow(wndHandle, nCmdShow);
-		unsigned int ID = -1;
 
 		while (WM_QUIT != msg.message)
 		{
@@ -372,9 +290,9 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 		cube.VertexBuffer->Release();
 		//gWorldViewProjBuffer->Release(); ??
-		gVertexLayout->Release();
-		gVertexShader->Release();
-		gPixelShader->Release();
+		//gVertexLayout->Release();
+		//gVertexShader->Release();
+		//gPixelShader->Release();
 		//gGeometryShader->Release(); ??
 		gBackbufferRTV->Release();
 		gSwapChain->Release();

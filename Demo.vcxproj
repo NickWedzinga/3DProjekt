@@ -93,8 +93,10 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Billboard.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="DeferredRendering.cpp" />
+    <ClCompile Include="mesh.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OBJLoader.cpp" />
@@ -157,6 +159,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Billboard.h" />
     <ClInclude Include="includes.h" />
     <ClInclude Include="bth_image.h" />
     <ClInclude Include="camera.h" />
