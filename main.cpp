@@ -149,6 +149,8 @@ void Render()
 	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
 
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0], clearColor);
+	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[1], clearColor);
+	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[2], clearColor);
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[3], clearColor);
 
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
@@ -168,10 +170,6 @@ void Render()
 
 	//Pipeline 2
 	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
-	//for (int i = 1; i < 3; i++)
-	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[1], clearColor);
-	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[2], clearColor);
-
 
 	gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
@@ -180,6 +178,7 @@ void Render()
 	gDeviceContext->PSSetShader(cube.pixelShader, nullptr, 0);
 
 	gDeviceContext->PSSetShaderResources(0, 1, &cube.textureView); //Pipelina texturen
+	gDeviceContext->PSSetShaderResources(1, 1, &cube.norTexView);
 
 	UINT32 vertexSize = sizeof(cube.vertices[0]);
 	UINT32 offset = 0;
@@ -208,12 +207,10 @@ void Render()
 	gDeviceContext->PSSetShader(deferred.gPixelShaderLight, nullptr, 0);
 
 	gDeviceContext->PSSetShaderResources(0, 3, deferred.gSRVA);
-	//gDeviceContext->PSSetShaderResources(0, 1, &deferred.gSRVA[2]);
 	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 	gDeviceContext->PSSetConstantBuffers(2, 1, &gWorldViewProjBuffer);
-	//gDeviceContext->PSSetConstantBuffers(3, 1, &deferred.IDBuffer);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
@@ -244,6 +241,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		constantBuffer();
 		deferred.lightbuffer(gDevice);
 		cube.materialCB(gDevice);
+		cube.NormalTexture("normalmap.jpg", gDevice);
 		deferred.createIDBuffer(mesh);
 		deferred.CreateRenderTargets(gDevice);
 		

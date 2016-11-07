@@ -1,17 +1,21 @@
 Texture2D txDiffuse : register(t0);
+Texture2D txNormalDiffuse : register(t1);
 SamplerState sampAni : register (s0);
 
 struct PS_IN
 {
 	float4 Pos : SV_POSITION;
-	float2 Uv : UV; 
+	float2 UV : UV;
 	float3 Normal : NORMAL;
 	float3 WorldPos : WORLDPOS;
 	float4 ID : IDD;
+	float3 tangent : TANGENT;
+	float3 bitangent : BITANGENT;
 };
 
 struct PS_OUT
 {
+	float4 terrain : SV_Target0;
 	float4 color : SV_Target1;
 	float4 normal : SV_Target2;
 	float4 ID : SV_Target3;
@@ -21,8 +25,18 @@ PS_OUT PS_main(PS_IN input) : SV_Target
 {
 	PS_OUT output;
 
-	output.color = txDiffuse.Sample(sampAni, input.Uv);
-	output.normal = float4(normalize(input.Normal), 1.0f);
+	float3 newNormal = float3(0.0f, 0.0f, 0.0f);
+	float3 textur = txNormalDiffuse.Sample(sampAni, input.UV);
+	//textur = normalize((textur * 2.0f) - 1.0f);
+	
+	newNormal = (textur.x * input.tangent) + (textur.y * input.bitangent) + (textur.z * -input.Normal); //z inverterat, dubbelkolla
+	newNormal = normalize(newNormal);
+
+	output.terrain = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	//output.color = txDiffuse.Sample(sampAni, input.UV);
+	output.color = float4(textur, 1.0f);
+	output.normal = float4(newNormal, 1.0f);
+	//output.normal = float4(normalize(input.Normal), 1.0f);
 	output.ID = input.ID;
 
 	return output;

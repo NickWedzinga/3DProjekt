@@ -223,3 +223,11 @@ void Object::InitializeObjectShaders(ID3D11Device* gDevice)
 	pGS->Release();
 	pPS->Release();
 }
+
+void Object::NormalTexture(string normal, ID3D11Device * gDevice)
+{
+	wchar_t nor[20];
+	MultiByteToWideChar(CP_UTF8, 0, normal.c_str(), -1, nor, sizeof(nor) / sizeof(wchar_t));
+
+	CreateWICTextureFromFile(gDevice, nor, NULL, &norTexView);
+}
