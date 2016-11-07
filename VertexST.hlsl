@@ -13,7 +13,7 @@ struct VS_OUT
 	float2 UV : UV;
 	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
-	float4 ID : ID;
+	float4 ID : IDD;
 };
 
 

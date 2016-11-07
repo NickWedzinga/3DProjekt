@@ -146,10 +146,10 @@ void Render()
 
 
 	//Pipeline 1
-	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA/*&gBackbufferRTV*/, gDepthStencilView);
+	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
 
-	for (int i = 0; i < 4; ++i)
-		gDeviceContext->ClearRenderTargetView(deferred.gRTVA[i]/*gBackbufferRTV*/, clearColor);
+	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0], clearColor);
+	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[3], clearColor);
 
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 
@@ -168,8 +168,10 @@ void Render()
 
 	//Pipeline 2
 	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
-	for (int i = 1; i < 4; i++)
-		gDeviceContext->ClearRenderTargetView(deferred.gRTVA[i], clearColor);
+	//for (int i = 1; i < 3; i++)
+	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[1], clearColor);
+	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[2], clearColor);
+
 
 	gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
@@ -205,7 +207,7 @@ void Render()
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(deferred.gPixelShaderLight, nullptr, 0);
 
-	gDeviceContext->PSSetShaderResources(0, 4, deferred.gSRVA);
+	gDeviceContext->PSSetShaderResources(0, 3, deferred.gSRVA);
 	//gDeviceContext->PSSetShaderResources(0, 1, &deferred.gSRVA[2]);
 	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
