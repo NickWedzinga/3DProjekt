@@ -49,7 +49,7 @@ vector<Mesh::VertexData> Billboard::makeQuad(XMFLOAT3 position, XMFLOAT3 camPos)
 	return quad;
 }
 
-bool Billboard::makeTexture(const string & text, ID3D11Device* gDevice)
+void Billboard::makeTexture(const string & text, ID3D11Device* gDevice) //returnade bool innan, satte void så länge för att matcha .h
 {
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));

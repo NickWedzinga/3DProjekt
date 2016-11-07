@@ -8,7 +8,6 @@ void DeferredRendering::CreateLightBuffer()
 {
 	XMFLOAT3 lightDir = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	lData.lightDirection = XMLoadFloat3(&lightDir);
-	lData.ID = 1;
 }
 
 void DeferredRendering::lightbuffer(ID3D11Device* gDevice)
@@ -44,7 +43,7 @@ void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
 
-	for (int i = 0; i < 3/*2*/; i++)
+	for (int i = 0; i < 4/*2*/; i++)
 		gDevice->CreateTexture2D(&textureDesc, NULL, &gRTTA[i]);
 
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
@@ -52,7 +51,7 @@ void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-	for (int i = 0; i < 3/*2*/; i++)
+	for (int i = 0; i < 4/*2*/; i++)
 		gDevice->CreateRenderTargetView(gRTTA[i], &renderTargetViewDesc, &gRTVA[i]);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
@@ -61,7 +60,7 @@ void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
-	for (int i = 0; i < 3/*2*/; i++)
+	for (int i = 0; i < 4/*2*/; i++)
 		gDevice->CreateShaderResourceView(gRTTA[i], &shaderResourceViewDesc, &gSRVA[i]);
 }
 
@@ -81,7 +80,32 @@ void DeferredRendering::InitializeLightShader(ID3D11Device* gDevice)
 	pPS->Release();
 }
 
-unsigned int DeferredRendering::Picking()
+void DeferredRendering::createIDBuffer(vector<Mesh> mesh)
 {
-	return lData.ID;
+	
+}
+
+
+
+void DeferredRendering::makeIDBufferGrateAgain(ID3D11Device * gDevice)
+{
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth = sizeof(IDData);
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = &IDData;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &IDBuffer);
+}
+
+int DeferredRendering::Picking()
+{
+	return *(IDData.ID);
 }

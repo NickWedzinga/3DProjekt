@@ -14,9 +14,9 @@ protected:
 		XMFLOAT2 UV;
 		XMFLOAT3 normal;
 		XMFLOAT3 position;
+		int ID;
 	};
 	
-	unsigned int ID;
 	XMFLOAT3 worldPosition;
 	string textureName;
 	//ID3D11Buffer* VertexBuffer = nullptr;
@@ -26,7 +26,7 @@ public:
 	ID3D11GeometryShader* geometryShader = nullptr;
 	ID3D11PixelShader* pixelShader = nullptr;
 	ID3D11InputLayout* vertexLayout = nullptr;
-
+	void setID(unsigned int ID);
 
 	vector<VertexData> vertices;
 	void InitializeShaders(ID3D11Device* gDevice);

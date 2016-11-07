@@ -7,12 +7,14 @@ struct PS_IN
 	float2 Uv : UV; 
 	float3 Normal : NORMAL;
 	float3 WorldPos : WORLDPOS;
+	float4 ID : IDD;
 };
 
 struct PS_OUT
 {
 	float4 color : SV_Target1;
 	float4 normal : SV_Target2;
+	float4 ID : SV_Target3;
 };
 
 PS_OUT PS_main(PS_IN input) : SV_Target
@@ -21,6 +23,7 @@ PS_OUT PS_main(PS_IN input) : SV_Target
 
 	output.color = txDiffuse.Sample(sampAni, input.Uv);
 	output.normal = float4(normalize(input.Normal), 1.0f);
+	output.ID = input.ID;
 
 	return output;
 };

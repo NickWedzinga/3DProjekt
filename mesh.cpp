@@ -1,6 +1,12 @@
 #include "mesh.h"
 
-void Mesh::initializeShaders(ID3D11Device * gDevice)
+void Mesh::setID(unsigned int ID)
+{
+	for (unsigned int i = 0; i < vertices.size(); i++)
+		this->vertices[i].ID = ID;
+}
+
+void Mesh::InitializeShaders(ID3D11Device * gDevice)
 {
 	ID3D10Blob* pVS = nullptr;
 	ID3D10Blob* pGS = nullptr;
@@ -17,7 +23,8 @@ void Mesh::initializeShaders(ID3D11Device * gDevice)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "IDD", 0, DXGI_FORMAT_R16_SINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &vertexLayout);
 

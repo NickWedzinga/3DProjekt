@@ -32,6 +32,8 @@ void Object::LoadObject(ID3D11Device* gDevice)
 	vector<XMFLOAT2> vertices2;
 	XMFLOAT3 vtx1, vtx3;
 	XMFLOAT2 vtx2;
+	VertexData temp;
+	temp.ID = 0;
 
 	UINT valueV = 0;
 	UINT valueVT = 0;
@@ -66,7 +68,6 @@ void Object::LoadObject(ID3D11Device* gDevice)
 		}
 		else if (line2.substr(0, 2) == "f ")
 		{
-			VertexData temp;
 			for (int j = 0; j < 3; j++)
 			{
 				if (j == 0)
@@ -212,7 +213,8 @@ void Object::InitializeObjectShaders(ID3D11Device* gDevice)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "IDD", 0, DXGI_FORMAT_R16_SINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &vertexLayout);
 

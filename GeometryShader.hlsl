@@ -12,6 +12,7 @@ struct GS_IN
 	float4 Pos : SV_POSITION;
 	float2 Uv : UV;
 	float3 Normal : NORMAL;
+	float4 ID : IDD;
 };
 
 struct GS_OUT
@@ -20,6 +21,7 @@ struct GS_OUT
 	float2 Uv : UV; 
 	float3 Normal : NORMAL;
 	float4 WorldPos : WORLDPOS;
+	float4 ID : IDD;
 };
 
 float3 CalculatefaceNormal(GS_IN input[3])
@@ -45,7 +47,6 @@ float3 CalculatefaceNormal(GS_IN input[3])
 void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 {
 	GS_OUT Output;
-	float PI = 3.14159265f;
 
 	float3 worldnormal = CalculatefaceNormal(input);
 	float3 vec = normalize(input[0].Pos - camPosition);
@@ -63,6 +64,7 @@ void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 			Output.WorldPos = poss;
 			Output.Uv = input[i].Uv;
 			Output.Normal = mul(WorldMatrix, input[i].Normal);
+			Output.ID = input[i].ID;
 			Outputstream.Append(Output);
 		}
 	}

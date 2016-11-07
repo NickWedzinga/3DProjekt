@@ -1,9 +1,10 @@
+Texture2D terrainTex : register(t0);
 Texture2D colorTex : register(t1);
 Texture2D normalTex : register(t2);
-Texture2D terrainTex : register(t0);
+//Texture2D IDTex : register(t3);
 SamplerState SampleTypePoint : register(s0);
 
-cbuffer LightBuffer : register(b0)
+cbuffer LightBuffer : register (b0)
 {
 	float3 lightDirection;
 	float padding;	//För att få 16-bytes (float4 (float3 + float = float4))

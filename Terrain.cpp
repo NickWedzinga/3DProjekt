@@ -106,7 +106,8 @@ void Terrain::InitializeTerrainShaders(ID3D11Device* gDevice)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "ID", 0, DXGI_FORMAT_R16_SINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayoutT);
 
@@ -152,6 +153,7 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			index = (terrainHeight*j) + i;
 			VertexData temp;
 			temp.normal = XMFLOAT3(0, 0, 0);
+			temp.ID = 1;
 			leftX = float(i);
 			rightX = float(i + 1);
 			upperZ = float(j + 1);

@@ -40,6 +40,7 @@ float tempz = 0;
 
 
 Object cube;
+vector<Mesh> mesh;
 DeferredRendering deferred;
 CONSTANT_BUFFER cData;
 Terrain* terrain = new Terrain;
@@ -129,9 +130,12 @@ void Update()
 	HRESULT hr2 = gDeviceContext->Map(gWorldViewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cData, sizeof(cData));
 	gDeviceContext->Unmap(gWorldViewProjBuffer, 0);
-	HRESULT hr3 = gDeviceContext->Map(cube.gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	/*HRESULT hr3 = gDeviceContext->Map(cube.gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cube.materialData, sizeof(cube.materialData));
-	gDeviceContext->Unmap(cube.gMaterialBuffer, 0);
+	gDeviceContext->Unmap(cube.gMaterialBuffer, 0);*/
+	/*gDeviceContext->Map(deferred.IDBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &deferred.IDData, sizeof(deferred.IDData));
+	gDeviceContext->Unmap(deferred.IDBuffer, 0);*/
 	tempx = camera->getPos().x;
 	tempz = camera->getPos().z;
 }
@@ -142,8 +146,11 @@ void Render()
 
 
 	//Pipeline 1
-	gDeviceContext->OMSetRenderTargets(1, &deferred.gRTVA[0]/*&gBackbufferRTV*/, gDepthStencilView);
-	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0]/*gBackbufferRTV*/, clearColor);
+	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA/*&gBackbufferRTV*/, gDepthStencilView);
+
+	for (int i = 0; i < 4; ++i)
+		gDeviceContext->ClearRenderTargetView(deferred.gRTVA[i]/*gBackbufferRTV*/, clearColor);
+
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 
 	gDeviceContext->VSSetShader(terrain->gVertexShaderT, nullptr, 0);
@@ -160,40 +167,33 @@ void Render()
 
 
 	//Pipeline 2
-	gDeviceContext->OMSetRenderTargets(3, deferred.gRTVA, gDepthStencilView);
-	for (int i = 1; i < 3; i++)
-		gDeviceContext->ClearRenderTargetView(deferred.gRTVA[i], clearColor); //Clear åt zbuffer
-
-	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
-
+	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
+	for (int i = 1; i < 4; i++)
+		gDeviceContext->ClearRenderTargetView(deferred.gRTVA[i], clearColor);
 
 	gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
-	//gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(cube.geometryShader, nullptr, 0);
-	//gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(cube.pixelShader, nullptr, 0);
-	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 
 	gDeviceContext->PSSetShaderResources(0, 1, &cube.textureView); //Pipelina texturen
 
 	UINT32 vertexSize = sizeof(cube.vertices[0]);
-	//UINT32 vertexSize = sizeof(cube.triangleVertices[0]);
 	UINT32 offset = 0;
 
 	gDeviceContext->IASetVertexBuffers(0, 1, &cube.VertexBuffer, &vertexSize, &offset);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//gDeviceContext->IASetInputLayout(gVertexLayout);
 	gDeviceContext->IASetInputLayout(cube.vertexLayout);
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 
 	gDeviceContext->Draw(cube.vertices.size(), 0);
-	//gDeviceContext->Draw(cube.triangleVertices.size(), 0);
 
 	//Pipeline 3 Billboard
+
+
 
 	//Pipeline 4 Deferred
 	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
@@ -205,12 +205,13 @@ void Render()
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(deferred.gPixelShaderLight, nullptr, 0);
 
-	gDeviceContext->PSSetShaderResources(0, 3, deferred.gSRVA);
+	gDeviceContext->PSSetShaderResources(0, 4, deferred.gSRVA);
 	//gDeviceContext->PSSetShaderResources(0, 1, &deferred.gSRVA[2]);
 	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 	gDeviceContext->PSSetConstantBuffers(2, 1, &gWorldViewProjBuffer);
+	//gDeviceContext->PSSetConstantBuffers(3, 1, &deferred.IDBuffer);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
@@ -224,6 +225,8 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 	MSG msg = { 0 };
 	ShowCursor(false);
 	HWND wndHandle = InitWindow(hInstance); //1. Skapa fönster
+	cube.setID(0);
+	terrain->setID(1);
 	
 	if (wndHandle)
 	{
@@ -239,15 +242,14 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		constantBuffer();
 		deferred.lightbuffer(gDevice);
 		cube.materialCB(gDevice);
+		deferred.createIDBuffer(mesh);
 		deferred.CreateRenderTargets(gDevice);
 		
-
 		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
 		TwWindowSize(WIDTH,HEIGHT);
 
 		gMyBar = TwNewBar("KekCity");
-		if (ID != -1)
-			TwAddVarRW(gMyBar, "ID: ", TW_TYPE_FLOAT, &ID, "min=0 max=1 step=1");
+		TwAddVarRW(gMyBar, "ID: ", TW_TYPE_FLOAT, &ID, "min=0 max=1 step=1");
 		//TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
 		//TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
 		//TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
@@ -261,7 +263,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		deferred.InitializeLightShader(gDevice);
 		terrain->InitializeTerrainShaders(gDevice);
 		cube.InitializeObjectShaders(gDevice);
-		billboard->InitializeShaders(gDevice);
+		//billboard->InitializeShaders(gDevice);
 
 		zbuffer(); //mad bufferz
 		
@@ -282,7 +284,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			{
 				Update(); //8.1 Update
 				Render(); //8.2 Rendera
-				//TwDraw();
+				TwDraw();
 
 				gSwapChain->Present(0, 0); //9. Växla front- och back-buffer
 			}
@@ -341,8 +343,8 @@ HWND InitWindow(HINSTANCE hInstance)
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	//Hur fungerar denna?
-	//if (TwEventWin(hWnd, message, wParam, lParam)) // send event message to AntTweakBar
-		//return 0; // event has been handled by AntTweakBar
+	if (TwEventWin(hWnd, message, wParam, lParam)) // send event message to AntTweakBar
+		return 0; // event has been handled by AntTweakBar
 	
 	switch (message) 
 	{
