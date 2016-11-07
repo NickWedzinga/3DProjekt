@@ -30,12 +30,12 @@ public:
 	ID3D11Buffer* IDBuffer;
 	LightBuffer lData;
 	ID3D11Buffer* gLightBuffer;
-	ID3D11RenderTargetView* gRTVA[4/*2*/];
-	ID3D11ShaderResourceView* gSRVA[4/*2*/];
+	ID3D11RenderTargetView* gRTVA[5];
+	ID3D11ShaderResourceView* gSRVA[5];
 	ID3D11VertexShader* gVertexShaderLight = nullptr;
 	ID3D11PixelShader* gPixelShaderLight = nullptr;
 private:
-	ID3D11Texture2D* gRTTA[4/*2*/];
+	ID3D11Texture2D* gRTTA[5];
 };
 
 #endif

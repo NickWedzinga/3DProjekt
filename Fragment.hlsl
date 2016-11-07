@@ -11,6 +11,7 @@ struct PS_IN
 	float4 ID : IDD;
 	float3 tangent : TANGENT;
 	float3 bitangent : BITANGENT;
+	float4 camRelObj : CAMRELOBJ;
 };
 
 struct PS_OUT
@@ -19,6 +20,7 @@ struct PS_OUT
 	float4 color : SV_Target1;
 	float4 normal : SV_Target2;
 	float4 ID : SV_Target3;
+	float4 camRelObj : SV_Target4;
 };
 
 PS_OUT PS_main(PS_IN input) : SV_Target
@@ -27,17 +29,16 @@ PS_OUT PS_main(PS_IN input) : SV_Target
 
 	float3 newNormal = float3(0.0f, 0.0f, 0.0f);
 	float3 textur = txNormalDiffuse.Sample(sampAni, input.UV);
-	//textur = normalize((textur * 2.0f) - 1.0f);
+	textur = normalize((textur * 2.0f) - 1.0f);
 	
 	newNormal = (textur.x * input.tangent) + (textur.y * input.bitangent) + (textur.z * -input.Normal); //z inverterat, dubbelkolla
 	newNormal = normalize(newNormal);
 
 	output.terrain = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	//output.color = txDiffuse.Sample(sampAni, input.UV);
-	output.color = float4(textur, 1.0f);
+	output.color = txDiffuse.Sample(sampAni, input.UV);
 	output.normal = float4(newNormal, 1.0f);
-	//output.normal = float4(normalize(input.Normal), 1.0f);
 	output.ID = input.ID;
+	output.camRelObj = input.camRelObj;
 
 	return output;
 };
