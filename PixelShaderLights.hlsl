@@ -25,7 +25,7 @@ cbuffer CONSTANT_BUFFER : register (b2)
 	matrix ViewMatrix;
 	matrix ProjMatrix;
 	float3 camDirection;
-	float3 camPosition;
+	float3 camLightPos;
 }
 
 struct PixelInputType
@@ -45,32 +45,41 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
 	terrain = terrainTex.Sample(SampleTypePoint, input.UV);
 	camRelObjLoc = camRelObj.Sample(SampleTypePoint, input.UV);
+	camRelObjLoc = normalize(camRelObjLoc);
 
-	float shiny = 5.0f; //hur stor specular cirkel
+	float shiny = 1.0f; //hur stor specular cirkel
 	float angle = 0;
 	float intensity = dot(camRelObjLoc.xyz, camDirection);
 	intensity = saturate(intensity);
 
+
+
+
 	if (intensity >= 0) //looking in the direction of the object
 	{
-		angle = dot(normals, normalize(camDirection)); //infallsvinkel
-		colors = intensity * colors;
+		angle = dot(-normals, camRelObjLoc); //infallsvinkel
+		//colors = intensity * colors;
 
 		//Calculate Ambient Light
 		float3 LA = KA.xyz;
 
 		//Calculate Diffuse Light
-		float3 LD = KD.xyz * saturate(angle);
+		float3 LD = KD.xyz /** intensity*/ * saturate(angle);
 
 		//calculate specular intensity
-		float3 n = dot(normals, normalize(/*camRelObjLoc*/camDirection)) * normals;
-		float3 r = (2 * n) - normalize(/*camRelObjLoc*/camDirection);
-		float3 rv = dot(r, /*camRelObjLoc*/camDirection);
-		float3 LS = KS.xyz * pow(rv, shiny);
+		float3 V = 2 * normals * dot(-normals, camRelObjLoc);
+		float3 R = camRelObjLoc + V;
+		float RV = saturate(dot(R, -camDirection));
+		/*float3 n = dot(normals, normalize(camDirection)) * normals;
+		float3 r = (2 * n) - normalize(camDirection);
+		float3 rv = dot(r, camDirection);*/
+		float3 LS = KS.xyz * pow(RV, shiny);
 
 		float3 result = (colors.xyz*LA) + terrain.xyz + (colors.xyz*LD) + (colors.xyz*LS);
 
 		return float4(result, 1.0f);
+		//return float4(LD, 0, 0, 1);
+		//return float4(intensity, 0.0f, 0.0f, 1.0f);
 	}
 	else //looking away from object
 		return float4(0.0f, 0.0f, 0.0f, 1.0f);

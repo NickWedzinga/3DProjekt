@@ -2,6 +2,11 @@ Texture2D txDiffuse : register(t0);
 Texture2D txNormalDiffuse : register(t1);
 SamplerState sampAni : register (s0);
 
+cbuffer KEY_BUFFER : register(b0)
+{
+	float3 normalMap;
+};
+
 struct PS_IN
 {
 	float2 UV : UV;
@@ -37,7 +42,10 @@ PS_OUT PS_main(PS_IN input)
 
 	output.terrain = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	output.color = color;
-	output.normal = newNormal;
+	if(normalMap.x == 1)
+		output.normal = float4(input.Normal, 1.0f);
+	else
+		output.normal = newNormal;
 	//output.ID = input.ID;
 	output.camRelObj = input.camRelObj;
 

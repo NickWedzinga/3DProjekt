@@ -4,7 +4,7 @@ cbuffer CONSTANT_BUFFER : register(b0)
 	matrix ViewMatrix;
 	matrix ProjMatrix;
 	float3 camDirection;
-	float3 camPosition;
+	float3 camLightPos;
 };
 
 struct GS_IN
@@ -52,7 +52,7 @@ void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 	GS_OUT Output;
 
 	float3 worldnormal = CalculatefaceNormal(input);
-	float3 vec = normalize(input[0].Pos - camPosition);
+	float3 vec = normalize(input[0].Pos - camLightPos);
 	float angle = dot(vec, worldnormal);
 
 	if (angle <= 0.0f) //Backface Culling
@@ -88,7 +88,7 @@ void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 			poss = mul(ViewMatrix, poss);
 			poss = mul(ProjMatrix, poss);
 			Output.Pos = poss;
-			Output.camRelObj = poss - float4(camPosition, 1.0f);
+			Output.camRelObj = poss - float4(camLightPos, 1.0f);
 			Output.WorldPos = poss;
 			Output.UV = input[i].UV;
 			Output.Normal = mul(WorldMatrix, input[i].Normal);

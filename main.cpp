@@ -23,8 +23,7 @@ ID3D11DepthStencilView* gDepthStencilView = nullptr;
 
 ID3D11Buffer* gWorldViewProjBuffer = nullptr;
 
-using namespace DirectX::SimpleMath;
-using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
+using namespace DirectX;
 using namespace std;
 
 TwBar *gMyBar;
@@ -33,7 +32,7 @@ float background[3]{0, 0, 0};
 float angleX = 0;
 float angleY = 0;
 float angleZ = 0;
-float ID = -1;
+int ID = -1;
 
 float tempx = 0;
 float tempz = 0;
@@ -67,6 +66,7 @@ void constantBuffer()
 	camera->Init(cData.ViewMatrix, cData.camDirection);
 	CreateProjMatrix();
 	deferred.CreateLightBuffer();
+	camera->initKeyBuffer(gDevice);
 
 	D3D11_BUFFER_DESC cbDesc;
 	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
@@ -130,9 +130,16 @@ void Update()
 	HRESULT hr2 = gDeviceContext->Map(gWorldViewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cData, sizeof(cData));
 	gDeviceContext->Unmap(gWorldViewProjBuffer, 0);
-	/*HRESULT hr3 = gDeviceContext->Map(cube.gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource2;
+	gDeviceContext->Map(camera->keyDataBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource2);
+	memcpy(mappedResource2.pData, &camera->keyData, sizeof(camera->keyData));
+	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
+
+	/*HRESULT hr4 = gDeviceContext->Map(cube.gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cube.materialData, sizeof(cube.materialData));
 	gDeviceContext->Unmap(cube.gMaterialBuffer, 0);*/
+
 	/*gDeviceContext->Map(deferred.IDBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &deferred.IDData, sizeof(deferred.IDData));
 	gDeviceContext->Unmap(deferred.IDBuffer, 0);*/
@@ -191,6 +198,7 @@ void Render()
 	gDeviceContext->IASetInputLayout(cube.vertexLayout);
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
+	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
 
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 

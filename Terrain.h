@@ -3,9 +3,6 @@
 #define HEIGHMAP_H
 
 #include "mesh.h"
-//#include <d3d11.h>
-#pragma once
-#include "mesh.h"
 #include <stdio.h>
 
 class Terrain : public Mesh

@@ -2,7 +2,7 @@
 #ifndef INCLUDES_H
 #define INCLUDES_H
 
-#include <DirectXMath.h>
+//#include <DirectXMath.h>
 #include <windows.h>
 #include <SimpleMath.h>
 #include <SimpleMath.inl>
@@ -29,7 +29,12 @@ struct CONSTANT_BUFFER
 	XMMATRIX ViewMatrix;
 	XMMATRIX ProjMatrix;
 	XMVECTOR camDirection;
-	XMVECTOR camPosition;
+	XMVECTOR camLightPos;
+};
+
+struct KEY_BUFFER
+{
+	XMVECTOR normalMap;
 };
 
 #endif // INCLUDES_H

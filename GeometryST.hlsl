@@ -4,6 +4,7 @@ cbuffer CONSTANT_BUFFER : register(b0)
 	matrix ViewMatrix;
 	matrix ProjMatrix;
 	float3 camDirection;
+	float3 camLightPos;
 };
 
 struct GS_IN
