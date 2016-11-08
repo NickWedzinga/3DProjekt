@@ -243,7 +243,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		constantBuffer();
 		deferred.lightbuffer(gDevice);
 		cube.materialCB(gDevice);
-		cube.NormalTexture("normalcpy.jpg", gDevice);
+		cube.NormalTexture("cubenor2.jpg", gDevice);
 		deferred.createIDBuffer(mesh);
 		deferred.CreateRenderTargets(gDevice);
 		
