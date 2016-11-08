@@ -138,6 +138,7 @@ void Update()
 	gDeviceContext->Unmap(deferred.IDBuffer, 0);*/
 	tempx = camera->getPos().x;
 	tempz = camera->getPos().z;
+
 }
 
 void Render()
@@ -146,7 +147,7 @@ void Render()
 
 
 	//Pipeline 1
-	gDeviceContext->OMSetRenderTargets(5, deferred.gRTVA, gDepthStencilView);
+	gDeviceContext->OMSetRenderTargets(1, &deferred.gRTVA[0], gDepthStencilView);
 
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0], clearColor);
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[1], clearColor);
@@ -170,7 +171,7 @@ void Render()
 
 
 	//Pipeline 2
-	gDeviceContext->OMSetRenderTargets(5, deferred.gRTVA, gDepthStencilView);
+	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
 
 	gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
@@ -207,7 +208,7 @@ void Render()
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(deferred.gPixelShaderLight, nullptr, 0);
 
-	gDeviceContext->PSSetShaderResources(0, 5, deferred.gSRVA);
+	gDeviceContext->PSSetShaderResources(0, 4, deferred.gSRVA);
 	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
@@ -242,7 +243,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		constantBuffer();
 		deferred.lightbuffer(gDevice);
 		cube.materialCB(gDevice);
-		cube.NormalTexture("normalmap.jpg", gDevice);
+		cube.NormalTexture("normalcpy.jpg", gDevice);
 		deferred.createIDBuffer(mesh);
 		deferred.CreateRenderTargets(gDevice);
 		
@@ -279,7 +280,6 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 				if (WM_LBUTTONUP == msg.message)
 					ID = deferred.Picking();
 				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
-
 			}
 			else
 			{

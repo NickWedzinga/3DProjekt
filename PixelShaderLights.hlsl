@@ -1,8 +1,8 @@
 Texture2D terrainTex : register(t0);
 Texture2D colorTex : register(t1);
 Texture2D normalTex : register(t2);
-Texture2D IDTex : register(t3);
-Texture2D camRelObj : register(t4);
+//Texture2D IDTex : register(t3);
+Texture2D camRelObj : register(t3);
 SamplerState SampleTypePoint : register(s0);
 
 cbuffer LightBuffer : register (b0)
@@ -39,32 +39,39 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float4 colors;
 	float4 normals;
 	float4 terrain;
-	float4 camRelObj;
-
-	float shiny = 5.0f; //hur stor specular cirkel
+	float4 camRelObjLoc;
 
 	colors = colorTex.Sample(SampleTypePoint, input.UV);
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
 	terrain = terrainTex.Sample(SampleTypePoint, input.UV);
-	camRelObj = camRelObj.Sample(SampleTypePoint, input.UV);
+	camRelObjLoc = camRelObj.Sample(SampleTypePoint, input.UV);
 
-	
+	float shiny = 5.0f; //hur stor specular cirkel
+	float angle = 0;
+	float intensity = dot(camRelObjLoc.xyz, camDirection);
+	intensity = saturate(intensity);
 
-	//Calculate Ambient Light
-	float3 LA = KA.xyz; //KA comment because material gives it 0
+	if (intensity >= 0) //looking in the direction of the object
+	{
+		angle = dot(normals, normalize(camDirection)); //infallsvinkel
+		colors = intensity * colors;
 
-	//Calculate Diffuse Light
-	float angle = dot(normals, normalize(/*camRelObj*/camDirection)); //infallsvinkel
-	float3 LD = KD.xyz * saturate(angle); //KD comment because material gives it 0
+		//Calculate Ambient Light
+		float3 LA = KA.xyz;
 
-	//calculate specular intensity
-	float3 n = dot(normals, normalize(/*camRelObj*/camDirection)) * normals;
-	float3 r = (2 * n) - normalize(/*camRelObj*/camDirection);
-	float3 rv = dot(r, /*camRelObj*/camDirection);
-	float3 LS = KS.xyz * pow(rv, shiny); //KS comment because material gives it 0
+		//Calculate Diffuse Light
+		float3 LD = KD.xyz * saturate(angle);
 
-	float3 result = (colors.xyz*LA) + terrain.xyz + (colors.xyz*LD) + (colors.xyz*LS);
+		//calculate specular intensity
+		float3 n = dot(normals, normalize(/*camRelObjLoc*/camDirection)) * normals;
+		float3 r = (2 * n) - normalize(/*camRelObjLoc*/camDirection);
+		float3 rv = dot(r, /*camRelObjLoc*/camDirection);
+		float3 LS = KS.xyz * pow(rv, shiny);
 
-	return float4(result, 1.0f);
-	//return colors;
+		float3 result = (colors.xyz*LA) + terrain.xyz + (colors.xyz*LD) + (colors.xyz*LS);
+
+		return float4(result, 1.0f);
+	}
+	else //looking away from object
+		return float4(0.0f, 0.0f, 0.0f, 1.0f);
 }

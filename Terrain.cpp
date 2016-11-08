@@ -38,7 +38,7 @@ void Terrain::Render(ID3D11DeviceContext *gDeviceContext)
 
 void Terrain::LoadHeightMap()
 {
-	char* filename = "objs/Test.bmp";
+	char* filename = "objs/firstheightmap.bmp";
 	FILE* filePtr;
 	//int error;
 	unsigned int count;
