@@ -194,13 +194,13 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 		}
 	}
 	if (!lockLight)
-		cBuffer.camLightPos = XMLoadFloat3(&pos);
+		cBuffer.camPos = XMLoadFloat3(&pos);
 	if (heightY != -1)
 		pos.y = heightY + 2;
-	/*if (!lockLight)*/
+	if (!lockLight)
 	CreateViewMatrix(cBuffer.ViewMatrix, cBuffer.camDirection);
-	//else
-		//CreateViewMatrix(cBuffer.ViewMatrix, lockedLight);
+	else
+		CreateViewMatrix(cBuffer.ViewMatrix, lockedLight);
 
 }
 

@@ -4,7 +4,7 @@ cbuffer CONSTANT_BUFFER : register(b0)
 	matrix ViewMatrix;
 	matrix ProjMatrix;
 	float3 camDirection;
-	float3 camLightPos;
+	float3 camPos;
 };
 
 struct GS_IN
@@ -12,7 +12,7 @@ struct GS_IN
 	float2 UV : UV;
 	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
-	float4 ID : IDD;
+	float4 ID : ID;
 };
 
 struct GSOutput
@@ -20,7 +20,7 @@ struct GSOutput
 	float2 UV : UV;
 	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
-	float4 ID : IDD;
+	float4 ID : ID;
 };
 
 [maxvertexcount(48)]

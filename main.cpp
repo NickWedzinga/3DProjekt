@@ -87,7 +87,7 @@ void constantBuffer()
 void zbuffer()
 {
 	HRESULT hr;
-	ID3D11Texture2D* gDepthStencilBuffer = NULL;
+	ID3D11Texture2D* gDepthStencilBuffer = nullptr;
 	D3D11_TEXTURE2D_DESC depthDesc;
 	depthDesc.Width = WIDTH;
 	depthDesc.Height = HEIGHT;
@@ -141,7 +141,7 @@ void Update()
 	gDeviceContext->Unmap(cube.gMaterialBuffer, 0);*/
 
 	/*gDeviceContext->Map(deferred.IDBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &deferred.IDData, sizeof(deferred.IDData));
+	memcpy(mappedResource.pData, &deferred.IData, sizeof(deferred.IData));
 	gDeviceContext->Unmap(deferred.IDBuffer, 0);*/
 	tempx = camera->getPos().x;
 	tempz = camera->getPos().z;
@@ -150,7 +150,7 @@ void Update()
 
 void Render()
 {
-	float clearColor[] = { background[0], background[1], background[2], 1 }; //Så att tweakbar kan användas?
+	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1 }; //Så att tweakbar kan användas?
 
 
 	//Pipeline 1
@@ -160,7 +160,6 @@ void Render()
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[1], clearColor);
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[2], clearColor);
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[3], clearColor);
-	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[4], clearColor);
 
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 
@@ -178,11 +177,9 @@ void Render()
 
 
 	//Pipeline 2
-	gDeviceContext->OMSetRenderTargets(3, deferred.gRTVA, gDepthStencilView);
+	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
 
 	gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(cube.geometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(cube.pixelShader, nullptr, 0);
 
@@ -199,6 +196,7 @@ void Render()
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
+	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
@@ -211,16 +209,13 @@ void Render()
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
 	gDeviceContext->VSSetShader(deferred.gVertexShaderLight, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(deferred.gPixelShaderLight, nullptr, 0);
 
-	gDeviceContext->PSSetShaderResources(0, 3, deferred.gSRVA);
+	gDeviceContext->PSSetShaderResources(0, 4, deferred.gSRVA);
 	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
-	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
-	gDeviceContext->PSSetConstantBuffers(2, 1, &gWorldViewProjBuffer);
+	gDeviceContext->PSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
@@ -251,8 +246,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		constantBuffer();
 		deferred.lightbuffer(gDevice);
 		cube.materialCB(gDevice);
-		cube.NormalTexture("cubenor2.jpg", gDevice);
-		deferred.createIDBuffer(mesh);
+		cube.NormalTexture("normalmap2.jpg", gDevice);
 		deferred.CreateRenderTargets(gDevice);
 		
 		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
@@ -269,7 +263,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		//TwAddVarRW(gMyBar, "X", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
 		//TwAddVarRW(gMyBar, "MouseX", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
 
-		//CreateShaders(); //5. Skapa vertex- och pixel-shaders
+		//5. Skapa vertex- och pixel-shaders
 		deferred.InitializeLightShader(gDevice);
 		terrain->InitializeTerrainShaders(gDevice);
 		cube.InitializeObjectShaders(gDevice);

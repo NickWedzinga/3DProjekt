@@ -3,7 +3,7 @@ struct PS_IN
 	float2 UV : UV;
 	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
-	float4 ID : IDD;
+	float4 ID : ID;
 };
 
 //struct PS_OUT

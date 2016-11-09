@@ -80,32 +80,7 @@ void DeferredRendering::InitializeLightShader(ID3D11Device* gDevice)
 	pPS->Release();
 }
 
-void DeferredRendering::createIDBuffer(vector<Mesh> mesh)
-{
-	
-}
-
-
-
-void DeferredRendering::makeIDBufferGrateAgain(ID3D11Device * gDevice)
-{
-	D3D11_BUFFER_DESC cbDesc;
-	cbDesc.ByteWidth = sizeof(IDData);
-	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbDesc.MiscFlags = 0;
-	cbDesc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = &IDData;
-	InitData.SysMemPitch = 0;
-	InitData.SysMemSlicePitch = 0;
-
-	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &IDBuffer);
-}
-
 int DeferredRendering::Picking()
 {
-	return *(IDData.ID);
+	return 0;//return *(IData.ID);
 }

@@ -7,13 +7,20 @@ cbuffer KEY_BUFFER : register(b0)
 	float3 normalMap;
 };
 
+cbuffer CONSTANT_BUFFER2 : register (b1)
+{
+	float4 KD;
+	float4 KA;
+	float4 KS;
+};
+
 struct PS_IN
 {
 	float2 UV : UV;
-	float3 Normal : NORMAL;
-	float4 Pos : SV_POSITION;
-	float4 ID : IDD;
-	float4 WorldPos : WORLDPOS;
+	float3 normal : NORMAL;
+	float4 pos : SV_POSITION; //implicit use by pixel shaders, has to be world coords, even though it is 
+	float4 worldPos : POSITION;
+	float4 ID : ID;
 	float3 tangent : TANGENT;
 	float3 bitangent : BITANGENT;
 	float3 camDirection : CAMDIRECTION;
@@ -24,8 +31,7 @@ struct PS_OUT
 	float4 terrain : SV_Target0;
 	float4 color : SV_Target1;
 	float4 normal : SV_Target2;
-	//float4 specular : SV_Target3;
-	//float4 ID : SV_Target4;	
+	float4 position : SV_Target3;
 };
 
 PS_OUT PS_main(PS_IN input)
@@ -36,19 +42,19 @@ PS_OUT PS_main(PS_IN input)
 	float4 textur = txNormalDiffuse.Sample(sampAni, input.UV);
 	float4 color = txDiffuse.Sample(sampAni, input.UV);
 	textur = normalize((textur * 2.0f) - 1.0f);
-	
-	newNormal.xyz = (textur.x * input.tangent) + (textur.y * input.bitangent) + (textur.z * -input.Normal); //z inverterat, dubbelkolla
-	newNormal = normalize(newNormal);
 
 	output.terrain = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	output.color = color;
-	output.color.w = dot(input.Normal, input.camDirection); //w in color holds specular
-	if(normalMap.x == 1)
-		output.normal = float4(input.Normal, 1.0f);
-	else
-		output.normal = newNormal;
-	//output.ID = input.ID;
-	//output.camRelObj = input.camRelObj;
+	output.color = color * KA + color * KD + color * KS;
 
+	output.position = input.worldPos;
+
+	if(normalMap.x == 1)
+		output.normal = float4(input.normal, 1.0f);
+	else
+	{
+		newNormal.xyz = (textur.x * input.tangent) + (textur.y * input.bitangent) + (textur.z * -input.normal); //z inverterat, dubbelkolla
+		newNormal = normalize(newNormal);
+		output.normal = newNormal;
+	}
 	return output;
 };

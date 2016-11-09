@@ -3,17 +3,17 @@
 struct VS_IN
 {
 	float2 UV : UV;
-	float3 Normal : NORMAL;
-	float3 Pos : POSITION; 
-	int ID : IDD;
+	float3 normal : NORMAL;
+	float3 pos : POSITION; 
+	int ID : ID;
 };
 
 struct VS_OUT
 {
 	float2 UV : UV;
-	float3 Normal : NORMAL;
-	float4 Pos : SV_POSITION;
-	int ID : IDD;
+	float4 normal : NORMAL;
+	float4 pos : SV_POSITION;
+	int ID : ID;
 };
 
 //-----------------------------------------------------------------------------------------
@@ -24,9 +24,9 @@ VS_OUT VS_main(VS_IN input)
 	//VS_OUT output = (VS_OUT)0;
 	VS_OUT output;
 
-	output.Pos = float4(input.Pos, 1.0f);
+	output.pos = float4(input.pos, 1.0f);
 	output.UV = input.UV;
-	output.Normal = input.Normal;
+	output.normal = float4(input.normal, 0.0f);
 	output.ID = float4(input.ID, 0.0f, 0.0f, 0.0f);
 
 	return output;
