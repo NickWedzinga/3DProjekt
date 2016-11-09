@@ -14,7 +14,7 @@ Object::~Object()
 
 void Object::LoadObject(ID3D11Device* gDevice)
 {
-	string myFile("box.obj"), special, line2, mtl;
+	string myFile("sphere1.obj"), special, line2, mtl;
 	ifstream file(myFile);
 	istringstream inputString;
 	//struct VertexV { float x, y, z; }; //skapar struct med x, y, z värden

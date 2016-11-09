@@ -16,7 +16,7 @@ struct PS_IN
 	float4 WorldPos : WORLDPOS;
 	float3 tangent : TANGENT;
 	float3 bitangent : BITANGENT;
-	float4 camRelObj : CAMRELOBJ;
+	float3 camDirection : CAMDIRECTION;
 };
 
 struct PS_OUT
@@ -24,7 +24,7 @@ struct PS_OUT
 	float4 terrain : SV_Target0;
 	float4 color : SV_Target1;
 	float4 normal : SV_Target2;
-	float4 camRelObj : SV_Target3;
+	//float4 specular : SV_Target3;
 	//float4 ID : SV_Target4;	
 };
 
@@ -42,12 +42,13 @@ PS_OUT PS_main(PS_IN input)
 
 	output.terrain = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	output.color = color;
+	output.color.w = dot(input.Normal, input.camDirection); //w in color holds specular
 	if(normalMap.x == 1)
 		output.normal = float4(input.Normal, 1.0f);
 	else
 		output.normal = newNormal;
 	//output.ID = input.ID;
-	output.camRelObj = input.camRelObj;
+	//output.camRelObj = input.camRelObj;
 
 	return output;
 };

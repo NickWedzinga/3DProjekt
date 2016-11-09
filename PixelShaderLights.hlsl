@@ -1,13 +1,14 @@
 Texture2D terrainTex : register(t0);
-Texture2D colorTex : register(t1);
+Texture2D colorTex : register(t1); //w holds camera angle compared to normal (specular)
 Texture2D normalTex : register(t2);
+Texture2D depthTex : register(t3);
 //Texture2D IDTex : register(t3);
-Texture2D camRelObj : register(t3);
+//Texture2D camRelObj : register(t3);
 SamplerState SampleTypePoint : register(s0);
 
 cbuffer LightBuffer : register (b0)
 {
-	float3 lightDirection;
+	float3 lightPos;
 	float padding;	//För att få 16-bytes (float4 (float3 + float = float4))
 };
 
@@ -25,7 +26,7 @@ cbuffer CONSTANT_BUFFER : register (b2)
 	matrix ViewMatrix;
 	matrix ProjMatrix;
 	float3 camDirection;
-	float3 camLightPos;
+	float3 camPos;
 }
 
 struct PixelInputType
@@ -39,48 +40,33 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float4 colors;
 	float4 normals;
 	float4 terrain;
-	float4 camRelObjLoc;
+	float4 depth;
 
 	colors = colorTex.Sample(SampleTypePoint, input.UV);
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
 	terrain = terrainTex.Sample(SampleTypePoint, input.UV);
-	camRelObjLoc = camRelObj.Sample(SampleTypePoint, input.UV);
-	camRelObjLoc = normalize(camRelObjLoc);
+	depth = depthTex.Sample(SampleTypePoint, input.UV);
 
-	float shiny = 1.0f; //hur stor specular cirkel
-	float angle = 0;
-	float intensity = dot(camRelObjLoc.xyz, camDirection);
-	intensity = saturate(intensity);
+	float3 lightToPoint = normalize(depth.xyz - lightPos);
+	float3 camToPoint = normalize(depth.xyz - camPos);
+	float shiny = 0.0005f; //hur stor specular cirkel
+	float diffuseAngle = 0;
 
+	diffuseAngle = dot(lightToPoint, -normals.xyz);
 
+	//Calculate Ambient Light
+	float3 LA = KA.xyz;
 
+	//Calculate Diffuse Light
+	float3 LD = KD.xyz * saturate(diffuseAngle);
 
-	if (intensity >= 0) //looking in the direction of the object
-	{
-		angle = dot(-normals, camRelObjLoc); //infallsvinkel
-		//colors = intensity * colors;
+	//calculate specular intensity
+	float3 Reflection = lightToPoint + 2 * normals.xyz * dot(-normals.xyz, ligthToPoint);
+	float RcDir = dot(Reflection, camToPoint);
+	float3 LS = KS.xyz * pow(RcDir, shiny);
 
-		//Calculate Ambient Light
-		float3 LA = KA.xyz;
+	float3 result = (colors.xyz*LA) + terrain.xyz + (colors.xyz*LD) + (colors.xyz*LS);
 
-		//Calculate Diffuse Light
-		float3 LD = KD.xyz /** intensity*/ * saturate(angle);
-
-		//calculate specular intensity
-		float3 V = 2 * normals * dot(-normals, camRelObjLoc);
-		float3 R = camRelObjLoc + V;
-		float RV = saturate(dot(R, -camDirection));
-		/*float3 n = dot(normals, normalize(camDirection)) * normals;
-		float3 r = (2 * n) - normalize(camDirection);
-		float3 rv = dot(r, camDirection);*/
-		float3 LS = KS.xyz * pow(RV, shiny);
-
-		float3 result = (colors.xyz*LA) + terrain.xyz + (colors.xyz*LD) + (colors.xyz*LS);
-
-		return float4(result, 1.0f);
-		//return float4(LD, 0, 0, 1);
-		//return float4(intensity, 0.0f, 0.0f, 1.0f);
-	}
-	else //looking away from object
-		return float4(0.0f, 0.0f, 0.0f, 1.0f);
+	return float4(result, 1.0f);
+	//return float4(LA, 1);
 }

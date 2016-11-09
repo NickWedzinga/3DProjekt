@@ -24,7 +24,7 @@ struct GS_OUT
 	float4 WorldPos : WORLDPOS;
 	float3 tangent : TANGENT;
 	float3 bitangent : BITANGENT;
-	float4 camRelObj : CAMRELOBJ;
+	float3 camDirection : CAMDIRECTION;
 };
 
 float3 CalculatefaceNormal(GS_IN input[3])
@@ -88,7 +88,8 @@ void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 			poss = mul(ViewMatrix, poss);
 			poss = mul(ProjMatrix, poss);
 			Output.Pos = poss;
-			Output.camRelObj = poss - float4(camLightPos, 1.0f);
+			Output.camDirection = camDirection;
+			//Output.camRelObj = poss - float4(camLightPos, 1.0f);
 			Output.WorldPos = poss;
 			Output.UV = input[i].UV;
 			Output.Normal = mul(WorldMatrix, input[i].Normal);

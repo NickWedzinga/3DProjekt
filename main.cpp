@@ -178,7 +178,7 @@ void Render()
 
 
 	//Pipeline 2
-	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
+	gDeviceContext->OMSetRenderTargets(3, deferred.gRTVA, gDepthStencilView);
 
 	gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
@@ -216,7 +216,7 @@ void Render()
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(deferred.gPixelShaderLight, nullptr, 0);
 
-	gDeviceContext->PSSetShaderResources(0, 4, deferred.gSRVA);
+	gDeviceContext->PSSetShaderResources(0, 3, deferred.gSRVA);
 	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
