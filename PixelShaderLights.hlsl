@@ -41,25 +41,25 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	float3 lightToPoint = normalize(position.xyz - lightPos);
 	float3 camToPoint = normalize(position.xyz - camPos);
-	float shiny = 0.5f; //hur stor specular cirkel
+	float shiny = 0.05f; //hur stor specular cirkel
 	float diffuseAngle = 0;
 
-	diffuseAngle = dot(lightToPoint, -normals.xyz);
+	diffuseAngle = dot(-normals.xyz, lightToPoint);
 
 	//Calculate Ambient Light
-	float LA = 0.5f;
+	float LA = 1/*0.5*/;
 
 	//Calculate Diffuse Light
 	float LD = saturate(diffuseAngle);
 
 	//calculate specular intensity
 	float3 Reflection = lightToPoint + 2 * normals.xyz * dot(-normals.xyz, lightToPoint);
-	float RcDir = dot(Reflection, camToPoint);
+	float RcDir = saturate(dot(Reflection, camDirection/*camToPoint*/));
 	float LS = pow(RcDir, shiny);
 
-	float3 result = (colors.xyz*LA) + terrain.xyz + (colors.xyz*LD) + (colors.xyz*LS);
+	float3 result = (colors.xyz*LA) + (colors.xyz*LD) + (colors.xyz*LS) + terrain.xyz;
 
 	return float4(result, 1.0f);
-	//return float4(LD, 0.0f, 0.0f, 1.0f);
+	//return float4(RcDir, 0.0f, 0.0f, 1.0f);
 	//return terrain;
 }

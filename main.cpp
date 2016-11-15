@@ -154,7 +154,7 @@ void Render()
 
 
 	//Pipeline 1
-	gDeviceContext->OMSetRenderTargets(1, &deferred.gRTVA[0], gDepthStencilView);
+	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
 
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0], clearColor);
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[1], clearColor);
@@ -246,7 +246,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		constantBuffer();
 		deferred.lightbuffer(gDevice);
 		cube.materialCB(gDevice);
-		cube.NormalTexture("normalmap2.jpg", gDevice);
+		cube.NormalTexture("normalmap.jpg", gDevice);
 		deferred.CreateRenderTargets(gDevice);
 		
 		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
@@ -280,7 +280,45 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 				if (WM_LBUTTONUP == msg.message)
-					ID = deferred.Picking();
+				{
+					//ID = deferred.Picking();
+					//ID3D11Resource* tempRes = nullptr;
+					//D3D11_SHADER_RESOURCE_VIEW_DESC tempDesc;
+
+					//deferred.gSRVA[1]->GetResource(&tempRes);
+					//deferred.gSRVA[1]->GetDesc(&tempDesc);
+
+					//ID3D11Texture2D* tex = (ID3D11Texture2D*)tempRes;
+					//D3D11_TEXTURE2D_DESC desc;
+					//tex->GetDesc(&desc);
+					//desc.BindFlags = 0;
+					//desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+					//desc.Usage = D3D11_USAGE_STAGING;
+
+					//ID3D11Texture2D* tempTex = nullptr;
+
+					//gDevice->CreateTexture2D(&desc, NULL, &tempTex);
+
+					//gDeviceContext->CopyResource(tempTex, tex);
+
+					//D3D11_MAPPED_SUBRESOURCE mapped;
+					//gDeviceContext->Map(tempTex, 0, D3D11_MAP_READ, 0, &mapped);
+
+					//const int pitch = mapped.RowPitch;
+					//BYTE* source = (BYTE*)(mapped.pData);
+					//BYTE* dest = new BYTE[(desc.Width)*(desc.Height) * 4];
+					//BYTE* destTemp = dest;
+
+					//float* sdf = new float[mapped.DepthPitch*mapped.RowPitch];
+					//
+					
+
+
+
+
+
+
+				}
 				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
 			}
 			else

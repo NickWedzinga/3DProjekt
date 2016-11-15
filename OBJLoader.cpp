@@ -33,7 +33,7 @@ void Object::LoadObject(ID3D11Device* gDevice)
 	XMFLOAT3 vtx1, vtx3;
 	XMFLOAT2 vtx2;
 	VertexData temp;
-	temp.ID = 0;
+	temp.ID = 2;
 
 	UINT valueV = 0;
 	UINT valueVT = 0;

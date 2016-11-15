@@ -45,7 +45,7 @@ PS_OUT PS_main(PS_IN input)
 
 	output.terrain = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	output.color = color * KA + color * KD + color * KS;
-
+	output.color.w = input.ID.x;
 	output.position = input.worldPos;
 
 	if(normalMap.x == 1)

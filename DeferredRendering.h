@@ -9,7 +9,7 @@ class DeferredRendering
 private:
 struct LightBuffer
 {
-	DirectX::XMVECTOR lightDirection;
+	DirectX::XMVECTOR lightPos;
 	float padding;
 };
 //struct IDBuffer

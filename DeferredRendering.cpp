@@ -6,8 +6,8 @@ using namespace std;
 
 void DeferredRendering::CreateLightBuffer()
 {
-	XMFLOAT3 lightDir = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	lData.lightDirection = XMLoadFloat3(&lightDir);
+	XMFLOAT3 lightDir = XMFLOAT3(0.0f, 0.0f, -5.0f);
+	lData.lightPos = XMLoadFloat3(&lightDir);
 }
 
 void DeferredRendering::lightbuffer(ID3D11Device* gDevice)

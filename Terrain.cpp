@@ -153,7 +153,7 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			index = (terrainHeight*j) + i;
 			VertexData temp;
 			temp.normal = XMFLOAT3(0, 0, 0);
-			temp.ID = 1;
+			temp.ID = 3;
 			leftX = float(i);
 			rightX = float(i + 1);
 			upperZ = float(j + 1);
