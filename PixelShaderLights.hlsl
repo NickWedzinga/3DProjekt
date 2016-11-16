@@ -6,6 +6,8 @@ Texture2D positionTex : register(t3);
 //Texture2D camRelObj : register(t3);
 SamplerState SampleTypePoint : register(s0);
 
+RWStructuredBuffer<uint> pickingBuffer : register(u1);
+
 cbuffer LightBuffer : register (b0)
 {
 	float3 lightPos;
@@ -19,7 +21,9 @@ cbuffer CONSTANT_BUFFER : register (b1)
 	matrix ProjMatrix;
 	float3 camDirection;
 	float3 camPos;
-}
+};
+
+
 
 struct PixelInputType
 {
@@ -34,6 +38,8 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float4 terrain;
 	float4 position;
 
+
+
 	colors = colorTex.Sample(SampleTypePoint, input.UV);
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
 	terrain = terrainTex.Sample(SampleTypePoint, input.UV);
@@ -45,6 +51,12 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float diffuseAngle = 0;
 
 	diffuseAngle = dot(-normals.xyz, lightToPoint);
+	
+
+	if (input.UV.x <= 0.51f && input.UV.x >= 0.49f && input.UV.y <= 0.51f && input.UV.y >= 0.49f)	//Does not work with UV==0.5. No pixel has that value
+	{
+		pickingBuffer[0] = colors.w;
+	}
 
 	//Calculate Ambient Light
 	float LA = 1/*0.5*/;

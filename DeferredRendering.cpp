@@ -4,6 +4,8 @@ using namespace DirectX::SimpleMath;
 using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
 using namespace std;
 
+
+
 void DeferredRendering::CreateLightBuffer()
 {
 	XMFLOAT3 lightDir = XMFLOAT3(0.0f, 0.0f, -5.0f);
@@ -69,9 +71,9 @@ void DeferredRendering::InitializeLightShader(ID3D11Device* gDevice)
 	ID3D10Blob* pVS = nullptr;
 	ID3D10Blob* pPS = nullptr;
 
-	D3DCompileFromFile(L"VertexShaderLights.hlsl", nullptr, nullptr, "LightVertexShader", "vs_4_0", 0, 0, &pVS, nullptr);
+	D3DCompileFromFile(L"VertexShaderLights.hlsl", nullptr, nullptr, "LightVertexShader", "vs_5_0", 0, 0, &pVS, nullptr);
 
-	D3DCompileFromFile(L"PixelShaderLights.hlsl", nullptr, nullptr, "LightPixelShader", "ps_4_0", 0, 0, &pPS, nullptr);
+	D3DCompileFromFile(L"PixelShaderLights.hlsl", nullptr, nullptr, "LightPixelShader", "ps_5_0", 0, 0, &pPS, nullptr);
 
 	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShaderLight);
 	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShaderLight);
@@ -80,7 +82,40 @@ void DeferredRendering::InitializeLightShader(ID3D11Device* gDevice)
 	pPS->Release();
 }
 
-int DeferredRendering::Picking()
+int DeferredRendering::Picking(ID3D11DeviceContext* gDeviceContext)
 {
-	return 0;//return *(IData.ID);
+	int* intDataPointer = nullptr;
+	ID3D11Resource* buffer = nullptr;
+	PickingBuffer->GetResource(&buffer);
+	D3D11_MAPPED_SUBRESOURCE mappedResource3;
+	gDeviceContext->Map(buffer, 0, D3D11_MAP_READ, 0, &mappedResource3);
+	intDataPointer = (int*)mappedResource3.pData;
+	int pickID = intDataPointer[0];
+	gDeviceContext->Unmap(buffer, 0);
+	return pickID;
+}
+
+void DeferredRendering::CreatePickingBuffer(ID3D11Device * gDevice)
+{
+	ID3D11Buffer* buffer = nullptr;
+	D3D11_BUFFER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.ByteWidth = sizeof(int);
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	desc.StructureByteStride = sizeof(int);
+	gDevice->CreateBuffer(&desc, NULL, &buffer);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC unDesc;
+	ZeroMemory(&unDesc, sizeof(unDesc));
+	unDesc.Format = DXGI_FORMAT_UNKNOWN;
+	unDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	unDesc.Buffer.FirstElement = 0;
+	unDesc.Buffer.NumElements = 1;
+	unDesc.Buffer.Flags = 0;
+	gDevice->CreateUnorderedAccessView(buffer, &unDesc, &PickingBuffer);
+
+	buffer->Release();
 }

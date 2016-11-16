@@ -136,6 +136,11 @@ void Update()
 	memcpy(mappedResource2.pData, &camera->keyData, sizeof(camera->keyData));
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
 
+
+
+	// Check iniDataPointer is valid.
+	
+
 	/*HRESULT hr4 = gDeviceContext->Map(cube.gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cube.materialData, sizeof(cube.materialData));
 	gDeviceContext->Unmap(cube.gMaterialBuffer, 0);*/
@@ -177,7 +182,7 @@ void Render()
 
 
 	//Pipeline 2
-	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
+	//gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
 
 	gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
 	gDeviceContext->GSSetShader(cube.geometryShader, nullptr, 0);
@@ -200,12 +205,15 @@ void Render()
 
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
+	ID3D11RenderTargetView* null[4] = {nullptr, nullptr, nullptr, nullptr};
+	gDeviceContext->OMSetRenderTargets(4, null, NULL);
 	//Pipeline 3 Billboard
 
 
 
 	//Pipeline 4 Deferred
-	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
+	//gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
+	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
 	gDeviceContext->VSSetShader(deferred.gVertexShaderLight, nullptr, 0);
@@ -248,6 +256,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		cube.materialCB(gDevice);
 		cube.NormalTexture("normalmap.jpg", gDevice);
 		deferred.CreateRenderTargets(gDevice);
+		deferred.CreatePickingBuffer(gDevice);
 		
 		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
 		TwWindowSize(WIDTH,HEIGHT);
@@ -281,43 +290,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 				DispatchMessage(&msg);
 				if (WM_LBUTTONUP == msg.message)
 				{
-					//ID = deferred.Picking();
-					//ID3D11Resource* tempRes = nullptr;
-					//D3D11_SHADER_RESOURCE_VIEW_DESC tempDesc;
-
-					//deferred.gSRVA[1]->GetResource(&tempRes);
-					//deferred.gSRVA[1]->GetDesc(&tempDesc);
-
-					//ID3D11Texture2D* tex = (ID3D11Texture2D*)tempRes;
-					//D3D11_TEXTURE2D_DESC desc;
-					//tex->GetDesc(&desc);
-					//desc.BindFlags = 0;
-					//desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
-					//desc.Usage = D3D11_USAGE_STAGING;
-
-					//ID3D11Texture2D* tempTex = nullptr;
-
-					//gDevice->CreateTexture2D(&desc, NULL, &tempTex);
-
-					//gDeviceContext->CopyResource(tempTex, tex);
-
-					//D3D11_MAPPED_SUBRESOURCE mapped;
-					//gDeviceContext->Map(tempTex, 0, D3D11_MAP_READ, 0, &mapped);
-
-					//const int pitch = mapped.RowPitch;
-					//BYTE* source = (BYTE*)(mapped.pData);
-					//BYTE* dest = new BYTE[(desc.Width)*(desc.Height) * 4];
-					//BYTE* destTemp = dest;
-
-					//float* sdf = new float[mapped.DepthPitch*mapped.RowPitch];
-					//
-					
-
-
-
-
-
-
+					ID = deferred.Picking(gDeviceContext);
 				}
 				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
 			}

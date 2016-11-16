@@ -44,15 +44,6 @@
     <FxCompile Include="Fragment.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShaderLights.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Vertex.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShaderLights.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="GeometryST.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
@@ -91,5 +82,16 @@
     <ClInclude Include="Billboard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PixelShaderLights.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="VertexShaderLights.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="Vertex.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
