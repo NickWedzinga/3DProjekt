@@ -23,8 +23,6 @@ cbuffer CONSTANT_BUFFER : register (b1)
 	float3 camPos;
 };
 
-
-
 struct PixelInputType
 {
 	float4 pos : SV_POSITION;
@@ -38,8 +36,6 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float4 terrain;
 	float4 position;
 
-
-
 	colors = colorTex.Sample(SampleTypePoint, input.UV);
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
 	terrain = terrainTex.Sample(SampleTypePoint, input.UV);
@@ -51,7 +47,6 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float diffuseAngle = 0;
 
 	diffuseAngle = dot(-normals.xyz, lightToPoint);
-	
 
 	if (input.UV.x <= 0.51f && input.UV.x >= 0.49f && input.UV.y <= 0.51f && input.UV.y >= 0.49f)	//Does not work with UV==0.5. No pixel has that value
 	{

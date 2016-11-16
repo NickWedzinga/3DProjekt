@@ -187,15 +187,6 @@ void Object::MTLLoader(string mtlfile, ID3D11Device* gDevice)
 	return;
 }
 
-void Object::Texture(string material, ID3D11Device* gDevice)
-{
-	wchar_t mat[20];
-	MultiByteToWideChar(CP_UTF8, 0, material.c_str(), -1, mat, sizeof(mat) / sizeof(wchar_t));
-
-	CreateWICTextureFromFile(gDevice, mat, NULL, &textureView);
-	return;
-}
-
 void Object::InitializeObjectShaders(ID3D11Device* gDevice)
 {
 	ID3D10Blob* pVS = nullptr;

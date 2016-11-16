@@ -1,3 +1,6 @@
+Texture2D tex : register(t0);
+SamplerState sampAni : register (s0);
+
 struct PS_IN
 {
 	float2 UV : UV;
@@ -16,8 +19,11 @@ struct PS_OUT
 
 PS_OUT PS_main(PS_IN input)
 {
+	float4 texColor = tex.Sample(sampAni, input.UV);
+
 	PS_OUT output;
-	output.terrain = float4(input.UV, 0.0f, 1.0f);
+	/*output.terrain = float4(input.UV, 0.0f, 1.0f);*/
+	output.terrain = texColor;
 	output.color = float4(0.0f, 0.0f, 0.0f, input.ID.x);
 	output.normal = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	output.position = float4(0.0f, 0.0f, 0.0f, 1.0f);

@@ -1,5 +1,14 @@
 #include "mesh.h"
 
+void Mesh::Texture(string material, ID3D11Device* gDevice)
+{
+	wchar_t mat[40];
+	MultiByteToWideChar(CP_UTF8, 0, material.c_str(), -1, mat, sizeof(mat) / sizeof(wchar_t));
+
+	CreateWICTextureFromFile(gDevice, mat, NULL, &textureView);
+	return;
+}
+
 void Mesh::setID(unsigned int ID)
 {
 	for (unsigned int i = 0; i < vertices.size(); i++)

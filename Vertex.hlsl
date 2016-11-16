@@ -21,7 +21,6 @@ struct VS_OUT
 //-----------------------------------------------------------------------------------------
 VS_OUT VS_main(VS_IN input)
 {
-	//VS_OUT output = (VS_OUT)0;
 	VS_OUT output;
 
 	output.pos = float4(input.pos, 1.0f);

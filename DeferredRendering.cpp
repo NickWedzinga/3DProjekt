@@ -100,7 +100,7 @@ void DeferredRendering::CreatePickingBuffer(ID3D11Device * gDevice)
 	ID3D11Buffer* buffer = nullptr;
 	D3D11_BUFFER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
-	desc.ByteWidth = sizeof(int);
+	desc.ByteWidth = sizeof(int) * HEIGHT * WIDTH;
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;

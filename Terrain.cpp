@@ -164,38 +164,44 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			//Triangle (1)
 			//Upper left
 			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y, upperZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32);
+			temp.UV = XMFLOAT2(leftX / terrainWidth, (terrainHeight - upperZ) / terrainHeight);
+			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom right
 			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, bottomZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32);
+			temp.UV = XMFLOAT2(rightX / terrainWidth, (terrainHeight - bottomZ) / terrainHeight);
+			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom left
 			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y, bottomZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y / 32);
+			temp.UV = XMFLOAT2(leftX / terrainWidth, (terrainHeight - bottomZ) / terrainHeight);
+			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Triangle (2)
 			//Upper left
 			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y, upperZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32);
+			temp.UV = XMFLOAT2(leftX / terrainWidth, (terrainHeight - upperZ) / terrainHeight);
+			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Upper right
 			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*upperZ) + rightX)].y, upperZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + rightX)].y / 32);
+			temp.UV = XMFLOAT2(rightX / terrainWidth, (terrainHeight - upperZ) / terrainHeight);
+			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + rightX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom right
 			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, bottomZ);
-			temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32);
+			temp.UV = XMFLOAT2(rightX / terrainWidth, (terrainHeight - bottomZ) / terrainHeight);
+			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 		}

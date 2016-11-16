@@ -32,7 +32,7 @@ float background[3]{0, 0, 0};
 float angleX = 0;
 float angleY = 0;
 float angleZ = 0;
-int ID = -1;
+int gID = -1;
 
 float tempx = 0;
 float tempz = 0;
@@ -174,6 +174,8 @@ void Render()
 	gDeviceContext->GSSetShader(terrain->gGeometryShaderT, nullptr, 0);
 	gDeviceContext->PSSetShader(terrain->gPixelShaderT, nullptr, 0);
 
+	gDeviceContext->PSSetShaderResources(0, 1, &terrain->textureView);
+
 	terrain->Render(gDeviceContext);
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
@@ -255,6 +257,8 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		deferred.lightbuffer(gDevice);
 		cube.materialCB(gDevice);
 		cube.NormalTexture("normalmap.jpg", gDevice);
+		terrain->Texture("objs/firstheightmap.jpg", gDevice);
+
 		deferred.CreateRenderTargets(gDevice);
 		deferred.CreatePickingBuffer(gDevice);
 		
@@ -262,7 +266,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		TwWindowSize(WIDTH,HEIGHT);
 
 		gMyBar = TwNewBar("KekCity");
-		TwAddVarRW(gMyBar, "ID: ", TW_TYPE_FLOAT, &ID, "min=0 max=1 step=1");
+		TwAddVarRW(gMyBar, "ID: ", TW_TYPE_FLOAT, &gID, "min=-5 max=300 step=1");
 		//TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
 		//TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
 		//TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
@@ -290,7 +294,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 				DispatchMessage(&msg);
 				if (WM_LBUTTONUP == msg.message)
 				{
-					ID = deferred.Picking(gDeviceContext);
+					gID = deferred.Picking(gDeviceContext);
 				}
 				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
 			}
