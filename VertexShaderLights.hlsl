@@ -3,7 +3,7 @@
 struct PixelInputType
 {
 	float4 pos : SV_POSITION;
-	float2 UV : TEXCORD0;
+	float2 UV : TEXCOORD0;
 };
 
 PixelInputType LightVertexShader(uint id : SV_VERTEXID)

@@ -28,10 +28,9 @@ struct PS_IN
 
 struct PS_OUT
 {
-	float4 terrain : SV_Target0;
-	float4 color : SV_Target1;
-	float4 normal : SV_Target2;
-	float4 position : SV_Target3;
+	float4 color : SV_Target0;
+	float4 normal : SV_Target1;
+	float4 position : SV_Target2;
 };
 
 PS_OUT PS_main(PS_IN input)
@@ -43,7 +42,6 @@ PS_OUT PS_main(PS_IN input)
 	float4 color = txDiffuse.Sample(sampAni, input.UV);
 	textur = normalize((textur * 2.0f) - 1.0f);
 
-	output.terrain = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	output.color = color * KA + color * KD + color * KS;
 	output.color.w = input.ID.x;
 	output.position = input.worldPos;

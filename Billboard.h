@@ -9,16 +9,18 @@ class Billboard : public Mesh
 public:
 	Billboard();
 	~Billboard();
+	void Init(XMFLOAT3 camPos, ID3D11Device* gDevice);
+	void Render(ID3D11DeviceContext* gDeviceContext);
+	void Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext);
+	void InitBBBuffer(ID3D11Device* gDevice);
 private:
-	struct FontType
-	{
-		float left, right;
-		int size;
-	};
+	XMFLOAT3 position;
+	XMMATRIX rotationMatrix;
+	ID3D11Buffer *indexBuffer;
 	ID3D11Texture2D* texture;
+	ID3D11Buffer* bBBuffer = nullptr;
 	float width, height;
-	vector<VertexData> makeQuad(XMFLOAT3 position, XMFLOAT3 camPos);
-	void makeTexture(const string & text, ID3D11Device* gDevice);
+	void InitShaders(ID3D11Device * gDevice);
 };
 
 #endif

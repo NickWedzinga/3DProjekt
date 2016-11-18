@@ -127,7 +127,7 @@ void Object::LoadObject(ID3D11Device* gDevice)
 	D3D11_SUBRESOURCE_DATA vertexData;
 	vertexData.pSysMem = vertices.data();
 	//vertexData.pSysMem = triangleVertices.data();
-	HRESULT hr = gDevice->CreateBuffer(&bufferDesc, &vertexData, &VertexBuffer);
+	HRESULT hr = gDevice->CreateBuffer(&bufferDesc, &vertexData, &vertexBuffer);
    
 	return;
 }

@@ -91,5 +91,8 @@
     <None Include="PixelST.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </None>
+    <None Include="GeometryBB.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

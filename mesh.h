@@ -20,9 +20,9 @@ protected:
 	
 	XMFLOAT3 worldPosition;
 	string textureName;
-	//ID3D11Buffer* VertexBuffer = nullptr;
 
 public:
+	ID3D11Buffer* vertexBuffer = nullptr;
 	ID3D11VertexShader* vertexShader = nullptr;
 	ID3D11GeometryShader* geometryShader = nullptr;
 	ID3D11PixelShader* pixelShader = nullptr;

@@ -45,7 +45,7 @@ void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 3; i++)
 		gDevice->CreateTexture2D(&textureDesc, NULL, &gRTTA[i]);
 
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
@@ -53,7 +53,7 @@ void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 3; i++)
 		gDevice->CreateRenderTargetView(gRTTA[i], &renderTargetViewDesc, &gRTVA[i]);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
@@ -62,8 +62,9 @@ void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 3; i++)
 		gDevice->CreateShaderResourceView(gRTTA[i], &shaderResourceViewDesc, &gSRVA[i]);
+
 }
 
 void DeferredRendering::InitializeLightShader(ID3D11Device* gDevice)
@@ -84,14 +85,29 @@ void DeferredRendering::InitializeLightShader(ID3D11Device* gDevice)
 
 int DeferredRendering::Picking(ID3D11DeviceContext* gDeviceContext)
 {
+	//ID3D11Resource* res = nullptr;
+	ID3D11Resource* idRes = nullptr;
+	//D3D11_BOX sourceRegion;
+	//sourceRegion.left = 320;
+	//sourceRegion.right = 321;
+	//sourceRegion.top = 240;
+	//sourceRegion.bottom = 241;
+	//sourceRegion.front = 0;
+	//sourceRegion.back = 1;
+
+	//gRTVA[1]->GetResource(&idRes);
+	//gDeviceContext->CopySubresourceRegion(res, 0, 0, 0, 0, idRes, 0, &sourceRegion);
+
+
+
 	int* intDataPointer = nullptr;
-	ID3D11Resource* buffer = nullptr;
-	PickingBuffer->GetResource(&buffer);
+	//ID3D11Resource* buffer = nullptr;
+	PickingBuffer->GetResource(&idRes);
 	D3D11_MAPPED_SUBRESOURCE mappedResource3;
-	gDeviceContext->Map(buffer, 0, D3D11_MAP_READ, 0, &mappedResource3);
+	gDeviceContext->Map(idRes, 0, D3D11_MAP_READ, 0, &mappedResource3);
 	intDataPointer = (int*)mappedResource3.pData;
 	int pickID = intDataPointer[0];
-	gDeviceContext->Unmap(buffer, 0);
+	gDeviceContext->Unmap(idRes, 0);
 	return pickID;
 }
 

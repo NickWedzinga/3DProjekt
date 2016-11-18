@@ -1,7 +1,6 @@
-Texture2D terrainTex : register(t0);
-Texture2D colorTex : register(t1);
-Texture2D normalTex : register(t2);
-Texture2D positionTex : register(t3);
+Texture2D colorTex : register(t0);
+Texture2D normalTex : register(t1);
+Texture2D positionTex : register(t2);
 //Texture2D IDTex : register(t3);
 //Texture2D camRelObj : register(t3);
 SamplerState SampleTypePoint : register(s0);
@@ -26,19 +25,17 @@ cbuffer CONSTANT_BUFFER : register (b1)
 struct PixelInputType
 {
 	float4 pos : SV_POSITION;
-	float2 UV : TEXCORD0;
+	float2 UV : TEXCOORD0;
 };
 
 float4 LightPixelShader(PixelInputType input) : SV_Target0
 {
 	float4 colors;
 	float4 normals;
-	float4 terrain;
 	float4 position;
 
 	colors = colorTex.Sample(SampleTypePoint, input.UV);
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
-	terrain = terrainTex.Sample(SampleTypePoint, input.UV);
 	position = positionTex.Sample(SampleTypePoint, input.UV);
 
 	float3 lightToPoint = normalize(position.xyz - lightPos);
@@ -48,7 +45,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	diffuseAngle = dot(-normals.xyz, lightToPoint);
 
-	if (input.UV.x <= 0.51f && input.UV.x >= 0.49f && input.UV.y <= 0.51f && input.UV.y >= 0.49f)	//Does not work with UV==0.5. No pixel has that value
+	if (input.pos.x == 320.0f && input.pos.y == 240.0f)	//Does not work with UV==0.5. No pixel has that value
 	{
 		pickingBuffer[0] = colors.w;
 	}
@@ -64,7 +61,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float RcDir = saturate(dot(Reflection, camDirection/*camToPoint*/));
 	float LS = pow(RcDir, shiny);
 
-	float3 result = (colors.xyz*LA) + (colors.xyz*LD) + (colors.xyz*LS) + terrain.xyz;
+	float3 result = (colors.xyz*LA) + (colors.xyz*LD) + (colors.xyz*LS);
 
 	return float4(result, 1.0f);
 	//return float4(RcDir, 0.0f, 0.0f, 1.0f);

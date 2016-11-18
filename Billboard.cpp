@@ -2,67 +2,166 @@
 
 Billboard::Billboard()
 {
-	width = height = 0.0f;
+	position = XMFLOAT3(0, 5, 0);
+	width = height = 3.0f;
 }
 
 Billboard::~Billboard()
 {
 }
 
-vector<Mesh::VertexData> Billboard::makeQuad(XMFLOAT3 position, XMFLOAT3 camPos)
+void Billboard::Init(XMFLOAT3 camPos, ID3D11Device* gDevice)
 {
-	vector<VertexData> quad;
 	VertexData vertex;
 	//matte!
 	XMVECTOR camToBB = XMLoadFloat3(&position) - XMLoadFloat3(&camPos);
+	camToBB = XMVector3Normalize(camToBB);
 	XMVECTOR up = XMLoadFloat3(&XMFLOAT3(0, 1, 0));
-	XMVECTOR left = XMVector3Cross(up, camToBB);
+	XMVECTOR left = XMVector3Cross(camToBB, up);
 	up = XMVector3Cross(left, camToBB);
 	XMStoreFloat3(&vertex.normal, -camToBB);
 
 	//Upper left
-	XMStoreFloat3(&vertex.position, left * width / 2 + up * height / 2);
+	XMStoreFloat3(&vertex.position, XMLoadFloat3(&position) + left * width / 2 + up * height / 2);
 	vertex.UV = XMFLOAT2(0, 0);
-	quad.push_back(vertex);
+	vertices.push_back(vertex);
 	//Bottom right
-	XMStoreFloat3(&vertex.position, -left * width / 2 - up * height / 2);
+	XMStoreFloat3(&vertex.position, XMLoadFloat3(&position) - left * width / 2 - up * height / 2);
 	vertex.UV = XMFLOAT2(1, 1);
-	quad.push_back(vertex);
+	vertices.push_back(vertex);
 	//Bottom left
-	XMStoreFloat3(&vertex.position, left * width / 2 - up * height / 2);
+	XMStoreFloat3(&vertex.position, XMLoadFloat3(&position) + left * width / 2 - up * height / 2);
 	vertex.UV = XMFLOAT2(0, 1);
-	quad.push_back(vertex);
+	vertices.push_back(vertex);
 
 	//Upper left
-	XMStoreFloat3(&vertex.position, left * width / 2 + up * height / 2);
+	XMStoreFloat3(&vertex.position, XMLoadFloat3(&position) + left * width / 2 + up * height / 2);
 	vertex.UV = XMFLOAT2(0, 0);
-	quad.push_back(vertex);
+	vertices.push_back(vertex);
 	//Upper right
-	XMStoreFloat3(&vertex.position, - left * width / 2 + up * height / 2);
+	XMStoreFloat3(&vertex.position, XMLoadFloat3(&position) - left * width / 2 + up * height / 2);
 	vertex.UV = XMFLOAT2(1, 0);
-	quad.push_back(vertex);
+	vertices.push_back(vertex);
 	//Bottom right
-	XMStoreFloat3(&vertex.position, -left * width / 2 - up * height / 2);
+	XMStoreFloat3(&vertex.position, XMLoadFloat3(&position) - left * width / 2 - up * height / 2);
 	vertex.UV = XMFLOAT2(1, 1);
-	quad.push_back(vertex);
+	vertices.push_back(vertex);
+	
+	InitShaders(gDevice);
 
-	return quad;
+	D3D11_BUFFER_DESC vertexBufferDesc;
+	memset(&vertexBufferDesc, 0, sizeof(vertexBufferDesc));
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexData)*vertices.size();
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA vertexData;
+	vertexData.pSysMem = vertices.data();
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+	gDevice->CreateBuffer(&vertexBufferDesc, &vertexData, &vertexBuffer);
+
+
+	D3D11_BUFFER_DESC indexBufferDesc;
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(VertexData)*vertices.size();
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA indexData;
+	indexData.pSysMem = vertices.data();
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+	gDevice->CreateBuffer(&indexBufferDesc, &indexData, &indexBuffer);
 }
 
-void Billboard::makeTexture(const string & text, ID3D11Device* gDevice) //returnade bool innan, satte void så länge för att matcha .h
+void Billboard::Render(ID3D11DeviceContext * gDeviceContext)
 {
-	D3D11_TEXTURE2D_DESC textureDesc;
-	ZeroMemory(&textureDesc, sizeof(textureDesc));
-	textureDesc.Width = width;
-	textureDesc.Height = height;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
+	UINT32 stride;
+	UINT32 offset;
 
-	gDevice->CreateTexture2D(&textureDesc, NULL, &texture);
+	stride = sizeof(vertices[0]);
+	offset = 0;
+	gDeviceContext->GSSetConstantBuffers(1, 1, &bBBuffer);
+	gDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+	gDeviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
+{
+	XMFLOAT3 camToBB;
+	camToBB.x = position.x - camPos.x;
+	camToBB.y = position.y - camPos.y;
+	camToBB.z = position.z - camPos.z;
+	XMVECTOR normal = XMLoadFloat3(&camToBB);
+	normal = XMVector3Normalize(-normal);
+	float yaw, pitch, roll;
+	XMFLOAT3 temp;
+	XMStoreFloat3(&temp, XMVector3Dot(normal, XMLoadFloat3(&XMFLOAT3(0, 0, 1))));
+	roll = temp.x;
+	XMStoreFloat3(&temp, XMVector3Dot(normal, XMLoadFloat3(&XMFLOAT3(1, 0, 0))));
+	pitch = temp.x;
+	XMStoreFloat3(&temp, XMVector3Dot(normal, XMLoadFloat3(&XMFLOAT3(0, 1, 0))));
+	yaw = temp.x;
+	rotationMatrix = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&XMFLOAT3(roll, pitch, yaw)));
+
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	gDeviceContext->Map(bBBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &bBBuffer, sizeof(bBBuffer));
+	gDeviceContext->Unmap(bBBuffer, 0);
+}
+
+void Billboard::InitBBBuffer(ID3D11Device* gDevice)
+{
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth = sizeof(KEY_BUFFER);
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = &bBBuffer;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	gDevice->CreateBuffer(&cbDesc, &InitData, &bBBuffer);
+}
+
+
+
+void Billboard::InitShaders(ID3D11Device * gDevice)
+{
+	ID3D10Blob* pVS = nullptr;
+	ID3D10Blob* pGS = nullptr;
+	ID3D10Blob* pPS = nullptr;
+
+	D3DCompileFromFile(L"VertexST.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, nullptr);
+	D3DCompileFromFile(L"GeometryBB.hlsl", nullptr, nullptr, "GS_main", "gs_4_0", 0, 0, &pGS, nullptr);
+	D3DCompileFromFile(L"PixelST.hlsl", nullptr, nullptr, "PS_main", "ps_4_0", 0, 0, &pPS, nullptr);
+
+	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader);
+	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &geometryShader);
+	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &pixelShader);
+
+	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
+		{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "ID", 0, DXGI_FORMAT_R16_SINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &vertexLayout);
+
+
+	pVS->Release();
+	pGS->Release();
+	pPS->Release();
 }

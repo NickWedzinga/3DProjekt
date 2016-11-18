@@ -34,7 +34,7 @@ public:
 	void NormalTexture(string normal, ID3D11Device* gDevice);
 
 	CONSTANT_BUFFER2 materialData;
-	ID3D11Buffer* VertexBuffer = nullptr;
+	//ID3D11Buffer* VertexBuffer = nullptr;
 	ID3D11Buffer* gMaterialBuffer = nullptr;
 	ID3D11ShaderResourceView* norTexView;
 private:

@@ -44,7 +44,7 @@ DeferredRendering deferred;
 CONSTANT_BUFFER cData;
 Terrain* terrain = new Terrain;
 Camera* camera = new Camera;
-Billboard* billboard = nullptr;
+Billboard* billboard = new Billboard;
 
 
 void CreateWorldMatrix()
@@ -67,6 +67,7 @@ void constantBuffer()
 	CreateProjMatrix();
 	deferred.CreateLightBuffer();
 	camera->initKeyBuffer(gDevice);
+	billboard->InitBBBuffer(gDevice);
 
 	D3D11_BUFFER_DESC cbDesc;
 	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
@@ -125,6 +126,7 @@ void SetViewport()
 void Update()
 {
 	CreateWorldMatrix();
+	billboard->Update(camera->getPos(), gDeviceContext);
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr2 = gDeviceContext->Map(gWorldViewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -135,8 +137,6 @@ void Update()
 	gDeviceContext->Map(camera->keyDataBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource2);
 	memcpy(mappedResource2.pData, &camera->keyData, sizeof(camera->keyData));
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
-
-
 
 	// Check iniDataPointer is valid.
 	
@@ -159,12 +159,11 @@ void Render()
 
 
 	//Pipeline 1
-	gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
+	gDeviceContext->OMSetRenderTargets(3, deferred.gRTVA, gDepthStencilView);
 
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0], clearColor);
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[1], clearColor);
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[2], clearColor);
-	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[3], clearColor);
 
 	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 
@@ -181,9 +180,18 @@ void Render()
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 
 	gDeviceContext->Draw(terrain->vertices.size(), 0);
-
-
+	
 	//Pipeline 2
+
+
+	gDeviceContext->GSSetShader(billboard->geometryShader, nullptr, 0);
+
+
+	billboard->Render(gDeviceContext);
+	gDeviceContext->PSSetShaderResources(0, 1, &billboard->textureView);
+	gDeviceContext->Draw(billboard->vertices.size(), 0);
+
+	//Pipeline 3
 	//gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
 
 	gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
@@ -196,12 +204,12 @@ void Render()
 	UINT32 vertexSize = sizeof(cube.vertices[0]);
 	UINT32 offset = 0;
 
-	gDeviceContext->IASetVertexBuffers(0, 1, &cube.VertexBuffer, &vertexSize, &offset);
+	gDeviceContext->IASetVertexBuffers(0, 1, &cube.vertexBuffer, &vertexSize, &offset);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	gDeviceContext->IASetInputLayout(cube.vertexLayout);
 
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
+	//gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 
@@ -209,8 +217,6 @@ void Render()
 
 	ID3D11RenderTargetView* null[4] = {nullptr, nullptr, nullptr, nullptr};
 	gDeviceContext->OMSetRenderTargets(4, null, NULL);
-	//Pipeline 3 Billboard
-
 
 
 	//Pipeline 4 Deferred
@@ -222,7 +228,7 @@ void Render()
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(deferred.gPixelShaderLight, nullptr, 0);
 
-	gDeviceContext->PSSetShaderResources(0, 4, deferred.gSRVA);
+	gDeviceContext->PSSetShaderResources(0, 3, deferred.gSRVA);
 	
 	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
@@ -258,6 +264,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		cube.materialCB(gDevice);
 		cube.NormalTexture("normalmap.jpg", gDevice);
 		terrain->Texture("objs/firstheightmap.jpg", gDevice);
+		billboard->Texture("SPITHOTFIRE.jpg", gDevice);
 
 		deferred.CreateRenderTargets(gDevice);
 		deferred.CreatePickingBuffer(gDevice);
@@ -277,6 +284,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		//TwAddVarRW(gMyBar, "MouseX", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
 
 		//5. Skapa vertex- och pixel-shaders
+		billboard->Init(camera->getPos(), gDevice);
 		deferred.InitializeLightShader(gDevice);
 		terrain->InitializeTerrainShaders(gDevice);
 		cube.InitializeObjectShaders(gDevice);
@@ -308,7 +316,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			}
 		}
 
-		cube.VertexBuffer->Release();
+		cube.vertexBuffer->Release();
 		//gWorldViewProjBuffer->Release(); ??
 		//gVertexLayout->Release();
 		//gVertexShader->Release();
