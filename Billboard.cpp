@@ -109,19 +109,19 @@ void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
 	pitch = temp.x;
 	XMStoreFloat3(&temp, XMVector3Dot(normal, XMLoadFloat3(&XMFLOAT3(0, 1, 0))));
 	yaw = temp.x;
-	rotationMatrix = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&XMFLOAT3(roll, pitch, yaw)));
+	rotationMatrix = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&XMFLOAT3(pitch, yaw, roll)));	//According to msdn: 3D vector containing the Euler angles in the order pitch, then yaw, and then roll. Stupid programmers, the function is namned ...RollPitchYaw...  
 
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	gDeviceContext->Map(bBBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &bBBuffer, sizeof(bBBuffer));
+	memcpy(mappedResource.pData, &rotationMatrix, sizeof(XMMATRIX));
 	gDeviceContext->Unmap(bBBuffer, 0);
 }
 
 void Billboard::InitBBBuffer(ID3D11Device* gDevice)
 {
 	D3D11_BUFFER_DESC cbDesc;
-	cbDesc.ByteWidth = sizeof(KEY_BUFFER);
+	cbDesc.ByteWidth = sizeof(XMMATRIX);
 	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
 	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -129,7 +129,7 @@ void Billboard::InitBBBuffer(ID3D11Device* gDevice)
 	cbDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = &bBBuffer;
+	InitData.pSysMem = &rotationMatrix;
 	InitData.SysMemPitch = 0;
 	InitData.SysMemSlicePitch = 0;
 

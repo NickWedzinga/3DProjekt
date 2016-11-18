@@ -155,7 +155,7 @@ void Update()
 
 void Render()
 {
-	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1 }; //Så att tweakbar kan användas?
+	float clearColor[] = { 0.5f, 0.5f, 0.5f, 1 }; //Så att tweakbar kan användas?
 
 
 	//Pipeline 1

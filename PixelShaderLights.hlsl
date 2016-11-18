@@ -58,10 +58,10 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	//calculate specular intensity
 	float3 Reflection = lightToPoint + 2 * normals.xyz * dot(-normals.xyz, lightToPoint);
-	float RcDir = saturate(dot(Reflection, camDirection/*camToPoint*/));
+	float RcDir = saturate(dot(Reflection, /*camToPoint*/camDirection));
 	float LS = pow(RcDir, shiny);
 
-	float3 result = (colors.xyz*LA) + (colors.xyz*LD) + (colors.xyz*LS);
+	float3 result = (colors.xyz*LA) + (colors.xyz*LD) /*+ (colors.xyz*LS)*/;
 
 	return float4(result, 1.0f);
 	//return float4(RcDir, 0.0f, 0.0f, 1.0f);

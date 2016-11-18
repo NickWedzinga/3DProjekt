@@ -36,7 +36,7 @@ void GS_main(triangle GS_IN input[3], inout TriangleStream< GSOutput > output)
 	for (uint i = 0; i < 3; i++)
 	{
 		float4 poss = input[i].pos;
-		poss = mul(WorldMatrix, poss);
+		//poss = mul(WorldMatrix, poss);
 		poss = mul(RotationMatrix, poss);
 		poss = mul(ViewMatrix, poss);
 		poss = mul(ProjMatrix, poss);
