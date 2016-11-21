@@ -45,12 +45,10 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	diffuseAngle = dot(-normals.xyz, lightToPoint);
 
-	if (position.x == 0.5f/*320.0f*/ && position.y == 0.5f/*240.0f*/)	//Does not work with UV==0.5. No pixel has that value
-	{
-		pickingBuffer[0] = colors.w + 0.5;
-	}
+	//return float4(colors.w / 4.0f, 0, 0, 1); bra debug med deferred
 
-	//pickingBuffer[0] = colors.w + 0.5;
+	//Samples the middle pixel of the color texture and sends the w-value (ID) back to the CPU
+	pickingBuffer[0] = colorTex.Sample(SampleTypePoint, float2(0.5f, 0.5f)).w + 0.5f;
 
 	//Calculate Ambient Light
 	float LA = 1/*0.5*/;

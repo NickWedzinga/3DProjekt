@@ -268,7 +268,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		TwWindowSize(WIDTH,HEIGHT);
 
 		gMyBar = TwNewBar("KekCity");
-		TwAddVarRW(gMyBar, "ID: ", TW_TYPE_FLOAT, &gID, "min=-5 max=300 step=1");
+		TwAddVarRW(gMyBar, "ID: ", TW_TYPE_INT32, &gID, "min=-5 max=300 step=1");
 		//TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
 		//TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
 		//TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
@@ -398,7 +398,7 @@ HRESULT CreateDirect3DContext(HWND wndHandle)
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		D3D11_CREATE_DEVICE_DEBUG,
+		0,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,
