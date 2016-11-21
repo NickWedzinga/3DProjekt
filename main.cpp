@@ -54,10 +54,7 @@ void CreateWorldMatrix()
 
 void CreateProjMatrix()
 {
-	float Near = 0.5;
-	float Far = 200;
-
-	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH/HEIGHT, Near, Far);
+	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH/HEIGHT, NEAR, FAR);
 }
 
 void constantBuffer()
@@ -137,7 +134,7 @@ void Update()
 	memcpy(mappedResource2.pData, &camera->keyData, sizeof(camera->keyData));
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
 
-	billboard->Update(camera->getPos(), gDeviceContext, cData);
+	billboard->Update(camera->getPos(), gDeviceContext);
 
 	/*HRESULT hr4 = gDeviceContext->Map(cube.gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cube.materialData, sizeof(cube.materialData));
@@ -192,20 +189,20 @@ void Render()
 	//Pipeline 3
 	//gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
 
-	gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
-	gDeviceContext->GSSetShader(cube.geometryShader, nullptr, 0);
-	gDeviceContext->PSSetShader(cube.pixelShader, nullptr, 0);
+	//gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
+	//gDeviceContext->GSSetShader(cube.geometryShader, nullptr, 0);
+	//gDeviceContext->PSSetShader(cube.pixelShader, nullptr, 0);
 
-	gDeviceContext->PSSetShaderResources(0, 1, &cube.textureView); //Pipelina texturen
-	gDeviceContext->PSSetShaderResources(1, 1, &cube.norTexView);
+	//gDeviceContext->PSSetShaderResources(0, 1, &cube.textureView); //Pipelina texturen
+	//gDeviceContext->PSSetShaderResources(1, 1, &cube.norTexView);
 
-	UINT32 vertexSize = sizeof(cube.vertices[0]);
-	UINT32 offset = 0;
+	//UINT32 vertexSize = sizeof(cube.vertices[0]);
+	//UINT32 offset = 0;
 
-	gDeviceContext->IASetVertexBuffers(0, 1, &cube.vertexBuffer, &vertexSize, &offset);
+	//gDeviceContext->IASetVertexBuffers(0, 1, &cube.vertexBuffer, &vertexSize, &offset);
 
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->IASetInputLayout(cube.vertexLayout);
+	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//gDeviceContext->IASetInputLayout(cube.vertexLayout);
 
 	//gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);

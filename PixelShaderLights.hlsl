@@ -45,10 +45,12 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	diffuseAngle = dot(-normals.xyz, lightToPoint);
 
-	if (input.pos.x == 0.5f && input.pos.y == 0.5f)	//Does not work with UV==0.5. No pixel has that value
+	if (position.x == 0.5f/*320.0f*/ && position.y == 0.5f/*240.0f*/)	//Does not work with UV==0.5. No pixel has that value
 	{
-		pickingBuffer[0] = colors.w;
+		pickingBuffer[0] = colors.w + 0.5;
 	}
+
+	//pickingBuffer[0] = colors.w + 0.5;
 
 	//Calculate Ambient Light
 	float LA = 1/*0.5*/;

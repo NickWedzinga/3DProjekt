@@ -11,7 +11,7 @@ public:
 	~Billboard();
 	void Init(XMFLOAT3 camPos, ID3D11Device* gDevice);
 	void Render(ID3D11DeviceContext* gDeviceContext);
-	void Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext, CONSTANT_BUFFER &cBuffer);
+	void Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext);
 	void InitBBBuffer(ID3D11Device* gDevice);
 private:
 	XMFLOAT3 position;
