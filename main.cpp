@@ -126,7 +126,6 @@ void SetViewport()
 void Update()
 {
 	CreateWorldMatrix();
-	billboard->Update(camera->getPos(), gDeviceContext);
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr2 = gDeviceContext->Map(gWorldViewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -138,8 +137,7 @@ void Update()
 	memcpy(mappedResource2.pData, &camera->keyData, sizeof(camera->keyData));
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
 
-	// Check iniDataPointer is valid.
-	
+	billboard->Update(camera->getPos(), gDeviceContext, cData);
 
 	/*HRESULT hr4 = gDeviceContext->Map(cube.gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &cube.materialData, sizeof(cube.materialData));

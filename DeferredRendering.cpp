@@ -103,9 +103,9 @@ int DeferredRendering::Picking(ID3D11DeviceContext* gDeviceContext)
 	int* intDataPointer = nullptr;
 	//ID3D11Resource* buffer = nullptr;
 	PickingBuffer->GetResource(&idRes);
-	D3D11_MAPPED_SUBRESOURCE mappedResource3;
-	gDeviceContext->Map(idRes, 0, D3D11_MAP_READ, 0, &mappedResource3);
-	intDataPointer = (int*)mappedResource3.pData;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	gDeviceContext->Map(idRes, 0, D3D11_MAP_READ, 0, &mappedResource);
+	intDataPointer = (int*)mappedResource.pData;
 	int pickID = intDataPointer[0];
 	gDeviceContext->Unmap(idRes, 0);
 	return pickID;

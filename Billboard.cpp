@@ -2,8 +2,8 @@
 
 Billboard::Billboard()
 {
-	position = XMFLOAT3(0, 5, 0);
-	width = height = 3.0f;
+	position = XMFLOAT3(0, 4, 0);
+	width = height = 5.0f;
 }
 
 Billboard::~Billboard()
@@ -93,9 +93,9 @@ void Billboard::Render(ID3D11DeviceContext * gDeviceContext)
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
+void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext, CONSTANT_BUFFER &cBuffer)
 {
-	XMFLOAT3 camToBB;
+/*	XMFLOAT3 camToBB;
 	camToBB.x = position.x - camPos.x;
 	camToBB.y = position.y - camPos.y;
 	camToBB.z = position.z - camPos.z;
@@ -109,8 +109,48 @@ void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
 	pitch = temp.x;
 	XMStoreFloat3(&temp, XMVector3Dot(normal, XMLoadFloat3(&XMFLOAT3(0, 1, 0))));
 	yaw = temp.x;
-	rotationMatrix = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&XMFLOAT3(pitch, yaw, roll)));	//According to msdn: 3D vector containing the Euler angles in the order pitch, then yaw, and then roll. Stupid programmers, the function is namned ...RollPitchYaw...  
+	rotationMatrix = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&XMFLOAT3(pitch, yaw, roll)));*/	//According to msdn: 3D vector containing the Euler angles in the order pitch, then yaw, and then roll. Stupid programmers, the function is namned ...RollPitchYaw...  
 
+	XMFLOAT3 billboard1 = XMFLOAT3(0.0, 0.0, 0.0);
+	XMFLOAT3X3 billboardView;
+	XMStoreFloat3x3(&billboardView, XMMatrixTranspose(cBuffer.ViewMatrix/*WorldMatrix*/));
+	
+	XMFLOAT4X4 billboardView1;
+	//billboardView1._11 = billboardView._11;
+	//billboardView1._12 = billboardView._12;
+	//billboardView1._13 = billboardView._13;
+	//billboardView1._14 = billboard1.x;
+	//billboardView1._21 = billboardView._21;
+	//billboardView1._22 = billboardView._22;
+	//billboardView1._23 = billboardView._23;
+	//billboardView1._24 = billboard1.y;
+	//billboardView1._31 = billboardView._31;
+	//billboardView1._32 = billboardView._32;
+	//billboardView1._33 = billboardView._33;
+	//billboardView1._34 = billboard1.z;
+	//billboardView1._41 = 0.0f;
+	//billboardView1._42 = 0.0f;
+	//billboardView1._43 = 0.0f;
+	//billboardView1._44 = 1.0f;
+
+	billboardView1._11 = billboardView._11;	//Pos in x-axies
+	billboardView1._12 = billboardView._12;	//Pos in y-axies
+	billboardView1._13 = billboardView._13;	//Pos in z-axies
+	billboardView1._14 = billboard1.x;
+	billboardView1._21 = billboardView._21;
+	billboardView1._22 = billboardView._22;
+	billboardView1._23 = billboardView._23;
+	billboardView1._24 = billboard1.y;
+	billboardView1._31 = billboardView._31;
+	billboardView1._32 = billboardView._32;
+	billboardView1._33 = billboardView._33;
+	billboardView1._34 = billboard1.z;
+	billboardView1._41 = 0.0f;
+	billboardView1._42 = 0.0f;
+	billboardView1._43 = 0.0f;
+	billboardView1._44 = 1.0f;
+
+	XMFLOAT4X4(rotationMatrix) = billboardView1;	
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	gDeviceContext->Map(bBBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);

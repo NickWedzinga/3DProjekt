@@ -45,7 +45,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	diffuseAngle = dot(-normals.xyz, lightToPoint);
 
-	if (input.pos.x == 320.0f && input.pos.y == 240.0f)	//Does not work with UV==0.5. No pixel has that value
+	if (input.pos.x == 0.5f && input.pos.y == 0.5f)	//Does not work with UV==0.5. No pixel has that value
 	{
 		pickingBuffer[0] = colors.w;
 	}
