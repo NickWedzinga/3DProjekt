@@ -73,7 +73,6 @@ void DeferredRendering::InitializeLightShader(ID3D11Device* gDevice)
 	ID3D10Blob* pPS = nullptr;
 
 	D3DCompileFromFile(L"VertexShaderLights.hlsl", nullptr, nullptr, "LightVertexShader", "vs_5_0", 0, 0, &pVS, nullptr);
-
 	D3DCompileFromFile(L"PixelShaderLights.hlsl", nullptr, nullptr, "LightPixelShader", "ps_5_0", 0, 0, &pPS, nullptr);
 
 	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShaderLight);

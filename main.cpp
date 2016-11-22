@@ -153,7 +153,7 @@ void Render()
 	float clearColor[] = { 0.5f, 0.5f, 0.5f, 1 }; //Så att tweakbar kan användas?
 
 
-	//Pipeline 1
+	//Pipeline 1	//Terrain
 	gDeviceContext->OMSetRenderTargets(3, deferred.gRTVA, gDepthStencilView);
 
 	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0], clearColor);
@@ -176,11 +176,8 @@ void Render()
 
 	gDeviceContext->Draw(terrain->vertices.size(), 0);
 	
-	//Pipeline 2
-
-
+	//Pipeline 2	//Billboard
 	gDeviceContext->GSSetShader(billboard->geometryShader, nullptr, 0);
-
 
 	billboard->Render(gDeviceContext);
 	gDeviceContext->PSSetShaderResources(0, 1, &billboard->textureView);
@@ -205,10 +202,10 @@ void Render()
 	//gDeviceContext->IASetInputLayout(cube.vertexLayout);
 
 	//gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
-	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
+	/*gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 
-	gDeviceContext->Draw(cube.vertices.size(), 0);
+	gDeviceContext->Draw(cube.vertices.size(), 0);*/
 
 	ID3D11RenderTargetView* null[4] = {nullptr, nullptr, nullptr, nullptr};
 	gDeviceContext->OMSetRenderTargets(4, null, NULL);
