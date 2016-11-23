@@ -159,11 +159,14 @@ void Render()
 	cube.Render(gDeviceContext);
 
 	gDeviceContext->Draw(cube.vertices.size(), 0);
+	gDeviceContext->Draw(cube.vertices.size(), 0);
 
-	ID3D11RenderTargetView* null[4] = {nullptr, nullptr, nullptr, nullptr};
-	gDeviceContext->OMSetRenderTargets(4, null, NULL);
+	/*ID3D11RenderTargetView* null[4] = {nullptr, nullptr, nullptr, nullptr};
+	gDeviceContext->OMSetRenderTargets(4, null, NULL);*/
 
-	//Pipeline 4 Deferred
+	//Pipeline 4 Shadows
+
+	//Pipeline 5 Deferred
 	float clearColor[] = { 0.5f, 0.5f, 0.5f, 1 };
 	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);

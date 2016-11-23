@@ -18,11 +18,17 @@ private:
 		XMMATRIX View;
 		XMMATRIX Proj;
 	}lights[5];
+	ID3D11RenderTargetView* lRTV[5];
+	ID3D11ShaderResourceView* lSRV[5];
+	ID3D11Texture2D* lT[5];
 public:
 	Lights();
 	~Lights();
 
 	void Init(unsigned int lights, ID3D11Device* gDevice);
+	void CreateRenderTargets(ID3D11Device* gDevice);
+	void Render(ID3D11DeviceContext* gDeviceContext);
+
 	ID3D11Buffer* lightBuffer = nullptr;
 };
 
