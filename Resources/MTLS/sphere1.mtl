@@ -4,5 +4,5 @@ Kd 1.00 1.00 1.00
 Ka 0.50 0.50 0.50
 Tf 1.00 1.00 1.00
 Ni 1.00
-map_Kd sphere1.jpg
+map_Kd Resources/Textures/sphere1.jpg
 Ks 0.50 0.50 0.50

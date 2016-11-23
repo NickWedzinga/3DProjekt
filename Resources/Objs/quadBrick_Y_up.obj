@@ -1,6 +1,6 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
-mtllib quadBrick_Y_up.mtl
+mtllib Resources/MTLS/quadBrick_Y_up.mtl
 v -0.500000 -0.000000 0.500000
 v 0.500000 -0.000000 0.500000
 v -0.500000 0.000000 -0.500000
