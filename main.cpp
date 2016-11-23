@@ -34,9 +34,6 @@ float angleY = 0;
 float angleZ = 0;
 int gID = -1;
 
-float tempx = 0;
-float tempz = 0;
-
 
 Object cube;
 vector<Mesh> mesh;
@@ -135,40 +132,12 @@ void Update()
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
 
 	billboard->Update(camera->getPos(), gDeviceContext);
-
-	/*HRESULT hr4 = gDeviceContext->Map(cube.gMaterialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &cube.materialData, sizeof(cube.materialData));
-	gDeviceContext->Unmap(cube.gMaterialBuffer, 0);*/
-
-	/*gDeviceContext->Map(deferred.IDBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &deferred.IData, sizeof(deferred.IData));
-	gDeviceContext->Unmap(deferred.IDBuffer, 0);*/
-	tempx = camera->getPos().x;
-	tempz = camera->getPos().z;
-
 }
 
 void Render()
 {
-	float clearColor[] = { 0.5f, 0.5f, 0.5f, 1 }; //Så att tweakbar kan användas?
-
-
 	//Pipeline 1	//Terrain
-	gDeviceContext->OMSetRenderTargets(3, deferred.gRTVA, gDepthStencilView);
-
-	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[0], clearColor);
-	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[1], clearColor);
-	gDeviceContext->ClearRenderTargetView(deferred.gRTVA[2], clearColor);
-
-	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
-
-	gDeviceContext->VSSetShader(terrain->gVertexShaderT, nullptr, 0);
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->GSSetShader(terrain->gGeometryShaderT, nullptr, 0);
-	gDeviceContext->PSSetShader(terrain->gPixelShaderT, nullptr, 0);
-
-	gDeviceContext->PSSetShaderResources(0, 1, &terrain->textureView);
+	deferred.SetRenderTargets(gDeviceContext, gDepthStencilView);
 
 	terrain->Render(gDeviceContext);
 
@@ -177,55 +146,28 @@ void Render()
 	gDeviceContext->Draw(terrain->vertices.size(), 0);
 	
 	//Pipeline 2	//Billboard
-	gDeviceContext->GSSetShader(billboard->geometryShader, nullptr, 0);
-
 	billboard->Render(gDeviceContext);
-	gDeviceContext->PSSetShaderResources(0, 1, &billboard->textureView);
-	gDeviceContext->Draw(billboard->vertices.size(), 0);
 
 	//Pipeline 3
-	//gDeviceContext->OMSetRenderTargets(4, deferred.gRTVA, gDepthStencilView);
-
-	//gDeviceContext->VSSetShader(cube.vertexShader, nullptr, 0);
-	//gDeviceContext->GSSetShader(cube.geometryShader, nullptr, 0);
-	//gDeviceContext->PSSetShader(cube.pixelShader, nullptr, 0);
-
-	//gDeviceContext->PSSetShaderResources(0, 1, &cube.textureView); //Pipelina texturen
-	//gDeviceContext->PSSetShaderResources(1, 1, &cube.norTexView);
-
-	//UINT32 vertexSize = sizeof(cube.vertices[0]);
-	//UINT32 offset = 0;
-
-	//gDeviceContext->IASetVertexBuffers(0, 1, &cube.vertexBuffer, &vertexSize, &offset);
-
-	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//gDeviceContext->IASetInputLayout(cube.vertexLayout);
-
-	//gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
-	/*gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
+	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 
-	gDeviceContext->Draw(cube.vertices.size(), 0);*/
+	cube.Render(gDeviceContext);
+
+	gDeviceContext->Draw(cube.vertices.size(), 0);
 
 	ID3D11RenderTargetView* null[4] = {nullptr, nullptr, nullptr, nullptr};
 	gDeviceContext->OMSetRenderTargets(4, null, NULL);
 
-
 	//Pipeline 4 Deferred
-	//gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
+	float clearColor[] = { 0.5f, 0.5f, 0.5f, 1 };
 	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
-	gDeviceContext->VSSetShader(deferred.gVertexShaderLight, nullptr, 0);
-	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(deferred.gPixelShaderLight, nullptr, 0);
+	deferred.Render(gDeviceContext);
 
-	gDeviceContext->PSSetShaderResources(0, 3, deferred.gSRVA);
-	
-	gDeviceContext->PSSetConstantBuffers(0, 1, &deferred.gLightBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
-
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	gDeviceContext->Draw(4, 0);
 
@@ -237,8 +179,6 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 	MSG msg = { 0 };
 	ShowCursor(false);
 	HWND wndHandle = InitWindow(hInstance); //1. Skapa fönster
-	cube.setID(0);
-	terrain->setID(1);
 	
 	if (wndHandle)
 	{
@@ -252,11 +192,11 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 		CreateTerrain();
 		constantBuffer();
-		deferred.lightbuffer(gDevice);
+		deferred.Lightbuffer(gDevice);
 		cube.materialCB(gDevice);
-		cube.NormalTexture("normalmap.jpg", gDevice);
-		terrain->Texture("objs/firstheightmap.jpg", gDevice);
-		billboard->Texture("SPITHOTFIRE.jpg", gDevice);
+		cube.NormalTexture("Resources/Normalmaps/normalmap.jpg", gDevice);
+		terrain->Texture("Resources/Textures/firstheightmap.jpg", gDevice);
+		billboard->Texture("Resources/Textures/SPITHOTFIRE.jpg", gDevice);
 
 		deferred.CreateRenderTargets(gDevice);
 		deferred.CreatePickingBuffer(gDevice);
@@ -271,16 +211,11 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		//TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
 		//TwAddVarRW(gMyBar, "RotationZ", TW_TYPE_FLOAT, &angleZ, "min = 0.00001 max = 360 step = 0.1");
 
-		//TwAddVarRW(gMyBar, "Z", TW_TYPE_FLOAT, &tempz, "min=-360 max=360 step=1");
-		//TwAddVarRW(gMyBar, "X", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
-		//TwAddVarRW(gMyBar, "MouseX", TW_TYPE_FLOAT, &tempx, "min=-360 max=360 step=1");
-
 		//5. Skapa vertex- och pixel-shaders
 		billboard->Init(camera->getPos(), gDevice);
 		deferred.InitializeLightShader(gDevice);
 		terrain->InitializeTerrainShaders(gDevice);
 		cube.InitializeObjectShaders(gDevice);
-		//billboard->InitializeShaders(gDevice);
 
 		zbuffer(); //mad bufferz
 		

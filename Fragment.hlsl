@@ -50,7 +50,7 @@ PS_OUT PS_main(PS_IN input)
 		output.normal = float4(input.normal, 1.0f);
 	else
 	{
-		newNormal.xyz = (textur.x * input.tangent) + (textur.y * input.bitangent) + (textur.z * -input.normal); //z inverterat, dubbelkolla
+		newNormal.xyz = (textur.x * input.tangent) + (textur.y * input.bitangent) + (textur.z * -input.normal);
 		newNormal = normalize(newNormal);
 		output.normal = newNormal;
 	}

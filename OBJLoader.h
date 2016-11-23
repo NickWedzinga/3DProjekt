@@ -20,11 +20,6 @@ struct CONSTANT_BUFFER2
 };
 
 public:
-	/*ID3D11VertexShader* vertexShader = nullptr;
-	ID3D11GeometryShader* geometryShader = nullptr;
-	ID3D11PixelShader* pixelShader = nullptr;
-	ID3D11InputLayout* vertexLayout = nullptr;*/
-
 	Object();
 	~Object();
 
@@ -32,9 +27,9 @@ public:
 	void materialCB(ID3D11Device* gDevice);
 	void InitializeObjectShaders(ID3D11Device * gDevice);
 	void NormalTexture(string normal, ID3D11Device* gDevice);
+	void Render(ID3D11DeviceContext* gDeviceContext);
 
 	CONSTANT_BUFFER2 materialData;
-	//ID3D11Buffer* VertexBuffer = nullptr;
 	ID3D11Buffer* gMaterialBuffer = nullptr;
 	ID3D11ShaderResourceView* norTexView;
 private:

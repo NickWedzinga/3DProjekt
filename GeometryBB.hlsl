@@ -28,8 +28,6 @@ void GS_main(point GS_IN input[1], inout TriangleStream< GSOutput > output)
 {
 	GSOutput element;
 
-	//GS för 1 input point ist för triangel, kräver mycket mindre arbete på CPU-sidan, kan vara värt att prova impl
-	//ändra input type till point eller nåt
 	float3 bbToCam = camPos - input[0].pos;
 	bbToCam = normalize(bbToCam);
 	float3 up = float3(0.0f, 1.0f, 0.0f);
@@ -54,7 +52,7 @@ void GS_main(point GS_IN input[1], inout TriangleStream< GSOutput > output)
 	UV[4] = float2(1, 0); //top right
 	UV[5] = float2(1, 1); //bottom right
 
-	element.normal = mul(ProjMatrix, mul(ViewMatrix, mul(RotationMatrix, bbToCam)));
+	element.normal = mul(ProjMatrix, mul(ViewMatrix, mul(WorldMatrix, bbToCam)));
 	element.ID = input[0].ID;
 
 	for (uint i = 0; i < 6; ++i)

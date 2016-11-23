@@ -32,13 +32,20 @@ void Terrain::ShutDown()
 
 void Terrain::Render(ID3D11DeviceContext *gDeviceContext)
 {
+	gDeviceContext->VSSetShader(gVertexShaderT, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->GSSetShader(gGeometryShaderT, nullptr, 0);
+	gDeviceContext->PSSetShader(gPixelShaderT, nullptr, 0);
+
+	gDeviceContext->PSSetShaderResources(0, 1, &textureView);
 	RenderBuffers(gDeviceContext);
 	return;
 }
 
 void Terrain::LoadHeightMap()
 {
-	char* filename = "objs/firstheightmap.bmp";
+	char* filename = "Resources/Heightmaps/firstheightmap.bmp";
 	FILE* filePtr;
 	//int error;
 	unsigned int count;

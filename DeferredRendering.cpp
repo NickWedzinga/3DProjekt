@@ -1,7 +1,7 @@
 #include "DeferredRendering.h"
 
 using namespace DirectX::SimpleMath;
-using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
+using namespace DirectX;
 using namespace std;
 
 
@@ -12,7 +12,7 @@ void DeferredRendering::CreateLightBuffer()
 	lData.lightPos = XMLoadFloat3(&lightDir);
 }
 
-void DeferredRendering::lightbuffer(ID3D11Device* gDevice)
+void DeferredRendering::Lightbuffer(ID3D11Device* gDevice)
 {
 	D3D11_BUFFER_DESC lightBufferDesc;
 	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -84,23 +84,9 @@ void DeferredRendering::InitializeLightShader(ID3D11Device* gDevice)
 
 int DeferredRendering::Picking(ID3D11DeviceContext* gDeviceContext)
 {
-	//ID3D11Resource* res = nullptr;
 	ID3D11Resource* idRes = nullptr;
-	//D3D11_BOX sourceRegion;
-	//sourceRegion.left = 320;
-	//sourceRegion.right = 321;
-	//sourceRegion.top = 240;
-	//sourceRegion.bottom = 241;
-	//sourceRegion.front = 0;
-	//sourceRegion.back = 1;
-
-	//gRTVA[1]->GetResource(&idRes);
-	//gDeviceContext->CopySubresourceRegion(res, 0, 0, 0, 0, idRes, 0, &sourceRegion);
-
-
 
 	int* intDataPointer = nullptr;
-	//ID3D11Resource* buffer = nullptr;
 	PickingBuffer->GetResource(&idRes);
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	gDeviceContext->Map(idRes, 0, D3D11_MAP_READ, 0, &mappedResource);
@@ -133,4 +119,28 @@ void DeferredRendering::CreatePickingBuffer(ID3D11Device * gDevice)
 	gDevice->CreateUnorderedAccessView(buffer, &unDesc, &PickingBuffer);
 
 	buffer->Release();
+}
+
+void DeferredRendering::Render(ID3D11DeviceContext* gDeviceContext)
+{
+	gDeviceContext->VSSetShader(gVertexShaderLight, nullptr, 0);
+	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(gPixelShaderLight, nullptr, 0);
+
+	gDeviceContext->PSSetShaderResources(0, 3, gSRVA);
+
+	gDeviceContext->PSSetConstantBuffers(0, 1, &gLightBuffer);
+
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+}
+
+void DeferredRendering::SetRenderTargets(ID3D11DeviceContext * gDeviceContext, ID3D11DepthStencilView * gDepthStencilView)
+{
+	float clearColor[] = { 0.5f, 0.5f, 0.5f, 1 };
+
+	gDeviceContext->OMSetRenderTargets(3, gRTVA, gDepthStencilView);
+	gDeviceContext->ClearRenderTargetView(gRTVA[0], clearColor);
+	gDeviceContext->ClearRenderTargetView(gRTVA[1], clearColor);
+	gDeviceContext->ClearRenderTargetView(gRTVA[2], clearColor);
+	gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); //Clear åt zbuffer
 }

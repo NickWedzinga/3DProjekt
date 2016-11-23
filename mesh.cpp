@@ -2,7 +2,7 @@
 
 void Mesh::Texture(string material, ID3D11Device* gDevice)
 {
-	wchar_t mat[40];
+	wchar_t mat[45];
 	MultiByteToWideChar(CP_UTF8, 0, material.c_str(), -1, mat, sizeof(mat) / sizeof(wchar_t));
 
 	CreateWICTextureFromFile(gDevice, mat, NULL, &textureView);

@@ -13,8 +13,8 @@
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 
-#define WIDTH 640.0f
-#define HEIGHT 480.0f
+#define WIDTH 960.0f
+#define HEIGHT 540.0f
 #define XPOS 800.0f
 #define YPOS 600.0f
 #define FOV 80.0f

@@ -42,6 +42,8 @@ void Billboard::Init(XMFLOAT3 camPos, ID3D11Device* gDevice)
 
 void Billboard::Render(ID3D11DeviceContext * gDeviceContext)
 {
+	gDeviceContext->GSSetShader(geometryShader, nullptr, 0);
+
 	UINT32 stride;
 	UINT32 offset;
 
@@ -49,6 +51,9 @@ void Billboard::Render(ID3D11DeviceContext * gDeviceContext)
 	offset = 0;
 	gDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+	gDeviceContext->PSSetShaderResources(0, 1, &textureView);
+	gDeviceContext->Draw(vertices.size(), 0);
+
 }
 
 void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)

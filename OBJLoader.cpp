@@ -14,19 +14,9 @@ Object::~Object()
 
 void Object::LoadObject(ID3D11Device* gDevice)
 {
-	string myFile("box.obj"), special, line2, mtl;
+	string myFile("Resources/Objs/box.obj"), special, line2, mtl;
 	ifstream file(myFile);
 	istringstream inputString;
-	//struct VertexV { float x, y, z; }; //skapar struct med x, y, z värden
-	//struct VertexVT { float u, v; };
-	//struct VertexVN { float x2, y2, z2; };
-
-	//vector<VertexV> vertices;
-	//vector<VertexVT> vertices2;
-	//vector<VertexVN> vertices3;
-	//VertexV vtx = { 0, 0, 0 };
-	//VertexVT vtx2 = { 0, 0 };
-	//VertexVN vtx3 = { 0, 0, 0 };
 	
 	vector<XMFLOAT3> vertices1, vertices3;
 	vector<XMFLOAT2> vertices2;
@@ -46,24 +36,16 @@ void Object::LoadObject(ID3D11Device* gDevice)
 		{
 			inputString >> special >> vtx1.x >> vtx1.y >> vtx1.z;
 			vertices1.push_back(vtx1);
-			//inputString >> special >> vtx.x >> vtx.y >> vtx.z;
-			//vertices.push_back(vtx);
 		}
 		else if (line2.substr(0, 3) == "vt ")
 		{
 			inputString >> special >> vtx2.x >> vtx2.y;
 			vtx2 = XMFLOAT2(1 - vtx2.x, 1 - vtx2.y);
 			vertices2.push_back(vtx2);
-			//inputString >> special >> vtx2.u >> vtx2.v;
-			//vtx2.u = 1 - vtx2.u; //Because "Maya"
-			//vtx2.v = 1 - vtx2.v; //Because "Maya"
-			//vertices2.push_back(vtx2);
 		}
 		else if (line2.substr(0, 3) == "vn ")
 		{
 			inputString >> special >> vtx3.x >> vtx3.y >> vtx3.z;
-			//inputString >> special >> vtx3.x2 >> vtx3.y2 >> vtx3.z2;
-			//vertices3.push_back(vtx3);
 			vertices3.push_back(vtx3);
 		}
 		else if (line2.substr(0, 2) == "f ")
@@ -79,29 +61,18 @@ void Object::LoadObject(ID3D11Device* gDevice)
 					inputString >> valueV >> valueSlash >> valueVT >> valueSlash >> valueVN;
 				}
 				temp.position = vertices1.at(valueV - 1);
-				/*temp.x = vertices.at(valueV - 1).x;
-				temp.y = vertices.at(valueV - 1).y;
-				temp.z = vertices.at(valueV - 1).z;*/
 
 				if (valueVT != 0)
 				{
 					temp.UV = vertices2.at(valueVT - 1);
-					/*temp.u = vertices2.at(valueVT - 1).u;
-					temp.v = vertices2.at(valueVT - 1).v;*/
 				}
 				else if (valueVT == 0)
 				{
 					temp.UV = XMFLOAT2(0.0f, 0.0f);
-					/*temp.u = 0.0f;
-					temp.v = 0.0f;*/
 				}
 				temp.normal = vertices3.at(valueVN - 1);
-				/*temp.x2 = vertices3.at(valueVN - 1).x2;
-				temp.y2 = vertices3.at(valueVN - 1).y2;
-				temp.z2 = vertices3.at(valueVN - 1).z2;*/
 				//pushback
 				vertices.push_back(temp);
-				//triangleVertices.push_back(temp);
 			}
 		}
 		else if (line2.substr(0, 7) == "mtllib ")
@@ -119,14 +90,12 @@ void Object::LoadObject(ID3D11Device* gDevice)
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.ByteWidth = sizeof(VertexData)*vertices.size();
-	//bufferDesc.ByteWidth = sizeof(VertexData)*triangleVertices.size();
 	bufferDesc.CPUAccessFlags = 0;
 	bufferDesc.MiscFlags = 0;
 	bufferDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA vertexData;
 	vertexData.pSysMem = vertices.data();
-	//vertexData.pSysMem = triangleVertices.data();
 	HRESULT hr = gDevice->CreateBuffer(&bufferDesc, &vertexData, &vertexBuffer);
    
 	return;
@@ -217,8 +186,27 @@ void Object::InitializeObjectShaders(ID3D11Device* gDevice)
 
 void Object::NormalTexture(string normal, ID3D11Device * gDevice)
 {
-	wchar_t nor[20];
+	wchar_t nor[40];
 	MultiByteToWideChar(CP_UTF8, 0, normal.c_str(), -1, nor, sizeof(nor) / sizeof(wchar_t));
 
 	CreateWICTextureFromFile(gDevice, nor, NULL, &norTexView);
 }
+
+void Object::Render(ID3D11DeviceContext * gDeviceContext)
+{
+	gDeviceContext->VSSetShader(vertexShader, nullptr, 0);
+	gDeviceContext->GSSetShader(geometryShader, nullptr, 0);
+	gDeviceContext->PSSetShader(pixelShader, nullptr, 0);
+
+	gDeviceContext->PSSetShaderResources(0, 1, &textureView); //Pipelina texturen
+	gDeviceContext->PSSetShaderResources(1, 1, &norTexView);
+
+	UINT32 vertexSize = sizeof(vertices[0]);
+	UINT32 offset = 0;
+
+	gDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexSize, &offset);
+
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	gDeviceContext->IASetInputLayout(vertexLayout);
+}
+

@@ -12,20 +12,16 @@ struct LightBuffer
 	DirectX::XMVECTOR lightPos;
 	float padding;
 };
-//struct IDBuffer
-//{
-//	int ID[unsigned int(WIDTH) * unsigned int(HEIGHT)];
-//};
 public:
 	void CreateLightBuffer();
-	void lightbuffer(ID3D11Device* gDevice);
+	void Lightbuffer(ID3D11Device* gDevice);
 	void CreateRenderTargets(ID3D11Device* gDevice);
 	void InitializeLightShader(ID3D11Device* gDevice);
 	int Picking(ID3D11DeviceContext* gDeviceContext);
 	void CreatePickingBuffer(ID3D11Device* gDevice);
+	void Render(ID3D11DeviceContext* gDeviceContext);
+	void SetRenderTargets(ID3D11DeviceContext* gDeviceContext, ID3D11DepthStencilView* gDepthStencilView);
 
-	/*IDBuffer IData;*/
-	/*ID3D11Buffer* IDBuffer;*/
 	LightBuffer lData;
 	ID3D11Buffer* gLightBuffer;
 	ID3D11RenderTargetView* gRTVA[3];

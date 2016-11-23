@@ -1,8 +1,6 @@
 Texture2D colorTex : register(t0);
 Texture2D normalTex : register(t1);
 Texture2D positionTex : register(t2);
-//Texture2D IDTex : register(t3);
-//Texture2D camRelObj : register(t3);
 SamplerState SampleTypePoint : register(s0);
 
 RWStructuredBuffer<uint> pickingBuffer : register(u1);
@@ -40,7 +38,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	float3 lightToPoint = normalize(position.xyz - lightPos);
 	float3 camToPoint = normalize(position.xyz - camPos);
-	float shiny = 0.05f; //hur stor specular cirkel
+	float shiny = 0.05f;
 	float diffuseAngle = 0;
 
 	diffuseAngle = dot(-normals.xyz, lightToPoint);
@@ -51,7 +49,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	pickingBuffer[0] = colorTex.Sample(SampleTypePoint, float2(0.5f, 0.5f)).w + 0.5f;
 
 	//Calculate Ambient Light
-	float LA = 1/*0.5*/;
+	float LA = 1;
 
 	//Calculate Diffuse Light
 	float LD = saturate(diffuseAngle);
@@ -64,6 +62,4 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float3 result = (colors.xyz*LA) + (colors.xyz*LD) /*+ (colors.xyz*LS)*/;
 
 	return float4(result, 1.0f);
-	//return float4(RcDir, 0.0f, 0.0f, 1.0f);
-	//return terrain;
 }
