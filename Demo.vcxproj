@@ -96,6 +96,7 @@
     <ClCompile Include="Billboard.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="DeferredRendering.cpp" />
+    <ClCompile Include="Lights.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="main.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="bth_image.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="DeferredRendering.h" />
+    <ClInclude Include="Lights.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="OBJLoader.h" />

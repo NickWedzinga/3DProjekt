@@ -9,10 +9,10 @@ using namespace std;
 void DeferredRendering::CreateLightBuffer()
 {
 	XMFLOAT3 lightDir = XMFLOAT3(0.0f, 0.0f, -5.0f);
-	lData.lightPos = XMLoadFloat3(&lightDir);
+	//lData.lightPos = XMLoadFloat3(&lightDir);
 }
 
-void DeferredRendering::Lightbuffer(ID3D11Device* gDevice)
+/*void DeferredRendering::Lightbuffer(ID3D11Device* gDevice)
 {
 	D3D11_BUFFER_DESC lightBufferDesc;
 	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -28,7 +28,7 @@ void DeferredRendering::Lightbuffer(ID3D11Device* gDevice)
 	InitLightData.SysMemSlicePitch = 0;
 
 	gDevice->CreateBuffer(&lightBufferDesc, &InitLightData, &gLightBuffer);
-}
+}*/
 
 void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 {
@@ -121,7 +121,7 @@ void DeferredRendering::CreatePickingBuffer(ID3D11Device * gDevice)
 	buffer->Release();
 }
 
-void DeferredRendering::Render(ID3D11DeviceContext* gDeviceContext)
+void DeferredRendering::Render(ID3D11DeviceContext* gDeviceContext, ID3D11Buffer* lights)
 {
 	gDeviceContext->VSSetShader(gVertexShaderLight, nullptr, 0);
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
@@ -129,7 +129,7 @@ void DeferredRendering::Render(ID3D11DeviceContext* gDeviceContext)
 
 	gDeviceContext->PSSetShaderResources(0, 3, gSRVA);
 
-	gDeviceContext->PSSetConstantBuffers(0, 1, &gLightBuffer);
+	gDeviceContext->PSSetConstantBuffers(0, 1, &lights);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 }

@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "Billboard.h"
 #include "includes.h"
+#include "Lights.h"
 
 HWND InitWindow(HINSTANCE hInstance);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -42,6 +43,7 @@ CONSTANT_BUFFER cData;
 Terrain* terrain = new Terrain;
 Camera* camera = new Camera;
 Billboard* billboard = new Billboard;
+Lights* lights = new Lights;
 
 
 void CreateWorldMatrix()
@@ -62,6 +64,7 @@ void constantBuffer()
 	deferred.CreateLightBuffer();
 	camera->initKeyBuffer(gDevice);
 	billboard->InitBBBuffer(gDevice);
+	lights->Init(2, gDevice);
 
 	D3D11_BUFFER_DESC cbDesc;
 	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
@@ -136,8 +139,8 @@ void Update()
 
 void Render()
 {
-	//Pipeline 1	//Terrain
 	deferred.SetRenderTargets(gDeviceContext, gDepthStencilView);
+	//Pipeline 1	//Terrain
 
 	terrain->Render(gDeviceContext);
 
@@ -165,7 +168,7 @@ void Render()
 	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
-	deferred.Render(gDeviceContext);
+	deferred.Render(gDeviceContext, lights->lightBuffer);
 
 	gDeviceContext->PSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
 
@@ -192,7 +195,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 		CreateTerrain();
 		constantBuffer();
-		deferred.Lightbuffer(gDevice);
+		//deferred.Lightbuffer(gDevice);
 		cube.materialCB(gDevice);
 		cube.NormalTexture("Resources/Normalmaps/normalmap.jpg", gDevice);
 		terrain->Texture("Resources/Textures/firstheightmap.jpg", gDevice);
