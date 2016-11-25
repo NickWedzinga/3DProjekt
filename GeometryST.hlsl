@@ -12,7 +12,7 @@ struct GS_IN
 	float2 UV : UV;
 	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
-	float4 ID : ID;
+	float ID : ID;
 };
 
 struct GSOutput
@@ -20,7 +20,7 @@ struct GSOutput
 	float2 UV : UV;
 	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
-	float4 ID : ID;
+	float ID : ID;
 };
 
 [maxvertexcount(48)]

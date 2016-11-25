@@ -98,6 +98,7 @@
     <ClCompile Include="DeferredRendering.cpp" />
     <ClCompile Include="Lights.cpp" />
     <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OBJLoader.cpp" />
@@ -173,11 +174,12 @@
     <ClInclude Include="DeferredRendering.h" />
     <ClInclude Include="Lights.h" />
     <ClInclude Include="mesh.h" />
+    <ClInclude Include="Plane.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="OBJLoader.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="GeometryBB.hlsl">
+    <None Include="GeometryBB.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Geometry</ShaderType>
@@ -187,7 +189,23 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">GS_main</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">GS_main</EntryPointName>
-    </FxCompile>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GeometryShaderShadows.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PixelShaderShadows.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

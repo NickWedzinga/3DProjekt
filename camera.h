@@ -29,6 +29,7 @@ private:
 	XMFLOAT2 arbitraryFloat2;
 	bool lockLight;
 	XMVECTOR lockedLight;
+	int flightMode;
 
 };
 

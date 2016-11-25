@@ -1,6 +1,11 @@
 Texture2D colorTex : register(t0);
 Texture2D normalTex : register(t1);
 Texture2D positionTex : register(t2);
+//Texture2D light1Tex : register(t3);
+//Texture2D light1Tex : register(t4);
+//Texture2D light1Tex : register(t5);
+//Texture2D light1Tex : register(t6);
+//Texture2D light1Tex : register(t7);
 SamplerState SampleTypePoint : register(s0);
 
 RWStructuredBuffer<uint> pickingBuffer : register(u1);
@@ -30,9 +35,9 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
 	position = positionTex.Sample(SampleTypePoint, input.UV);
 
-	float3 lightToPoint = normalize(position.xyz - camPos/*lightPos*/);
+	float3 lightToPoint = normalize(position.xyz - float3(15, 0, -3)/*camPos/*lightPos*/);
 	float3 camToPoint = normalize(position.xyz - camPos);
-	float shiny = 0.05f;
+	float shiny = 1.0f;
 	float diffuseAngle = 0;
 
 	diffuseAngle = dot(-normals.xyz, lightToPoint);
@@ -43,14 +48,14 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	pickingBuffer[0] = colorTex.Sample(SampleTypePoint, float2(0.5f, 0.5f)).w + 0.5f;
 
 	//Calculate Ambient Light
-	float LA = 1;
+	float LA = 0.7f;
 
 	//Calculate Diffuse Light
 	float LD = saturate(diffuseAngle);
 
 	//calculate specular intensity
 	float3 Reflection = lightToPoint + 2 * normals.xyz * dot(-normals.xyz, lightToPoint);
-	float RcDir = saturate(dot(Reflection, /*camToPoint*/camDirection));
+	float RcDir = (dot(Reflection, /*camDirection*/camToPoint));
 	float LS = pow(RcDir, shiny);
 
 	float3 result = (colors.xyz*LA) + (colors.xyz*LD) + (colors.xyz*LS);

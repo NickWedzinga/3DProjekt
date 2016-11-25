@@ -42,6 +42,9 @@
     <ClCompile Include="Lights.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Plane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bth_image.h">
@@ -71,6 +74,9 @@
     <ClInclude Include="Lights.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Plane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="PixelShaderLights.hlsl">
@@ -97,10 +103,14 @@
     <None Include="PixelST.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="GeometryBB.hlsl">
+    <None Include="GeometryBB.hlsl">
       <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
+    </None>
+    <None Include="GeometryShaderShadows.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="PixelShaderShadows.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

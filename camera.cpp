@@ -8,6 +8,8 @@ Camera::Camera()
 	camDir = XMFLOAT3(0, 0, 0);
 	arbitraryFloat2 = XMFLOAT2(0, 0);
 	lockLight = false;
+	flightMode = 0;
+
 }
 
 Camera::~Camera()
@@ -69,11 +71,11 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 					pos.z += 0.15 * forward.z;
 					pos.x += 0.15 * forward.x;
 				}
-				if (GetAsyncKeyState(VK_SPACE) && heightY == -1) // space
+				if (GetAsyncKeyState(VK_SPACE)) // space
 				{
 					pos.y += 0.15;
 				}
-				else if (GetAsyncKeyState(0x60) && heightY == -1) //z
+				else if (GetAsyncKeyState(0x60)) //z
 				{
 					pos.y -= 0.15;
 				}
@@ -98,11 +100,11 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 					pos.z -= 0.15 * rightf.z;
 					pos.x -= 0.15 * rightf.x;
 				}
-				if (GetAsyncKeyState(VK_SPACE) && heightY == -1) // space
+				if (GetAsyncKeyState(VK_SPACE)) // space
 				{
 					pos.y += 0.15;
 				}
-				else if (GetAsyncKeyState(0x60) && heightY == -1) //z
+				else if (GetAsyncKeyState(0x60)) //z
 				{
 					pos.y -= 0.15;
 				}
@@ -127,11 +129,11 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 					pos.z -= 0.15 * forward.z;
 					pos.x -= 0.15 * forward.x;
 				}
-				if (GetAsyncKeyState(VK_SPACE) && heightY == -1) // space
+				if (GetAsyncKeyState(VK_SPACE)) // space
 				{
 					pos.y += 0.15;
 				}
-				else if (GetAsyncKeyState(0x60) && heightY == -1) //z
+				else if (GetAsyncKeyState(0x60)) //z
 				{
 					pos.y -= 0.15;
 				}
@@ -156,11 +158,11 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 					pos.z += 0.15 * rightf.z;
 					pos.x += 0.15 * rightf.x;
 				}
-				if (GetAsyncKeyState(VK_SPACE) && heightY == -1) // space
+				if (GetAsyncKeyState(VK_SPACE)) // space
 				{
 					pos.y += 0.15;
 				}
-				else if (GetAsyncKeyState(0x60) && heightY == -1) //z
+				else if (GetAsyncKeyState(0x60)) //z
 				{
 					pos.y -= 0.15;
 				}
@@ -169,11 +171,9 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 				msg->message = WM_QUIT;
 				break;
 			case VK_SPACE: //space
-				if (heightY == -1)
 					pos.y += 0.15;
 				break;
 			case 0x5A:  //z
-				if (heightY == -1)
 					pos.y -= 0.15;
 				break;
 			case 0x31:	//1	//Normalmap on
@@ -189,13 +189,19 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 				lockLight = true;
 				lockedLight = XMLoadFloat3(&camDir);
 				break;
+			case 0x35:	//5	//FlightMode off
+				flightMode = 0;
+				break;
+			case 0x36:	//6	//FlightMode on
+				flightMode = 1;
+				break;
 			break;
 			}
 		}
 	}
 	if (!lockLight)
 		cBuffer.camPos = XMLoadFloat3(&pos);
-	if (heightY != -1)
+	if (heightY != -1 && flightMode == 0)
 		pos.y = heightY + 2;
 	if (!lockLight)
 	CreateViewMatrix(cBuffer.ViewMatrix, cBuffer.camDirection);

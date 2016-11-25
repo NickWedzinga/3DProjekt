@@ -10,6 +10,7 @@
 #include "Billboard.h"
 #include "includes.h"
 #include "Lights.h"
+#include "Plane.h"
 
 HWND InitWindow(HINSTANCE hInstance);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -44,6 +45,8 @@ Terrain* terrain = new Terrain;
 Camera* camera = new Camera;
 Billboard* billboard = new Billboard;
 Lights* lights = new Lights;
+Plane* ground = new Plane;
+Plane* wall = new Plane;
 
 
 void CreateWorldMatrix()
@@ -53,7 +56,7 @@ void CreateWorldMatrix()
 
 void CreateProjMatrix()
 {
-	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH/HEIGHT, NEAR, FAR);
+	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(90), WIDTH/HEIGHT, NEAR, FAR);
 }
 
 void constantBuffer()
@@ -64,7 +67,6 @@ void constantBuffer()
 	deferred.CreateLightBuffer();
 	camera->initKeyBuffer(gDevice);
 	billboard->InitBBBuffer(gDevice);
-	lights->Init(2, gDevice);
 
 	D3D11_BUFFER_DESC cbDesc;
 	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
@@ -148,10 +150,15 @@ void Render()
 
 	gDeviceContext->Draw(terrain->vertices.size(), 0);
 	
-	//Pipeline 2	//Billboard
+	//Pipeline 2	//Floors and walls
+	ground->Render(gDeviceContext);
+	wall->Render(gDeviceContext);
+	
+
+	//Pipeline 3	//Billboard
 	billboard->Render(gDeviceContext);
 
-	//Pipeline 3
+	//Pipeline 4	//Cube
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
@@ -159,20 +166,19 @@ void Render()
 	cube.Render(gDeviceContext);
 
 	gDeviceContext->Draw(cube.vertices.size(), 0);
+
+	//Pipeline 5 Shadows
+	lights->Render(gDeviceContext, gDepthStencilView);
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
-	/*ID3D11RenderTargetView* null[4] = {nullptr, nullptr, nullptr, nullptr};
-	gDeviceContext->OMSetRenderTargets(4, null, NULL);*/
 
-	//Pipeline 4 Shadows
-
-	//Pipeline 5 Deferred
+	//Pipeline 6 Deferred
 	float clearColor[] = { 0.5f, 0.5f, 0.5f, 1 };
 	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
 	deferred.Render(gDeviceContext, lights->lightBuffer);
-
+	lights->SetShaderResources(gDeviceContext);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
 
 	gDeviceContext->Draw(4, 0);
@@ -195,14 +201,19 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		SetViewport(); //3. Sätt viewport
 		
 		cube.LoadObject(gDevice);	//4. Ersätter triangleData
+		ground->CreatePlane(XMFLOAT3(0, -5, 0), 20, 0, 20, gDevice);
+		wall->CreatePlane(XMFLOAT3(0, 0, 10), 20, 10, 0, gDevice);
 
+		lights->Init(5, gDevice);
 		CreateTerrain();
 		constantBuffer();
 		//deferred.Lightbuffer(gDevice);
 		cube.materialCB(gDevice);
-		cube.NormalTexture("Resources/Normalmaps/normalmap.jpg", gDevice);
+		cube.NormalTexture("Resources/Normalmaps/normalmap.bmp", gDevice);
 		terrain->Texture("Resources/Textures/firstheightmap.jpg", gDevice);
 		billboard->Texture("Resources/Textures/SPITHOTFIRE.jpg", gDevice);
+		ground->Texture("Resources/Textures/grass.jpg", gDevice);
+		wall->Texture("Resources/Textures/brick_16.jpg", gDevice);
 
 		deferred.CreateRenderTargets(gDevice);
 		deferred.CreatePickingBuffer(gDevice);

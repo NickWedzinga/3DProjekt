@@ -19,7 +19,7 @@
 #define YPOS 600.0f
 #define FOV 80.0f
 #define NEAR 0.1f
-#define FAR 200.0f
+#define FAR 100.0f
 
 using namespace DirectX;
 

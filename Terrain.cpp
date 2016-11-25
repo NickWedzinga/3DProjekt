@@ -32,11 +32,11 @@ void Terrain::ShutDown()
 
 void Terrain::Render(ID3D11DeviceContext *gDeviceContext)
 {
-	gDeviceContext->VSSetShader(gVertexShaderT, nullptr, 0);
+	gDeviceContext->VSSetShader(vertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->GSSetShader(gGeometryShaderT, nullptr, 0);
-	gDeviceContext->PSSetShader(gPixelShaderT, nullptr, 0);
+	gDeviceContext->GSSetShader(geometryShader, nullptr, 0);
+	gDeviceContext->PSSetShader(pixelShader, nullptr, 0);
 
 	gDeviceContext->PSSetShaderResources(0, 1, &textureView);
 	RenderBuffers(gDeviceContext);
@@ -106,9 +106,9 @@ void Terrain::InitializeTerrainShaders(ID3D11Device* gDevice)
 	D3DCompileFromFile(L"GeometryST.hlsl", nullptr, nullptr, "GS_main", "gs_4_0", 0, 0, &pGS, nullptr);
 	D3DCompileFromFile(L"PixelST.hlsl", nullptr, nullptr, "PS_main", "ps_4_0", 0, 0, &pPS, nullptr);
 
-	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShaderT);
-	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShaderT);
-	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShaderT);
+	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader);
+	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &geometryShader);
+	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &pixelShader);
 
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -267,9 +267,6 @@ void Terrain::RenderBuffers(ID3D11DeviceContext *gDeviceContext)
 {
 	UINT32 stride;
 	UINT32 offset;
-
-	//stride = sizeof(VertexData);
-	//stride = sizeof(vertices[0]);
 	stride = sizeof(vertices[0]);
 	offset = 0;
 

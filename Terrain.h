@@ -24,9 +24,6 @@ public:
 	void InitializeTerrainShaders(ID3D11Device* gDevice);
 	float getHeightMapY(DirectX::XMFLOAT2 cord);
 
-	ID3D11VertexShader* gVertexShaderT = nullptr;
-	ID3D11GeometryShader* gGeometryShaderT = nullptr;
-	ID3D11PixelShader* gPixelShaderT = nullptr;
 	ID3D11InputLayout* gVertexLayoutT = nullptr;
 
 private:

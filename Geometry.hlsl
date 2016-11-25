@@ -12,7 +12,7 @@ struct GS_IN
 	float2 UV : UV;
 	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
-	int ID : ID;
+	float ID : ID;
 };
 
 struct GS_OUT
@@ -21,7 +21,7 @@ struct GS_OUT
 	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
 	float4 worldPos : POSITION;
-	float4 ID : ID;
+	float ID : ID;
 	float3 tangent : TANGENT;
 	float3 bitangent : BITANGENT;
 	float3 camDirection : CAMDIRECTION;

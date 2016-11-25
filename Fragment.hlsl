@@ -20,7 +20,7 @@ struct PS_IN
 	float3 normal : NORMAL;
 	float4 pos : SV_POSITION; //implicit use by pixel shaders, has to be world coords, even though it is 
 	float4 worldPos : POSITION;
-	float4 ID : ID;
+	float ID : ID;
 	float3 tangent : TANGENT;
 	float3 bitangent : BITANGENT;
 	float3 camDirection : CAMDIRECTION;
@@ -43,7 +43,7 @@ PS_OUT PS_main(PS_IN input)
 	textur = normalize((textur * 2.0f) - 1.0f);
 
 	output.color = color * KA + color * KD + color * KS;
-	output.color.w = input.ID.x;
+	output.color.w = input.ID;
 	output.position = input.worldPos;
 
 	if(normalMap.x == 1)

@@ -12,7 +12,7 @@ struct GS_IN
 	float2 UV : UV;
 	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
-	float4 ID : ID;
+	float ID : ID;
 };
 
 struct GSOutput
@@ -20,7 +20,7 @@ struct GSOutput
 	float2 UV : UV;
 	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
-	float4 ID : ID;
+	float ID : ID;
 };
 
 [maxvertexcount(6)]
@@ -35,14 +35,14 @@ void GS_main(point GS_IN input[1], inout TriangleStream< GSOutput > output)
 	left = normalize(left);
 	up = cross(left, bbToCam);
 	up = normalize(up);
-
+	float scaleFactor = 0.05;
 	float4 pos[6];
-	pos[0] = input[0].pos + float4(left, 0.0f) * 0.05 + float4(up, 0.0f) * 0.05; //top left
-	pos[1] = input[0].pos - float4(left, 0.0f) * 0.05 - float4(up, 0.0f) * 0.05; //bottom right
-	pos[2] = input[0].pos + float4(left, 0.0f) * 0.05 - float4(up, 0.0f) * 0.05; //bottom left
-	pos[3] = input[0].pos + float4(left, 0.0f) * 0.05 + float4(up, 0.0f) * 0.05; //top left
-	pos[4] = input[0].pos - float4(left, 0.0f) * 0.05 + float4(up, 0.0f) * 0.05; //top right
-	pos[5] = input[0].pos - float4(left, 0.0f) * 0.05 - float4(up, 0.0f) * 0.05; //bottom right
+	pos[0] = input[0].pos + float4(left, 0.0f) * scaleFactor+ float4(up, 0.0f) * scaleFactor; //top left
+	pos[1] = input[0].pos - float4(left, 0.0f) * scaleFactor- float4(up, 0.0f) * scaleFactor; //bottom right
+	pos[2] = input[0].pos + float4(left, 0.0f) * scaleFactor- float4(up, 0.0f) * scaleFactor; //bottom left
+	pos[3] = input[0].pos + float4(left, 0.0f) * scaleFactor+ float4(up, 0.0f) * scaleFactor; //top left
+	pos[4] = input[0].pos - float4(left, 0.0f) * scaleFactor+ float4(up, 0.0f) * scaleFactor; //top right
+	pos[5] = input[0].pos - float4(left, 0.0f) * scaleFactor- float4(up, 0.0f) * scaleFactor; //bottom right
 
 	float2 UV[6];
 	UV[0] = float2(0, 0); //top left
