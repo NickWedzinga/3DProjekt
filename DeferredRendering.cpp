@@ -129,14 +129,14 @@ void DeferredRendering::Render(ID3D11DeviceContext* gDeviceContext, ID3D11Buffer
 
 	gDeviceContext->PSSetShaderResources(0, 3, gSRVA);
 
-	gDeviceContext->PSSetConstantBuffers(0, 1, &lights);
+	gDeviceContext->PSSetConstantBuffers(1, 1, &lights);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 }
 
 void DeferredRendering::SetRenderTargets(ID3D11DeviceContext * gDeviceContext, ID3D11DepthStencilView * gDepthStencilView)
 {
-	float clearColor[] = { 0.5f, 0.5f, 0.5f, 1 };
+	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	gDeviceContext->OMSetRenderTargets(3, gRTVA, gDepthStencilView);
 	gDeviceContext->ClearRenderTargetView(gRTVA[0], clearColor);

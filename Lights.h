@@ -18,20 +18,21 @@ private:
 		XMMATRIX View[5];
 		XMMATRIX Proj[5];
 	}lights;
-	ID3D11RenderTargetView* lRTV[5];
-	ID3D11ShaderResourceView* lSRV[5];
-	ID3D11Texture2D* lT[5];
+	ID3D11RenderTargetView* lRTV[1];
+	ID3D11ShaderResourceView* lSRV[1];
+	ID3D11Texture2D* lT[1];
 	ID3D11GeometryShader* geometryShader = nullptr;
 	ID3D11PixelShader* pixelShader = nullptr;
+	ID3D11DepthStencilView* lightsDS = nullptr;
 
 	void InitShaders(ID3D11Device* gDevice);
+	void CreateRenderTargets(ID3D11Device* gDevice);
 public:
 	Lights();
 	~Lights();
 
 	void Init(unsigned int lights, ID3D11Device* gDevice);
-	void CreateRenderTargets(ID3D11Device* gDevice);
-	void Render(ID3D11DeviceContext* gDeviceContext, ID3D11DepthStencilView* gDepthStencilView);
+	void Render(ID3D11DeviceContext* gDeviceContext);
 	void SetShaderResources(ID3D11DeviceContext* gDeviceContext);
 
 	ID3D11Buffer* lightBuffer = nullptr;

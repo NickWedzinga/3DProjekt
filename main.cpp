@@ -168,18 +168,18 @@ void Render()
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
 	//Pipeline 5 Shadows
-	lights->Render(gDeviceContext, gDepthStencilView);
+	lights->Render(gDeviceContext);
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
 
 	//Pipeline 6 Deferred
-	float clearColor[] = { 0.5f, 0.5f, 0.5f, 1 };
+	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
+	gDeviceContext->PSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 	deferred.Render(gDeviceContext, lights->lightBuffer);
 	lights->SetShaderResources(gDeviceContext);
-	gDeviceContext->PSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
 
 	gDeviceContext->Draw(4, 0);
 
@@ -204,7 +204,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		ground->CreatePlane(XMFLOAT3(0, -5, 0), 20, 0, 20, gDevice);
 		wall->CreatePlane(XMFLOAT3(0, 0, 10), 20, 10, 0, gDevice);
 
-		lights->Init(5, gDevice);
+		lights->Init(1, gDevice);
 		CreateTerrain();
 		constantBuffer();
 		//deferred.Lightbuffer(gDevice);

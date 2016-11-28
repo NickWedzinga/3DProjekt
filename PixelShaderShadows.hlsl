@@ -1,7 +1,8 @@
 struct PS_IN
 {
 	float4 pos : SV_POSITION;
-	float4 light[5] : LIGHT;
+	float3 light : LIGHT;
+	/*float3 light[5] : LIGHT;*/
 };
 
 struct PS_OUT
@@ -13,14 +14,14 @@ struct PS_OUT
 	float4 light5 : SV_Target4;
 };
 
-PS_OUT PS_main(PS_IN input)
+float4 PS_main(PS_IN input) : SV_Target0
 {
 	PS_OUT output;
+	//output.light1 = float4(input.light[0], 1.0f);
+	//output.light2 = float4(input.light[1], 1.0f);
+	//output.light3 = float4(input.light[2], 1.0f);
+	//output.light4 = float4(input.light[3], 1.0f);
+	//output.light5 = float4(input.light[4], 1.0f);
 
-	output.light1 = float4(input.light[0].z, 0.0f, 0.0f, 1.0f);
-	output.light2 = float4(input.light[1].z, 0.0f, 0.0f, 1.0f);
-	output.light3 = float4(input.light[2].z, 0.0f, 0.0f, 1.0f);
-	output.light4 = float4(input.light[3].z, 0.0f, 0.0f, 1.0f);
-	output.light5 = float4(input.light[4].z, 0.0f, 0.0f, 1.0f);
-	return output;
+	return float4(input.light, 1.0f);;
 }

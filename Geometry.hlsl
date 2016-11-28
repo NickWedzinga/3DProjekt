@@ -10,7 +10,7 @@ cbuffer CONSTANT_BUFFER : register(b0)
 struct GS_IN
 {
 	float2 UV : UV;
-	float4 normal : NORMAL;
+	float3 normal : NORMAL;
 	float4 pos : SV_POSITION;
 	float ID : ID;
 };
@@ -18,7 +18,7 @@ struct GS_IN
 struct GS_OUT
 {
 	float2 UV : UV;
-	float4 normal : NORMAL;
+	float3 normal : NORMAL;
 	float4 pos : SV_POSITION;
 	float4 worldPos : POSITION;
 	float ID : ID;

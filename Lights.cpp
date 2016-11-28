@@ -15,7 +15,7 @@ void Lights::Init(unsigned int lights, ID3D11Device* gDevice)
 	if (lights < 6)
 	{
 		this->lights.noLights = XMFLOAT3(lights, lights, lights);
-		for (unsigned int i = 0; i < lights; ++i)
+		for (int i = 0; i < lights; ++i)
 		{
 			this->lights.position[i] = XMFLOAT3(i * 2 - 4, /*i +*/ 5, -3);
 			this->lights.intensity[i] = XMFLOAT3(i + 1, i + 1, i + 1);
@@ -24,15 +24,6 @@ void Lights::Init(unsigned int lights, ID3D11Device* gDevice)
 			this->lights.Proj[i] = XMMatrixPerspectiveFovLH(XMConvertToRadians(70), WIDTH / HEIGHT, NEAR, 10);
 			this->lights.View[i] = XMMatrixLookToLH(XMLoadFloat3(&this->lights.position[i]), XMLoadFloat3(&this->lights.direction[i]), XMLoadFloat3(&XMFLOAT3(0.0f, 1.0f, 0.0f)));
 		}
-		//for (unsigned int i = 0; i < 5 - lights; ++i)
-		//{
-		//	this->lights.position[i] = XMFLOAT3(0, 0, 0);
-		//	this->lights.intensity[i] = XMFLOAT3(0, 0, 0);
-		//	this->lights.color[i] = XMFLOAT3(0, 0, 0);
-		//	//XMStoreFloat3(&this->lights.direction[i], XMLoadFloat3(&XMFLOAT3(0, 0, 0)) - XMLoadFloat3(&this->lights.position[i]));
-		//	this->lights.Proj[i] = XMMATRIX()/*XMMatrixPerspectiveFovLH(XMConvertToRadians(70), WIDTH / HEIGHT, NEAR, 10)*/;
-		//	this->lights.View[i] = XMMATRIX()/*XMMatrixLookToLH(XMLoadFloat3(&this->lights.position[i]), XMLoadFloat3(&this->lights.direction[i]), XMLoadFloat3(&XMFLOAT3(0.0f, 1.0f, 0.0f)))*/;
-		//}
 
 		D3D11_BUFFER_DESC lightBufferDesc;
 		lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -49,7 +40,27 @@ void Lights::Init(unsigned int lights, ID3D11Device* gDevice)
 
 		gDevice->CreateBuffer(&lightBufferDesc, &InitLightData, &lightBuffer);
 		InitShaders(gDevice);
+
+		HRESULT hr;
+		ID3D11Texture2D* lightsSB = nullptr;
+		D3D11_TEXTURE2D_DESC depthDesc;
+		depthDesc.Width = WIDTH;
+		depthDesc.Height = HEIGHT;
+		depthDesc.MipLevels = 1;
+		depthDesc.ArraySize = 1;
+		depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthDesc.SampleDesc.Count = 1;
+		depthDesc.SampleDesc.Quality = 0;
+		depthDesc.Usage = D3D11_USAGE_DEFAULT;
+		depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		depthDesc.CPUAccessFlags = 0;
+		depthDesc.MiscFlags = 0;
+
+		hr = gDevice->CreateTexture2D(&depthDesc, NULL, &lightsSB);
+		hr = gDevice->CreateDepthStencilView(lightsSB, NULL, &lightsDS);
 	}
+
+	CreateRenderTargets(gDevice);
 }
 
 void Lights::InitShaders(ID3D11Device * gDevice)
@@ -82,7 +93,7 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
 
-	for (int i = 0; i < 5/*this->lights.noLights.x*/; i++)
+	for (int i = 0; i < 1/*this->lights.noLights.x*/; i++)
 		gDevice->CreateTexture2D(&textureDesc, NULL, &lT[i]);
 
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
@@ -90,7 +101,7 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-	for (int i = 0; i < 5/*this->lights.noLights.x*/; i++)
+	for (int i = 0; i < 1/*this->lights.noLights.x*/; i++)
 		gDevice->CreateRenderTargetView(lT[i], &renderTargetViewDesc, &lRTV[i]);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
@@ -99,27 +110,20 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
-	for (int i = 0; i < 5/*this->lights.noLights.x*/; i++)
+	for (int i = 0; i < 1/*this->lights.noLights.x*/; i++)
 		gDevice->CreateShaderResourceView(lT[i], &shaderResourceViewDesc, &lSRV[i]);
 }
 
-void Lights::Render(ID3D11DeviceContext * gDeviceContext, ID3D11DepthStencilView* gDepthStencilView)
+void Lights::Render(ID3D11DeviceContext * gDeviceContext)
 {
-	int numLights = this->lights.noLights.x;
-	gDeviceContext->OMSetRenderTargets(5, lRTV, gDepthStencilView);		//Borde inte vara någon skillnad med eller utan depth
+	gDeviceContext->OMSetRenderTargets(1, &lRTV[0], lightsDS);		//Borde inte vara någon skillnad med eller utan depth
 	gDeviceContext->GSSetShader(geometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(pixelShader, nullptr, 0);
 
 	gDeviceContext->GSGetConstantBuffers(0, 1, &lightBuffer);
-
-
-	//for (int i = 0; i < numLights; i++)
-	//{
-		//We can just call draw again and we will draw the cube.
-	//}
 }
 
 void Lights::SetShaderResources(ID3D11DeviceContext * gDeviceContext)
 {
-	gDeviceContext->PSSetShaderResources(3, 5, lSRV);
+	gDeviceContext->PSSetShaderResources(3, 1, lSRV);
 }

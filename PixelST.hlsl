@@ -4,7 +4,7 @@ SamplerState sampAni : register (s0);
 struct PS_IN
 {
 	float2 UV : UV;
-	float4 normal : NORMAL;
+	float3 normal : NORMAL;
 	float4 pos : SV_POSITION;
 	float ID : ID;
 };

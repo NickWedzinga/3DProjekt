@@ -10,7 +10,7 @@ cbuffer CONSTANT_BUFFER : register(b0)
 struct GS_IN
 {
 	float2 UV : UV;
-	float4 normal : NORMAL;
+	float3 normal : NORMAL;
 	float4 pos : SV_POSITION;
 	float ID : ID;
 };
@@ -18,7 +18,7 @@ struct GS_IN
 struct GSOutput
 {
 	float2 UV : UV;
-	float4 normal : NORMAL;
+	float3 normal : NORMAL;
 	float4 pos : SV_POSITION;
 	float ID : ID;
 };
@@ -35,7 +35,7 @@ void GS_main(triangle GS_IN input[3], inout TriangleStream< GSOutput > output)
 		poss = mul(ViewMatrix, poss);
 		poss = mul(ProjMatrix, poss);
 		element.pos = poss;
-		float4 normal = input[i].normal;
+		float3 normal = input[i].normal;
 		normal = mul(WorldMatrix, normal);
 		normal = mul(ViewMatrix, normal);
 		normal = mul(ProjMatrix, normal);
