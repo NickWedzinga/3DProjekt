@@ -23,5 +23,5 @@ float4 PS_main(PS_IN input) : SV_Target0
 	//output.light4 = float4(input.light[3], 1.0f);
 	//output.light5 = float4(input.light[4], 1.0f);
 
-	return float4(input.light, 1.0f);;
+	return float4(1.0f, 0.0f, 0.0f, 1.0f);;
 }

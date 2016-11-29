@@ -52,7 +52,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	//light4 = light4Tex.Sample(SampleTypePoint, input.UV);
 	//light5 = light5Tex.Sample(SampleTypePoint, input.UV);
 
-	return light1;
+	//return light1;
 	//Samples the middle pixel of the color texture and sends the w-value (ID) back to the CPU
 	pickingBuffer[0] = colorTex.Sample(SampleTypePoint, float2(0.5f, 0.5f)).w + 0.5f;
 

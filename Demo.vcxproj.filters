@@ -114,5 +114,8 @@
     <FxCompile Include="PixelShaderLights.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="VertexShaderShadows.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

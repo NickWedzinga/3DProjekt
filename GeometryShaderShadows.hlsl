@@ -1,12 +1,21 @@
-cbuffer lights : b0
+cbuffer lights : register (b0)
 {
 	float3 noLights;
-	float3 position[5];
-	float3 intensity[5];
-	float3 color[5];
-	float3 direction[5];
-	matrix View[5];
-	matrix Proj[5];
+	float3 position;
+	float3 intensity;
+	float3 color;
+	float3 direction;
+	matrix View;
+	matrix Proj;
+};
+
+cbuffer CONSTANT_BUFFER : register (b1)
+{
+	matrix WorldMatrix;
+	matrix ViewMatrix;
+	matrix ProjMatrix;
+	float3 camDirection;
+	float3 camPos;
 };
 
 struct GS_IN
@@ -30,15 +39,25 @@ void GS_main(triangle GS_IN input[3], inout TriangleStream< GS_OUT > output)
 	GS_OUT element;
 	for (uint i = 0; i < 3; i++)
 	{
-		for (uint j = 0; j < noLights.x; j++)
-		{
-			float4 tempPos = input[i].pos;
-			tempPos = mul(View[j], tempPos);
-			tempPos = mul(Proj[j], tempPos);
-			element.light = tempPos.xyz;
-			element.pos = tempPos;
+		//for (uint j = 0; j < noLights.x; j++)
+		//{
+		//	float4 tempPos = input[i].pos;
+		//	tempPos = mul(View, tempPos);
+		//	tempPos = mul(Proj, tempPos);
+		//	element.light = tempPos.xyz;
+		//	element.pos = tempPos;
 
-			output.Append(element);
-		}
+		//	output.Append(element);
+		//}
+		float4 tempPos = input[i].pos;
+		/*tempPos = mul(View, tempPos);
+		tempPos = mul(Proj, tempPos);*/
+		tempPos = mul(WorldMatrix, tempPos);
+		tempPos = mul(ViewMatrix, tempPos);
+		tempPos = mul(ProjMatrix, tempPos);
+		element.light = tempPos.xyz;
+		element.pos = tempPos;
+
+		output.Append(element);
 	}
 }

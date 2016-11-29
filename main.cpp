@@ -169,6 +169,7 @@ void Render()
 
 	//Pipeline 5 Shadows
 	lights->Render(gDeviceContext);
+	gDeviceContext->GSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
 
@@ -344,10 +345,11 @@ HRESULT CreateDirect3DContext(HWND wndHandle)
 	scd.Windowed = TRUE;                                    // windowed/full-screen mode
 
 	// create a device, device context and swap chain using the information in the scd struct
-	HRESULT hr = D3D11CreateDeviceAndSwapChain(NULL,
+	HRESULT hr = D3D11CreateDeviceAndSwapChain(
+		NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		0,
+		D3D11_CREATE_DEVICE_DEBUG,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,

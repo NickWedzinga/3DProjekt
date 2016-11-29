@@ -63,7 +63,7 @@ void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
 		vertices[i].position.y -= 0.08f;
 		if (vertices[i].position.y < 0)
 			vertices[i].position.y = 100;
-		gDeviceContext->UpdateSubresource(vertexBuffer, i, NULL, &vertices[i], sizeof(VertexData), sizeof(vertices));
+		gDeviceContext->UpdateSubresource(vertexBuffer, i/*0*/, NULL, &vertices[i], sizeof(VertexData), sizeof(vertices));
 	}
 }
 
