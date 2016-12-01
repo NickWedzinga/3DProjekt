@@ -40,7 +40,6 @@ void Terrain::Render(ID3D11DeviceContext *gDeviceContext)
 
 	gDeviceContext->PSSetShaderResources(0, 1, &textureView);
 	RenderBuffers(gDeviceContext);
-	return;
 }
 
 void Terrain::LoadHeightMap()

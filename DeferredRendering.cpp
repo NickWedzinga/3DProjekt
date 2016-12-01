@@ -131,6 +131,8 @@ void DeferredRendering::Render(ID3D11DeviceContext* gDeviceContext, ID3D11Buffer
 
 	gDeviceContext->PSSetConstantBuffers(1, 1, &lights);
 
+	//gDeviceContext->IASetVertexBuffers(0, 0, NULL, 0, 0);
+
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 }
 

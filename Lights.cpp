@@ -108,7 +108,7 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 	textureDesc.MiscFlags = 0;
 
 	for (int i = 0; i < 1/*this->lights.noLights.x*/; i++)
-		gDevice->CreateTexture2D(&textureDesc, NULL, &lT[i]);
+		gDevice->CreateTexture2D(&textureDesc, NULL, &lT[0]);
 
 	//D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 	//renderTargetViewDesc.Format = textureDesc.Format;
@@ -134,7 +134,7 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
 	for (int i = 0; i < 1/*this->lights.noLights.x*/; i++)
-		gDevice->CreateShaderResourceView(lT[i], &shaderResourceViewDesc, &lSRV[i]);
+		gDevice->CreateShaderResourceView(lT[0], &shaderResourceViewDesc, &lSRV[0]);
 }
 
 void Lights::Render(ID3D11DeviceContext * gDeviceContext)
@@ -146,10 +146,10 @@ void Lights::Render(ID3D11DeviceContext * gDeviceContext)
 
 
 
-	gDeviceContext->VSGetConstantBuffers(0, 1, &lightBuffer);
+	gDeviceContext->VSSetConstantBuffers(0, 1, &lightBuffer);
 }
 
 void Lights::SetShaderResources(ID3D11DeviceContext * gDeviceContext)
 {
-	gDeviceContext->PSSetShaderResources(3, 1, lSRV);
+	gDeviceContext->PSSetShaderResources(3, 1, &lSRV[0]);
 }

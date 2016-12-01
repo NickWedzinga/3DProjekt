@@ -169,7 +169,7 @@ void Render()
 
 	//Pipeline 5 Shadows
 	lights->Render(gDeviceContext);
-	gDeviceContext->GSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
+	//gDeviceContext->VSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
 

@@ -8,15 +8,15 @@
 class Lights
 {
 private:
+	//XMFLOAT3 noLights;
+	//XMFLOAT3 position[5];
+	//XMFLOAT3 intensity[5];
+	//XMFLOAT3 color[5];
+	//XMFLOAT3 direction[5]; //for spotlights, 0,0,0 if not spotlight
+	//XMMATRIX View[5];
+	//XMMATRIX Proj[5];
 	struct lightData
 	{
-		//XMFLOAT3 noLights;
-		//XMFLOAT3 position[5];
-		//XMFLOAT3 intensity[5];
-		//XMFLOAT3 color[5];
-		//XMFLOAT3 direction[5]; //for spotlights, 0,0,0 if not spotlight
-		//XMMATRIX View[5];
-		//XMMATRIX Proj[5];
 		XMFLOAT3 noLights;
 		XMFLOAT3 position;
 		XMFLOAT3 intensity;

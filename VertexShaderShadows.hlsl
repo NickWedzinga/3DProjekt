@@ -17,10 +17,10 @@ struct VS_IN
 	int ID : ID;
 };
 
-float4  VS_main(VS_IN input) : SV_POSITION
+float4 VS_main(VS_IN input) : SV_POSITION
 {
-	float3 pos = input.pos;
-	pos = mul(View, pos);
-	pos = mul(Proj, pos);
-	return float4(pos, 1.0f);
+	float3 poss = input.pos;
+	poss = mul(View, poss);
+	poss = mul(Proj, poss);
+	return float4(poss, 1.0f);
 }

@@ -7,7 +7,7 @@ Billboard::Billboard()
 	srand(time(NULL));
 	VertexData vertex;
 	vertex.ID = 4;
-	for (unsigned int i = 0; i < 4096; ++i)
+	for (unsigned int i = 0; i < 500; ++i)
 	{
 		vertex.normal = XMFLOAT3(0, 0, 0);
 		vertex.position = XMFLOAT3((rand() % 256) * 0.4, rand() % 100 + 15, (rand() % 256) * 0.4);
@@ -63,7 +63,7 @@ void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
 		vertices[i].position.y -= 0.08f;
 		if (vertices[i].position.y < 0)
 			vertices[i].position.y = 100;
-		gDeviceContext->UpdateSubresource(vertexBuffer, i/*0*/, NULL, &vertices[i], sizeof(VertexData), sizeof(vertices));
+		gDeviceContext->UpdateSubresource(vertexBuffer, 0/*i*/, NULL, &vertices[0/*i*/], sizeof(VertexData), sizeof(vertices));
 	}
 }
 
