@@ -18,7 +18,6 @@ struct CONSTANT_BUFFER2
 	DirectX::XMFLOAT4 KA;
 	DirectX::XMFLOAT4 KS;
 };
-
 public:
 	Object();
 	~Object();
@@ -28,9 +27,11 @@ public:
 	void InitializeObjectShaders(ID3D11Device * gDevice);
 	void NormalTexture(string normal, ID3D11Device* gDevice);
 	void Render(ID3D11DeviceContext* gDeviceContext);
+	void SetSampler(ID3D11Device* gDevice);
 
 	CONSTANT_BUFFER2 materialData;
 	ID3D11Buffer* gMaterialBuffer = nullptr;
+	ID3D11SamplerState* sampler;
 	ID3D11ShaderResourceView* norTexView;
 private:
    void MTLLoader(std::string mtlfile, ID3D11Device* gDevice);

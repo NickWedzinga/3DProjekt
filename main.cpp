@@ -38,7 +38,6 @@ int gID = -1;
 
 
 Object cube;
-vector<Mesh> mesh;
 DeferredRendering deferred;
 CONSTANT_BUFFER cData;
 Terrain* terrain = new Terrain;
@@ -141,9 +140,9 @@ void Update()
 
 void Render()
 {
+	SetViewport();
 	deferred.SetRenderTargets(gDeviceContext, gDepthStencilView);
 	//Pipeline 1	//Terrain
-
 	terrain->Render(gDeviceContext);
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
@@ -159,6 +158,7 @@ void Render()
 	billboard->Render(gDeviceContext);
 
 	//Pipeline 4	//Cube
+	gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
@@ -170,11 +170,15 @@ void Render()
 	//Pipeline 5 Shadows
 	lights->Render(gDeviceContext);
 	//gDeviceContext->VSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
+	
 	gDeviceContext->Draw(cube.vertices.size(), 0);
+	ground->Render(gDeviceContext);
+	wall->Render(gDeviceContext);
 
 
 	//Pipeline 6 Deferred
 	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
 	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
@@ -184,7 +188,7 @@ void Render()
 
 	gDeviceContext->Draw(4, 0);
 
-	
+	gDeviceContext->ClearState();
 }
 
 int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
@@ -275,6 +279,11 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 		delete camera;
 		delete terrain;
+		delete billboard;
+		delete lights;
+		delete ground;
+		delete wall;
+
 	}
 
 	return (int) msg.wParam;

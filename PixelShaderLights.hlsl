@@ -1,12 +1,13 @@
 Texture2D colorTex : register(t0);
 Texture2D normalTex : register(t1);
 Texture2D positionTex : register(t2);
-//Texture2D light1Tex : register(t3);
+Texture2D light1Tex : register(t3);
 //Texture2D light2Tex : register(t4);
 //Texture2D light3Tex : register(t5);
 //Texture2D light4Tex : register(t6);
 //Texture2D light5Tex : register(t7);
-SamplerState SampleTypePoint : register(s0);
+
+SamplerState SampleTypePoint : register (s0);
 
 RWStructuredBuffer<uint> pickingBuffer : register(u1);
 
@@ -50,7 +51,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
 	position = positionTex.Sample(SampleTypePoint, input.UV);
-	//light1 = light1Tex.Sample(SampleTypePoint, input.UV);
+	light1 = light1Tex.Sample(SampleTypePoint, input.UV);
 	//light2 = light2Tex.Sample(SampleTypePoint, input.UV);
 	//light3 = light3Tex.Sample(SampleTypePoint, input.UV);
 	//light4 = light4Tex.Sample(SampleTypePoint, input.UV);
@@ -59,7 +60,8 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	colors = colorTex.Sample(SampleTypePoint, input.UV);
 
-	//return light1;
+	return float4(light1.x, 0.0f, 0.0f, 1.0f);
+
 	//Samples the middle pixel of the color texture and sends the w-value (ID) back to the CPU
 	pickingBuffer[0] = colorTex.Sample(SampleTypePoint, float2(0.5f, 0.5f)).w + 0.5f;
 

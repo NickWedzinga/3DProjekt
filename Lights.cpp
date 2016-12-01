@@ -25,11 +25,12 @@ void Lights::Init(unsigned int lights, ID3D11Device* gDevice)
 		//	this->lights.View[i] = XMMatrixLookToLH(XMLoadFloat3(&this->lights.position[i]), XMLoadFloat3(&this->lights.direction[i]), XMLoadFloat3(&XMFLOAT3(0.0f, 1.0f, 0.0f)));
 		//}
 		int i = 1 ;
-		this->lights.position = XMFLOAT3(i * 2 - 4, /*i +*/ 5, -3);
+		//this->lights.position = XMFLOAT3(i * 2 - 4, /*i +*/ 5, -3);
+		this->lights.position = XMFLOAT3(0, /*i +*/ 4, -5);
 		this->lights.intensity = XMFLOAT3(i + 1, i + 1, i + 1);
 		this->lights.color = XMFLOAT3(i - 1, i, i + 1);
 		XMStoreFloat3(&this->lights.direction, XMLoadFloat3(&XMFLOAT3(0, 0, 0)) - XMLoadFloat3(&this->lights.position));
-		this->lights.Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(70), WIDTH / HEIGHT, NEAR, 10);
+		this->lights.Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(70), WIDTH / HEIGHT, NEAR, 7);
 		this->lights.View = XMMatrixLookToLH(XMLoadFloat3(&this->lights.position), XMLoadFloat3(&this->lights.direction), XMLoadFloat3(&XMFLOAT3(0.0f, 1.0f, 0.0f)));
 
 		D3D11_BUFFER_DESC lightBufferDesc;
@@ -139,6 +140,7 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 
 void Lights::Render(ID3D11DeviceContext * gDeviceContext)
 {
+	gDeviceContext->ClearDepthStencilView(lightsDS, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	gDeviceContext->OMSetRenderTargets(0, nullptr, lightsDS);		//Borde inte vara någon skillnad med eller utan depth
 	gDeviceContext->VSSetShader(vertexShader, nullptr, 0);
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
