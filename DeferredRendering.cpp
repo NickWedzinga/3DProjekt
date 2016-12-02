@@ -6,6 +6,24 @@ using namespace std;
 
 
 
+DeferredRendering::DeferredRendering()
+{
+}
+
+DeferredRendering::~DeferredRendering()
+{
+	gVertexShaderLight->Release();
+	gPixelShaderLight->Release();
+	PickingBuffer->Release();
+	for (int i = 0; i < 3; i++)
+	{
+		gRTVA[i]->Release();
+		gSRVA[i]->Release();
+		gRTTA[i]->Release();
+	}
+
+}
+
 void DeferredRendering::CreateLightBuffer()
 {
 	XMFLOAT3 lightDir = XMFLOAT3(0.0f, 0.0f, -5.0f);

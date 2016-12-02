@@ -8,6 +8,17 @@ Lights::Lights()
 
 Lights::~Lights()
 {
+	vertexShader->Release();
+	//geometryShader->Release();
+	//pixelShader->Release();
+	lightsDS->Release();
+	lightBuffer->Release();
+	for (int i = 0; i < 1; i++)
+	{
+		//lRTV[i]->Release();
+		lSRV[i]->Release();
+		lT[i]->Release();
+	}
 }
 
 void Lights::Init(unsigned int lights, ID3D11Device* gDevice)

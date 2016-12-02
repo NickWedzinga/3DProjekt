@@ -14,6 +14,7 @@ Camera::Camera()
 
 Camera::~Camera()
 {
+	keyDataBuffer->Release();;
 }
 
 void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)

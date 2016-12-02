@@ -22,6 +22,8 @@ protected:
 	string textureName;
 
 public:
+	Mesh();
+	~Mesh();
 	ID3D11Buffer* vertexBuffer = nullptr;
 	ID3D11VertexShader* vertexShader = nullptr;
 	ID3D11GeometryShader* geometryShader = nullptr;
@@ -32,7 +34,7 @@ public:
 	void setID(unsigned int ID);
 
 	vector<VertexData> vertices;
-	void InitializeShaders(ID3D11Device* gDevice);
+	/*void InitializeShaders(ID3D11Device* gDevice);*/
 
 };
 

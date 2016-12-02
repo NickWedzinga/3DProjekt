@@ -10,6 +10,9 @@ Object::Object()
 
 Object::~Object()
 {
+	gMaterialBuffer->Release();
+	sampler->Release();
+	norTexView->Release();
 }
 
 void Object::LoadObject(ID3D11Device* gDevice)
@@ -182,6 +185,7 @@ void Object::InitializeObjectShaders(ID3D11Device* gDevice)
 	pVS->Release();
 	pGS->Release();
 	pPS->Release();
+	SetSampler(gDevice);
 }
 
 void Object::NormalTexture(string normal, ID3D11Device * gDevice)

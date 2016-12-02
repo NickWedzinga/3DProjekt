@@ -31,8 +31,8 @@ public:
 
 	CONSTANT_BUFFER2 materialData;
 	ID3D11Buffer* gMaterialBuffer = nullptr;
-	ID3D11SamplerState* sampler;
-	ID3D11ShaderResourceView* norTexView;
+	ID3D11SamplerState* sampler = nullptr;
+	ID3D11ShaderResourceView* norTexView = nullptr;
 private:
    void MTLLoader(std::string mtlfile, ID3D11Device* gDevice);
 };

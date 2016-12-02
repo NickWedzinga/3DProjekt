@@ -15,6 +15,7 @@ Terrain::Terrain()
 
 Terrain::~Terrain()
 {
+	indexBuffer->Release();
 }
 
 void Terrain::Initialize(ID3D11Device* gDevice)
@@ -115,7 +116,7 @@ void Terrain::InitializeTerrainShaders(ID3D11Device* gDevice)
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "ID", 0, DXGI_FORMAT_R16_SINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
-	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayoutT);
+	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &vertexLayout);
 
 
 	pVS->Release();
@@ -272,7 +273,7 @@ void Terrain::RenderBuffers(ID3D11DeviceContext *gDeviceContext)
 	gDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	gDeviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->IASetInputLayout(gVertexLayoutT);
+	gDeviceContext->IASetInputLayout(vertexLayout);
 
 	return;
 }

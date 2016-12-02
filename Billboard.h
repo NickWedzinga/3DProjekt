@@ -16,8 +16,6 @@ public:
 private:
 	XMFLOAT3 position;
 	XMMATRIX rotationMatrix;
-	ID3D11Buffer *indexBuffer;
-	ID3D11Texture2D* texture;
 	ID3D11Buffer* bBBuffer = nullptr;
 	float width, height;
 	void InitShaders(ID3D11Device * gDevice);

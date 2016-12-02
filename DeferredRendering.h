@@ -13,6 +13,8 @@ private:
 //	float padding;
 //};
 public:
+	DeferredRendering();
+	~DeferredRendering();
 	void CreateLightBuffer();
 	//void Lightbuffer(ID3D11Device* gDevice);
 	void CreateRenderTargets(ID3D11Device* gDevice);

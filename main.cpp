@@ -2,7 +2,7 @@
 // BTH - Stefan Petersson 2014.
 //--------------------------------------------------------------------------------------
 
-#include <AntTweakBar.h>
+//#include <AntTweakBar.h>
 #include "OBJLoader.h"
 #include "DeferredRendering.h"
 #include "Terrain.h"
@@ -22,13 +22,12 @@ ID3D11Device* gDevice = nullptr;
 ID3D11DeviceContext* gDeviceContext = nullptr;
 ID3D11RenderTargetView* gBackbufferRTV = nullptr;
 ID3D11DepthStencilView* gDepthStencilView = nullptr;
-
 ID3D11Buffer* gWorldViewProjBuffer = nullptr;
 
 using namespace DirectX;
 using namespace std;
 
-TwBar *gMyBar;
+//TwBar *gMyBar;
 float background[3]{0, 0, 0};					
 
 float angleX = 0;
@@ -223,11 +222,11 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		deferred.CreateRenderTargets(gDevice);
 		deferred.CreatePickingBuffer(gDevice);
 		
-		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
-		TwWindowSize(WIDTH,HEIGHT);
+		//TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
+		//TwWindowSize(WIDTH,HEIGHT);
 
-		gMyBar = TwNewBar("KekCity");
-		TwAddVarRW(gMyBar, "ID: ", TW_TYPE_INT32, &gID, "min=-5 max=300 step=1");
+		//gMyBar = TwNewBar("KekCity");
+		//TwAddVarRW(gMyBar, "ID: ", TW_TYPE_INT32, &gID, "min=-5 max=300 step=1");
 		//TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
 		//TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
 		//TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
@@ -259,7 +258,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			{
 				Update(); //8.1 Update
 				Render(); //8.2 Rendera
-				TwDraw();
+				//TwDraw();
 
 				gSwapChain->Present(0, 0); //9. Växla front- och back-buffer
 			}
@@ -275,6 +274,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		gSwapChain->Release();
 		gDevice->Release();
 		gDeviceContext->Release();
+		gDepthStencilView->Release();
 		DestroyWindow(wndHandle);
 
 		delete camera;
@@ -323,8 +323,8 @@ HWND InitWindow(HINSTANCE hInstance)
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	//Hur fungerar denna?
-	if (TwEventWin(hWnd, message, wParam, lParam)) // send event message to AntTweakBar
-		return 0; // event has been handled by AntTweakBar
+	//if (TwEventWin(hWnd, message, wParam, lParam)) // send event message to AntTweakBar
+	//	return 0; // event has been handled by AntTweakBar
 	
 	switch (message) 
 	{
@@ -358,7 +358,7 @@ HRESULT CreateDirect3DContext(HWND wndHandle)
 		NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		D3D11_CREATE_DEVICE_DEBUG,
+		NULL,//D3D11_CREATE_DEVICE_DEBUG,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,

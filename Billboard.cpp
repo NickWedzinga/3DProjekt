@@ -18,6 +18,7 @@ Billboard::Billboard()
 
 Billboard::~Billboard()
 {
+	bBBuffer->Release();
 }
 
 void Billboard::Init(XMFLOAT3 camPos, ID3D11Device* gDevice)
