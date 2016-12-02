@@ -8,7 +8,7 @@ Lights::Lights()
 
 Lights::~Lights()
 {
-	vertexShader->Release();
+	vertexShader2->Release();
 	//geometryShader->Release();
 	//pixelShader->Release();
 	//lightsDS->Release();
@@ -37,12 +37,13 @@ void Lights::Init(unsigned int lights, ID3D11Device* gDevice)
 		//}
 		int i = 1 ;
 		//this->lights.position = XMFLOAT3(i * 2 - 4, /*i +*/ 5, -3);
-		this->lights.position = XMFLOAT3(0, /*i +*/ 4, -5);
+		this->lights.position = XMFLOAT3(0, /*i +*/ 3, -5);
 		this->lights.intensity = XMFLOAT3(i + 1, i + 1, i + 1);
 		this->lights.color = XMFLOAT3(i - 1, i, i + 1);
 		XMStoreFloat3(&this->lights.direction, XMLoadFloat3(&XMFLOAT3(0, 0, 0)) - XMLoadFloat3(&this->lights.position));
-		this->lights.Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(70), WIDTH / HEIGHT, NEAR, 20);
+		this->lights.Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(70), WIDTH / HEIGHT, NEAR, 8);
 		this->lights.View = XMMatrixLookToLH(XMLoadFloat3(&this->lights.position), XMLoadFloat3(&this->lights.direction), XMLoadFloat3(&XMFLOAT3(0.0f, 1.0f, 0.0f)));
+		this->lights.distance = XMFLOAT3(8, 8, 8);
 
 		D3D11_BUFFER_DESC lightBufferDesc;
 		lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -84,24 +85,27 @@ void Lights::Init(unsigned int lights, ID3D11Device* gDevice)
 
 void Lights::InitShaders(ID3D11Device * gDevice)
 {
-	//ID3D10Blob* pGS = nullptr;
-	ID3D10Blob* pPS = nullptr;
 	ID3D10Blob* pVS = nullptr;
+	ID3D10Blob* pGS = nullptr;
+	ID3D10Blob* pPS = nullptr;
+	HRESULT hr;
 
+	//D3DCompileFromFile(L"VertexShaderShadows.hlsl", nullptr, nullptr, "VS_main", "vs_5_0", 0, 0, &pVS, nullptr);
+	//D3DCompileFromFile(L"GeometryShaderShadows.hlsl", nullptr, nullptr, "main", "gs_5_0", 0, 0, &pGS, nullptr);
+	//D3DCompileFromFile(L"PixelShaderShadows.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &pPS, nullptr);
 
-	D3DCompileFromFile(L"VertexShaderShadows.hlsl", nullptr, nullptr, "VS_main", "vs_5_0", 0, 0, &pVS, nullptr);
-	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader);
-	pVS->Release();
+	//hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader);
+	//hr = gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &geometryShader);
+	//hr = gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &pixelShader);
 
-
-	//D3DCompileFromFile(L"GeometryShaderShadows.hlsl", nullptr, nullptr, "GS_main", "gs_5_0", 0, 0, &pGS, nullptr);
-	D3DCompileFromFile(L"PixelShaderShadows.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &pPS, nullptr);
-
-	//gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &geometryShader);
-	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &pixelShader);
-
+	//pVS->Release();
 	//pGS->Release();
-	pPS->Release();
+	//pPS->Release();
+
+	pVS = nullptr;
+	D3DCompileFromFile(L"VertexShaderShadows.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &pVS, nullptr);
+	hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader2);
+	pVS->Release();
 }
 
 void Lights::CreateRenderTargets(ID3D11Device* gDevice)
@@ -149,17 +153,17 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 		gDevice->CreateShaderResourceView(lT[0], &shaderResourceViewDesc, &lSRV[0]);
 }
 
-void Lights::Render(ID3D11DeviceContext * gDeviceContext, ID3D11RenderTargetView* gBackbufferRTV)
+void Lights::Render(ID3D11DeviceContext* gDeviceContext)
 {
-
 	gDeviceContext->ClearDepthStencilView(lightsDS, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	//ID3D11RenderTargetView* rtv = { nullptr };
-	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, lightsDS);
-	gDeviceContext->VSSetShader(vertexShader, nullptr, 0);
-	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(pixelShader, nullptr, 0);
+	gDeviceContext->OMSetRenderTargets(0, nullptr, lightsDS);
 
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	gDeviceContext->VSSetShader(vertexShader2, nullptr, 0);
+	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->GSSetShader(geometryShader, nullptr, 0);
+	//gDeviceContext->PSSetShader(pixelShader, nullptr, 0);
+
 	gDeviceContext->VSSetConstantBuffers(0, 1, &lightBuffer);
 }
 

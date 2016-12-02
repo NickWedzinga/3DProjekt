@@ -2,7 +2,7 @@ struct PS_IN
 {
 	float2 UV : UV;
 	float3 normal : NORMAL;
-	float4 pos : POSITION;
+	//float4 pos : POSITION;
 	float4 svPos : SV_POSITION;
 	int ID : ID;
 };

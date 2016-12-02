@@ -20,6 +20,7 @@ struct GSOutput
 	float2 UV : UV;
 	float3 normal : NORMAL;
 	float4 pos : SV_POSITION;
+	float4 worldPos : WORLDPOS;
 	float ID : ID;
 };
 
@@ -32,6 +33,7 @@ void GS_main(triangle GS_IN input[3], inout TriangleStream< GSOutput > output)
 	{
 		float4 poss = input[i].pos;
 		poss = mul(WorldMatrix, poss);
+		element.worldPos = poss;
 		poss = mul(ViewMatrix, poss);
 		poss = mul(ProjMatrix, poss);
 		element.pos = poss;

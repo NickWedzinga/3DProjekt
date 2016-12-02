@@ -20,8 +20,10 @@ struct GSOutput
 	float2 UV : UV;
 	float3 normal : NORMAL;
 	float4 pos : SV_POSITION;
+	float4 worldPos : WORLDPOS;
 	float ID : ID;
 };
+
 
 [maxvertexcount(6)]
 void GS_main(point GS_IN input[1], inout TriangleStream< GSOutput > output)
@@ -58,7 +60,12 @@ void GS_main(point GS_IN input[1], inout TriangleStream< GSOutput > output)
 	for (uint i = 0; i < 6; ++i)
 	{
 		pos[i].w = 1.0f;
-		element.pos = mul(ProjMatrix, mul(ViewMatrix, mul(WorldMatrix, pos[i])));
+		float4 poss = pos[i];
+		poss = mul(WorldMatrix, poss);
+		element.worldPos = poss;
+		poss = mul(ViewMatrix, poss);
+		poss = mul(ProjMatrix, poss);
+		element.pos = poss;
 		element.UV = UV[i];
 		output.Append(element);
 	}

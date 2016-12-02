@@ -85,10 +85,11 @@ void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 		{
 			float4 poss = input[i].pos;
 			poss = mul(WorldMatrix, poss);
+			Output.worldPos = poss;
 			poss = mul(ViewMatrix, poss);
 			poss = mul(ProjMatrix, poss);
 			Output.pos = poss;
-			Output.worldPos = poss;
+			
 			Output.camDirection = camDirection;
 			Output.UV = input[i].UV;
 			Output.normal = mul(WorldMatrix, input[i].normal);

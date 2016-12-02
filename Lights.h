@@ -24,11 +24,13 @@ private:
 		XMFLOAT3 intensity;
 		XMFLOAT3 color;
 		XMFLOAT3 direction; //for spotlights, 0,0,0 if not spotlight
+		XMFLOAT3 distance;
 	};
 	ID3D11RenderTargetView* lRTV[1];
 	ID3D11ShaderResourceView* lSRV[1];
 	ID3D11Texture2D* lT[1];
 	ID3D11VertexShader* vertexShader = nullptr;
+	ID3D11VertexShader* vertexShader2 = nullptr;
 	ID3D11GeometryShader* geometryShader = nullptr;
 	ID3D11PixelShader* pixelShader = nullptr;
 	
@@ -43,7 +45,7 @@ public:
 	ID3D11DepthStencilView* lightsDS = nullptr;
 
 	void Init(unsigned int lights, ID3D11Device* gDevice);
-	void Render(ID3D11DeviceContext* gDeviceContext, ID3D11RenderTargetView* gBackbufferRTV);
+	void Render(ID3D11DeviceContext* gDeviceContext);
 	void SetShaderResources(ID3D11DeviceContext* gDeviceContext);
 
 	ID3D11Buffer* lightBuffer = nullptr;

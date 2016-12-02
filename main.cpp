@@ -2,7 +2,7 @@
 // BTH - Stefan Petersson 2014.
 //--------------------------------------------------------------------------------------
 
-//#include <AntTweakBar.h>
+#include <AntTweakBar.h>
 #include "OBJLoader.h"
 #include "DeferredRendering.h"
 #include "Terrain.h"
@@ -27,7 +27,7 @@ ID3D11Buffer* gWorldViewProjBuffer = nullptr;
 using namespace DirectX;
 using namespace std;
 
-//TwBar *gMyBar;
+TwBar *gMyBar;
 float background[3]{0, 0, 0};					
 
 float angleX = 0;
@@ -54,14 +54,14 @@ void CreateWorldMatrix()
 
 void CreateProjMatrix()
 {
-	//cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(90), WIDTH/HEIGHT, NEAR, FAR);
-	cData.ProjMatrix = lights->lights.Proj;
+	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(90), WIDTH/HEIGHT, NEAR, FAR);
+	//cData.ProjMatrix = lights->lights.Proj;
 }
 
 void constantBuffer()
 {
 	CreateWorldMatrix();
-	camera->Init(cData.ViewMatrix, cData.camDirection, *lights);
+	camera->Init(cData.ViewMatrix, cData.camDirection);
 	CreateProjMatrix();
 	deferred.CreateLightBuffer();
 	camera->initKeyBuffer(gDevice);
@@ -170,8 +170,7 @@ void Render()
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
 	//Pipeline 5 Shadows
-	lights->Render(gDeviceContext, gBackbufferRTV);
-	gDeviceContext->VSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
+	lights->Render(gDeviceContext);
 	
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 	ground->Render(gDeviceContext);
@@ -179,16 +178,16 @@ void Render()
 
 
 	//Pipeline 6 Deferred
-	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	//gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
-	//gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
-	//gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
+	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
+	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
-	//gDeviceContext->PSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
-	//deferred.Render(gDeviceContext, lights->lightBuffer);
-	//lights->SetShaderResources(gDeviceContext);
+	gDeviceContext->PSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
+	deferred.Render(gDeviceContext, lights->lightBuffer);
+	lights->SetShaderResources(gDeviceContext);
 
-	//gDeviceContext->Draw(4, 0);
+	gDeviceContext->Draw(4, 0);
 
 	gDeviceContext->ClearState();
 }
@@ -225,11 +224,11 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		deferred.CreateRenderTargets(gDevice);
 		deferred.CreatePickingBuffer(gDevice);
 		
-		//TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
-		//TwWindowSize(WIDTH,HEIGHT);
+		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
+		TwWindowSize(WIDTH,HEIGHT);
 
-		//gMyBar = TwNewBar("KekCity");
-		//TwAddVarRW(gMyBar, "ID: ", TW_TYPE_INT32, &gID, "min=-5 max=300 step=1");
+		gMyBar = TwNewBar("KekCity");
+		TwAddVarRW(gMyBar, "ID: ", TW_TYPE_INT32, &gID, "min=-5 max=300 step=1");
 		//TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
 		//TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
 		//TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
@@ -255,13 +254,13 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 				{
 					gID = deferred.Picking(gDeviceContext);
 				}
-				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)), *lights);
+				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
 			}
 			else
 			{
 				Update(); //8.1 Update
 				Render(); //8.2 Rendera
-				//TwDraw();
+				TwDraw();
 
 				gSwapChain->Present(0, 0); //9. Växla front- och back-buffer
 			}
@@ -326,8 +325,8 @@ HWND InitWindow(HINSTANCE hInstance)
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	//Hur fungerar denna?
-	//if (TwEventWin(hWnd, message, wParam, lParam)) // send event message to AntTweakBar
-	//	return 0; // event has been handled by AntTweakBar
+	if (TwEventWin(hWnd, message, wParam, lParam)) // send event message to AntTweakBar
+		return 0; // event has been handled by AntTweakBar
 	
 	switch (message) 
 	{

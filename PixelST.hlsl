@@ -6,6 +6,7 @@ struct PS_IN
 	float2 UV : UV;
 	float3 normal : NORMAL;
 	float4 pos : SV_POSITION;
+	float4 worldPos : WORLDPOS;
 	float ID : ID;
 };
 
@@ -23,6 +24,6 @@ PS_OUT PS_main(PS_IN input)
 	PS_OUT output;
 	output.color = float4(texColor.xyz, input.ID);
 	output.normal = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	output.position = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	output.position = input.worldPos;
 	return output;
 }

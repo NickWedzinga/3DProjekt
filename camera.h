@@ -3,7 +3,6 @@
 #define CAMERA_H
 
 #include "includes.h"
-#include "Lights.h"
 #include <Windowsx.h>
 
 class Camera
@@ -11,8 +10,8 @@ class Camera
 public:
 	Camera();
 	~Camera();
-	void Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY, Lights &light);
-	void Init(XMMATRIX &view, XMVECTOR &camDirection, Lights &light);
+	void Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY);
+	void Init(XMMATRIX &view, XMVECTOR &camDirection);
 	void initKeyBuffer(ID3D11Device* gDevice);
 
 	XMFLOAT3 getPos();
@@ -23,7 +22,7 @@ public:
 	KEY_BUFFER keyData;
 
 private:
-	void CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection, Lights &light);
+	void CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection);
 	XMFLOAT3 pos;
 	XMFLOAT2 mouse;
 	XMFLOAT3 camDir;

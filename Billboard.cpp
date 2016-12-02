@@ -7,7 +7,7 @@ Billboard::Billboard()
 	srand(time(NULL));
 	VertexData vertex;
 	vertex.ID = 4;
-	for (unsigned int i = 0; i < 500; ++i)
+	for (unsigned int i = 0; i < 4096/4; ++i)		//Because lags
 	{
 		vertex.normal = XMFLOAT3(0, 0, 0);
 		vertex.position = XMFLOAT3((rand() % 256) * 0.4, rand() % 100 + 15, (rand() % 256) * 0.4);
