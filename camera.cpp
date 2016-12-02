@@ -17,7 +17,7 @@ Camera::~Camera()
 	keyDataBuffer->Release();;
 }
 
-void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
+void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY, Lights &light)
 {
 	float x, y;
 	XMFLOAT3 rightf, forward;
@@ -205,18 +205,18 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 	if (heightY != -1 && flightMode == 0)
 		pos.y = heightY + 2;
 	if (!lockLight)
-	CreateViewMatrix(cBuffer.ViewMatrix, cBuffer.camDirection);
+		CreateViewMatrix(cBuffer.ViewMatrix, cBuffer.camDirection, light);
 	else
-		CreateViewMatrix(cBuffer.ViewMatrix, lockedLight);
+		CreateViewMatrix(cBuffer.ViewMatrix, lockedLight, light);
 
 }
 
-void Camera::Init(XMMATRIX &view, XMVECTOR &camDirection)
+void Camera::Init(XMMATRIX &view, XMVECTOR &camDirection, Lights &light)
 {
 	pos = XMFLOAT3(0, 2, -10);
 	mouse = XMFLOAT2(320, 240);
 	camDir = XMFLOAT3(0, 0, 1);
-	CreateViewMatrix(view, camDirection);
+	CreateViewMatrix(view, camDirection, light);
 }
 
 XMFLOAT3 Camera::getPos()
@@ -259,7 +259,7 @@ void Camera::initKeyBuffer(ID3D11Device* gDevice)
 	gDevice->CreateBuffer(&cbDesc, &InitData, &keyDataBuffer);
 }
 
-void Camera::CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection)
+void Camera::CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection, Lights &light)
 {
 	XMFLOAT3 cam1 = XMFLOAT3(pos.x, pos.y, pos.z);
 	XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
@@ -267,5 +267,6 @@ void Camera::CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection)
 	XMVECTOR cam = XMLoadFloat3(&cam1);
 	XMVECTOR up = XMLoadFloat3(&at1);
 	camDirection = XMLoadFloat3(&camDir);
-	ViewMatrix = XMMatrixLookToLH(cam, camDirection, up);
+	//ViewMatrix = XMMatrixLookToLH(cam, camDirection, up);
+	ViewMatrix = light.lights.View;
 }

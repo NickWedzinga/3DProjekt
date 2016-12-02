@@ -54,13 +54,14 @@ void CreateWorldMatrix()
 
 void CreateProjMatrix()
 {
-	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(90), WIDTH/HEIGHT, NEAR, FAR);
+	//cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(90), WIDTH/HEIGHT, NEAR, FAR);
+	cData.ProjMatrix = lights->lights.Proj;
 }
 
 void constantBuffer()
 {
 	CreateWorldMatrix();
-	camera->Init(cData.ViewMatrix, cData.camDirection);
+	camera->Init(cData.ViewMatrix, cData.camDirection, *lights);
 	CreateProjMatrix();
 	deferred.CreateLightBuffer();
 	camera->initKeyBuffer(gDevice);
@@ -140,6 +141,8 @@ void Update()
 void Render()
 {
 	SetViewport();
+
+
 	deferred.SetRenderTargets(gDeviceContext, gDepthStencilView);
 	//Pipeline 1	//Terrain
 	terrain->Render(gDeviceContext);
@@ -167,8 +170,8 @@ void Render()
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
 	//Pipeline 5 Shadows
-	lights->Render(gDeviceContext);
-	//gDeviceContext->VSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
+	lights->Render(gDeviceContext, gBackbufferRTV);
+	gDeviceContext->VSSetConstantBuffers(1, 1, &gWorldViewProjBuffer);
 	
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 	ground->Render(gDeviceContext);
@@ -176,16 +179,16 @@ void Render()
 
 
 	//Pipeline 6 Deferred
-	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
-	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
-	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	//gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
+	//gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
+	//gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
-	gDeviceContext->PSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
-	deferred.Render(gDeviceContext, lights->lightBuffer);
-	lights->SetShaderResources(gDeviceContext);
+	//gDeviceContext->PSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
+	//deferred.Render(gDeviceContext, lights->lightBuffer);
+	//lights->SetShaderResources(gDeviceContext);
 
-	gDeviceContext->Draw(4, 0);
+	//gDeviceContext->Draw(4, 0);
 
 	gDeviceContext->ClearState();
 }
@@ -252,7 +255,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 				{
 					gID = deferred.Picking(gDeviceContext);
 				}
-				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
+				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)), *lights);
 			}
 			else
 			{
