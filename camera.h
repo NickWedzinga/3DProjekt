@@ -13,6 +13,8 @@ public:
 	void Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY);
 	void Init(XMMATRIX &view, XMVECTOR &camDirection);
 	void initKeyBuffer(ID3D11Device* gDevice);
+	void CreatePlanes(XMMATRIX &proj, XMMATRIX &view);
+	void Culling();
 
 	XMFLOAT3 getPos();
 	void setPos(XMFLOAT3 pos);
@@ -27,6 +29,7 @@ private:
 	XMFLOAT2 mouse;
 	XMFLOAT3 camDir;
 	XMFLOAT2 arbitraryFloat2;
+	XMVECTOR plane[6];
 	bool lockLight;
 	XMVECTOR lockedLight;
 	int flightMode;

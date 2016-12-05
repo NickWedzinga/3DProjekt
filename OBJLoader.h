@@ -19,7 +19,7 @@ struct CONSTANT_BUFFER2
 	DirectX::XMFLOAT4 KS;
 };
 public:
-	Object();
+	Object(int ID);
 	~Object();
 
 	void LoadObject(ID3D11Device* gDevice);

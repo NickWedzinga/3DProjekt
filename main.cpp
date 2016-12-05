@@ -2,6 +2,15 @@
 // BTH - Stefan Petersson 2014.
 //--------------------------------------------------------------------------------------
 
+//Things to do!!!!
+//Bilboard backside, too many vertices
+//Specular
+//Shadowmapping, things
+//Frustrum
+//Memoryleaks
+//Fatta koden
+
+
 #include <AntTweakBar.h>
 #include "OBJLoader.h"
 #include "DeferredRendering.h"
@@ -36,15 +45,17 @@ float angleZ = 0;
 int gID = -1;
 
 
-Object cube;
+
 DeferredRendering deferred;
 CONSTANT_BUFFER cData;
-Terrain* terrain = new Terrain;
 Camera* camera = new Camera;
-Billboard* billboard = new Billboard;
 Lights* lights = new Lights;
-Plane* ground = new Plane;
-Plane* wall = new Plane;
+Object cube(2);
+Plane* ground = new Plane(3);
+Plane* wall = new Plane(4);
+Terrain* terrain = new Terrain(5);
+Billboard* billboard = new Billboard(6);
+vector<Object*> cubes;
 
 
 void CreateWorldMatrix()
@@ -54,8 +65,7 @@ void CreateWorldMatrix()
 
 void CreateProjMatrix()
 {
-	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(90), WIDTH/HEIGHT, NEAR, FAR);
-	//cData.ProjMatrix = lights->lights.Proj;
+	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH/HEIGHT, NEAR, FAR);
 }
 
 void constantBuffer()
@@ -135,13 +145,13 @@ void Update()
 	memcpy(mappedResource2.pData, &camera->keyData, sizeof(camera->keyData));
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
 
+	camera->CreatePlanes(cData.ProjMatrix, cData.ViewMatrix);
 	billboard->Update(camera->getPos(), gDeviceContext);
 }
 
 void Render()
 {
 	SetViewport();
-
 
 	deferred.SetRenderTargets(gDeviceContext, gDepthStencilView);
 	//Pipeline 1	//Terrain
@@ -188,7 +198,7 @@ void Render()
 	lights->SetShaderResources(gDeviceContext);
 
 	gDeviceContext->Draw(4, 0);
-
+	TwDraw();
 	gDeviceContext->ClearState();
 }
 
@@ -210,7 +220,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		ground->CreatePlane(XMFLOAT3(0, -5, 0), 40, 0, 20, gDevice);
 		wall->CreatePlane(XMFLOAT3(0, 0, 10), 40, 10, 0, gDevice);
 
-		lights->Init(1, gDevice);
+		lights->Init(1, &cube, gDevice);
 		CreateTerrain();
 		constantBuffer();
 		//deferred.Lightbuffer(gDevice);
@@ -244,6 +254,8 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		
 		ShowWindow(wndHandle, nCmdShow);
 
+		//cube.moveMesh(XMFLOAT3(15, 15, 10), gDeviceContext);
+
 		while (WM_QUIT != msg.message)
 		{
 			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -260,7 +272,6 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			{
 				Update(); //8.1 Update
 				Render(); //8.2 Rendera
-				TwDraw();
 
 				gSwapChain->Present(0, 0); //9. Växla front- och back-buffer
 			}

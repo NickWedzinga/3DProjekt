@@ -4,13 +4,14 @@ using namespace DirectX::SimpleMath;
 using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
 using namespace std;
 
-Terrain::Terrain()
+Terrain::Terrain(int ID)
 {
+	this->ID = ID;
 	this->vertexBuffer = 0;
 	this->indexBuffer = 0;
 	this->terrainHeight = 0;
 	this->terrainWidth = 0;
-	this->scaleFactor = 0.4;
+	this->scaleFactor = 0.8;
 }
 
 Terrain::~Terrain()
@@ -160,7 +161,7 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			index = (terrainHeight*j) + i;
 			VertexData temp;
 			temp.normal = XMFLOAT3(0, 0, 0);
-			temp.ID = 3;
+			temp.ID = this->ID;
 			leftX = float(i);
 			rightX = float(i + 1);
 			upperZ = float(j + 1);

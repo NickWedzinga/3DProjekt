@@ -17,9 +17,7 @@ protected:
 		XMFLOAT3 position;
 		int ID;
 	};
-	
-	XMFLOAT3 worldPosition;
-	string textureName;
+	int ID;
 
 public:
 	Mesh();
@@ -31,11 +29,10 @@ public:
 	ID3D11InputLayout* vertexLayout = nullptr;
 	ID3D11ShaderResourceView* textureView = nullptr;
 	void Texture(string material, ID3D11Device* gDevice);
-	void setID(unsigned int ID);
+	void moveMesh(XMFLOAT3 position, ID3D11DeviceContext* gDeviceContext);
 
 	vector<VertexData> vertices;
-	/*void InitializeShaders(ID3D11Device* gDevice);*/
-
+	XMFLOAT3 center;
 };
 
 #endif

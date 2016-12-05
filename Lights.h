@@ -4,6 +4,7 @@
 #define LIGHTS_H
 
 #include "includes.h"
+#include "OBJLoader.h"
 
 class Lights
 {
@@ -44,7 +45,7 @@ public:
 	lightData lights;
 	ID3D11DepthStencilView* lightsDS = nullptr;
 
-	void Init(unsigned int lights, ID3D11Device* gDevice);
+	void Init(unsigned int lights, Object* cube, ID3D11Device* gDevice);
 	void Render(ID3D11DeviceContext* gDeviceContext);
 	void SetShaderResources(ID3D11DeviceContext* gDeviceContext);
 

@@ -6,7 +6,6 @@ Camera::Camera()
 	mouse = XMFLOAT2(XPOS, YPOS);
 	SetCursorPos(mouse.x, mouse.y);
 	camDir = XMFLOAT3(0, 0, 0);
-	arbitraryFloat2 = XMFLOAT2(0, 0);
 	lockLight = false;
 	flightMode = 0;
 	moveSpeed = 0.5f;
@@ -37,7 +36,6 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 			if ((y = (mouse.y - GET_Y_LPARAM(msg->lParam))) != 0)
 			{
 				y = -y / 5000; //(1 / 5000) is an arbitrary scalar to slow down camera swivel speed
-				arbitraryFloat2.y += y;
 				XMMATRIX rotation = XMMatrixRotationAxis(rightv, y);
 				XMStoreFloat3(&camDir, (XMVector3Transform(XMVECTOR(XMLoadFloat3(&camDir)), rotation)));
 				mouse.y = GET_Y_LPARAM(msg->lParam);
@@ -257,6 +255,57 @@ void Camera::initKeyBuffer(ID3D11Device* gDevice)
 	InitData.SysMemSlicePitch = 0;
 
 	gDevice->CreateBuffer(&cbDesc, &InitData, &keyDataBuffer);
+}
+
+void Camera::CreatePlanes(XMMATRIX &proj, XMMATRIX &view)
+{
+	XMMATRIX viewProjMatrix = view * proj;
+	XMFLOAT4X4 viewProj;
+	XMFLOAT4 temp[6];
+	XMStoreFloat4x4(&viewProj, viewProjMatrix);
+
+	temp[0].x = viewProj._14 + viewProj._11;
+	temp[0].y = viewProj._24 + viewProj._21;
+	temp[0].z = viewProj._34 + viewProj._31;
+	temp[0].w = viewProj._44 + viewProj._41;
+
+	temp[1].x = viewProj._14 - viewProj._11;
+	temp[1].y = viewProj._24 - viewProj._21;
+	temp[1].z = viewProj._34 - viewProj._31;
+	temp[1].w = viewProj._44 - viewProj._41;
+
+	temp[2].x = viewProj._14 - viewProj._12;
+	temp[2].y = viewProj._24 - viewProj._22;
+	temp[2].z = viewProj._34 - viewProj._32;
+	temp[2].w = viewProj._44 - viewProj._42;
+
+	temp[3].x = viewProj._14 + viewProj._12;
+	temp[3].y = viewProj._24 + viewProj._22;
+	temp[3].z = viewProj._34 + viewProj._32;
+	temp[3].w = viewProj._44 + viewProj._42;
+
+	temp[4].x = viewProj._13;
+	temp[4].y = viewProj._23;
+	temp[4].z = viewProj._33;
+	temp[4].w = viewProj._43;
+
+	temp[5].x = viewProj._14 - viewProj._13;
+	temp[5].y = viewProj._24 - viewProj._23;
+	temp[5].z = viewProj._34 - viewProj._33;
+	temp[5].w = viewProj._44 - viewProj._43;
+
+	
+
+	for (int i = 0; i < 6; i++)
+	{
+		this->plane[i] = XMLoadFloat4(&temp[i]);
+		this->plane[i] = XMVector4Normalize(this->plane[i]);
+	}
+}
+
+void Camera::Culling()
+{
+
 }
 
 void Camera::CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection)

@@ -1,4 +1,4 @@
-#define epsilon 0.00005f
+#define epsilon 0.00005f	//0.00005f works
 
 Texture2D colorTex : register(t0);
 Texture2D normalTex : register(t1);
@@ -99,7 +99,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 		float shadowCoeff = lerp(lerp(s0, s1, lerps.x), lerp(s2, s3, lerps.x), lerps.y); //WHAT
 
-		if (colors.w > 0.2f && colors.w < 2.8f || colors.w > 4.2f) //no light calculations for terrain and billboarded particles
+		if (colors.w < 4.2f) //no light calculations for terrain and billboarded particles
 		{
 			colors.xyz = colors.xyz * shadowCoeff;
 			position = positionTex.Sample(SampleTypePoint, input.UV);
@@ -127,7 +127,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 		}
 		else
 		{
-			result = colors;
+			result = colors.xyz;
 		}
 	//}
 	return float4(result, 1.0f);

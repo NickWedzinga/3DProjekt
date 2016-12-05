@@ -13,7 +13,7 @@ private:
 		float x, y, z;
 	};
 public:
-	Terrain();
+	Terrain(int ID);
 	~Terrain();
 
 	void Initialize(ID3D11Device* gDevice);

@@ -7,7 +7,7 @@
 class Billboard : public Mesh
 {
 public:
-	Billboard();
+	Billboard(int ID);
 	~Billboard();
 	void Init(XMFLOAT3 camPos, ID3D11Device* gDevice);
 	void Render(ID3D11DeviceContext* gDeviceContext);

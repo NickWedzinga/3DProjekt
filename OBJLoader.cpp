@@ -4,8 +4,9 @@ using namespace DirectX::SimpleMath;
 using namespace DirectX; //Verkar som man kan ha fler än 1 using namespace, TIL.
 
 
-Object::Object()
+Object::Object(int ID)
 {
+	this->ID = ID;
 }
 
 Object::~Object()
@@ -17,6 +18,7 @@ Object::~Object()
 
 void Object::LoadObject(ID3D11Device* gDevice)
 {
+	this->center = XMFLOAT3(0, 0, 0);
 	string myFile("Resources/Objs/box.obj"), special, line2, mtl;
 	ifstream file(myFile);
 	istringstream inputString;
@@ -26,7 +28,7 @@ void Object::LoadObject(ID3D11Device* gDevice)
 	XMFLOAT3 vtx1, vtx3;
 	XMFLOAT2 vtx2;
 	VertexData temp;
-	temp.ID = 2;
+	temp.ID = this->ID;
 
 	UINT valueV = 0;
 	UINT valueVT = 0;
@@ -100,7 +102,7 @@ void Object::LoadObject(ID3D11Device* gDevice)
 	D3D11_SUBRESOURCE_DATA vertexData;
 	vertexData.pSysMem = vertices.data();
 	HRESULT hr = gDevice->CreateBuffer(&bufferDesc, &vertexData, &vertexBuffer);
-   
+
 	return;
 }
 

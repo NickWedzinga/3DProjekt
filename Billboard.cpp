@@ -2,16 +2,23 @@
 #include <iostream>
 #include <time.h>
 
-Billboard::Billboard()
+Billboard::Billboard(int ID)
 {
 	srand(time(NULL));
 	VertexData vertex;
-	vertex.ID = 4;
-	for (unsigned int i = 0; i < 4096/4; ++i)		//Because lags
+	vertex.ID = ID;
+	for (unsigned int i = 0; i < 4096/2; ++i)		//Because lags
 	{
 		vertex.normal = XMFLOAT3(0, 0, 0);
-		vertex.position = XMFLOAT3((rand() % 256) * 0.4, rand() % 100 + 15, (rand() % 256) * 0.4);
+		vertex.position = XMFLOAT3((rand() % 256) * 0.8, rand() % 100 + 15, (rand() % 256) * 0.8);
 		vertex.UV = XMFLOAT2(0.5, 0.5);
+
+		//"Quad", setting ID based on the particle's position
+		if (vertex.position.x >= 256 * 0.4)
+			vertex.ID += 1;
+		if (vertex.position.z >= 256 * 0.4)
+			vertex.ID += 2;
+
 		vertices.push_back(vertex);
 	}
 }

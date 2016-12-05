@@ -1,7 +1,8 @@
 #include "Plane.h"
 
-Plane::Plane()
+Plane::Plane(int ID)
 {
+	this->ID = ID;
 }
 
 Plane::~Plane()
@@ -11,7 +12,7 @@ Plane::~Plane()
 void Plane::CreatePlane(XMFLOAT3 pos, int width, int height, int depth, ID3D11Device* gDevice)
 {
 	VertexData temp;
-	temp.ID = 5;
+	temp.ID = this->ID;
 	temp.normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	//Triangle 1

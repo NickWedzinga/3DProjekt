@@ -6,11 +6,6 @@ Mesh::Mesh()
 
 Mesh::~Mesh()
 {
-	//vertexBuffer->Release();
-	//vertexShader->Release();
-	//geometryShader->Release();
-	//pixelShader->Release();
-	//vertexLayout->Release();
 	textureView->Release();
 }
 
@@ -23,10 +18,19 @@ void Mesh::Texture(string material, ID3D11Device* gDevice)
 	return;
 }
 
-void Mesh::setID(unsigned int ID)
+void Mesh::moveMesh(XMFLOAT3 position, ID3D11DeviceContext* gDeviceContext)
 {
-	for (unsigned int i = 0; i < vertices.size(); i++)
-		this->vertices[i].ID = ID;
+	XMFLOAT3 change;
+	XMStoreFloat3(&change, (XMLoadFloat3(&position) - XMLoadFloat3(&this->center)));
+	this->center = position;
+
+	for (unsigned int i = 0; i < this->vertices.size(); ++i)
+	{
+		vertices[i].position.x += change.x;
+		vertices[i].position.y += change.y;
+		vertices[i].position.z += change.z;
+		gDeviceContext->UpdateSubresource(vertexBuffer, 0/*i*/, NULL, &vertices[0/*i*/], sizeof(VertexData), sizeof(vertices));
+	}
 }
 
 //void Mesh::InitializeShaders(ID3D11Device * gDevice)
