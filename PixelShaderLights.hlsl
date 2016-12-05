@@ -1,3 +1,5 @@
+#define epsilon 0.00005f
+
 Texture2D colorTex : register(t0);
 Texture2D normalTex : register(t1);
 Texture2D positionTex : register(t2);
@@ -75,17 +77,35 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	//for (uint i = 0; i < lights[0].noLights.x; ++i)
 	//{
 		position = positionTex.Sample(SampleTypePoint, input.UV);
+		
 		position.w = 1.0f;
 		position = mul(lights[i].View, position);
 		position = mul(lights[i].Proj, position);
-		position /= position.w;
+		position /= position.w; //convert to NDC
 
-		float2 shadowmapCoord = position.xy *= 0.5 + float2(0.5f, 0.5f);
-		light1 = light1Tex.Sample(SampleTypePoint, shadowmapCoord);
+		float2 shadowmapCoord = float2(position.x * 0.5, position.y * -0.5f) + float2(0.5f, 0.5f); //from -1, 1 to 0, 1 DUBBELKOLLA
 
-		if (position.z <= light1.x) //TRUE => lit point
+		float dx = 1.0f / 960.0f; //divide by SMAP_WIDTH
+		float dy = 1.0f / 540.0f; //divide by SMAP_HEIGHT
+
+		float s0 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord).x + epsilon < position.z) ? 0.0f : 1.0f; //DUBBELKOLLA, .x istället för .r?
+		float s1 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord + float2(dx, 0.0f)).x + epsilon < position.z) ? 0.0f : 1.0f;
+		float s2 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord + float2(0.0f, dy)).x + epsilon < position.z) ? 0.0f : 1.0f;
+		float s3 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord + float2(dx, dy)).x + epsilon < position.z) ? 0.0f : 1.0f;
+
+		float2 texelPos = float2(shadowmapCoord.x * 960.0f, shadowmapCoord.y * 540.0f); //.x, .y?
+
+		float2 lerps = frac(texelPos);
+
+		float shadowCoeff = lerp(lerp(s0, s1, lerps.x), lerp(s2, s3, lerps.x), lerps.y); //WHAT
+
+		if (colors.w > 0.2f && colors.w < 2.8f || colors.w > 4.2f) //no light calculations for terrain and billboarded particles
 		{
-			float3 lightToPoint = normalize(position.xyz - lights[i].lightPosition);
+			colors.xyz = colors.xyz * shadowCoeff;
+			position = positionTex.Sample(SampleTypePoint, input.UV);
+			float3 lightPos = lights[i].lightPosition;
+
+			float3 lightToPoint = normalize(position.xyz - lightPos/*lights[i].lightPosition*/);
 			float3 camToPoint = normalize(position.xyz - camPos);
 			float shiny = 1.0f;
 			float diffuseAngle = 0;
@@ -103,7 +123,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 			float RcDir = (dot(Reflection, camToPoint));
 			float LS = pow(RcDir, shiny);
 
-			result = (colors.xyz * LA) + (colors.xyz*LD) + (colors.xyz*LS);
+			result = (colors.xyz * LA) + (colors.xyz*LD);// +(colors.xyz*LS);
 		}
 		else
 		{

@@ -9,7 +9,7 @@ Camera::Camera()
 	arbitraryFloat2 = XMFLOAT2(0, 0);
 	lockLight = false;
 	flightMode = 0;
-
+	moveSpeed = 0.5f;
 }
 
 Camera::~Camera()
@@ -55,127 +55,127 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 			case 0x57: //w
 				if (GetAsyncKeyState(0x41)) //a
 				{
-					pos.z += 0.15 * forward.z * cos(XM_PI / 4);
-					pos.x += 0.15 * forward.x * cos(XM_PI / 4);
-					pos.z -= 0.15 * rightf.z * cos(XM_PI / 4);
-					pos.x -= 0.15 * rightf.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * forward.z * cos(XM_PI / 4);
+					pos.x += moveSpeed * forward.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * rightf.z * cos(XM_PI / 4);
+					pos.x -= moveSpeed * rightf.x * cos(XM_PI / 4);
 				}
 				else if (GetAsyncKeyState(0x44)) //d
 				{
-					pos.z += 0.15 * forward.z * cos(XM_PI / 4);
-					pos.x += 0.15 * forward.x * cos(XM_PI / 4);
-					pos.z += 0.15 * rightf.z * cos(XM_PI / 4);
-					pos.x += 0.15 * rightf.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * forward.z * cos(XM_PI / 4);
+					pos.x += moveSpeed * forward.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * rightf.z * cos(XM_PI / 4);
+					pos.x += moveSpeed * rightf.x * cos(XM_PI / 4);
 				}
 				else
 				{
-					pos.z += 0.15 * forward.z;
-					pos.x += 0.15 * forward.x;
+					pos.z += moveSpeed * forward.z;
+					pos.x += moveSpeed * forward.x;
 				}
 				if (GetAsyncKeyState(VK_SPACE)) // space
 				{
-					pos.y += 0.15;
+					pos.y += moveSpeed;
 				}
 				else if (GetAsyncKeyState(0x60)) //z
 				{
-					pos.y -= 0.15;
+					pos.y -= moveSpeed;
 				}
 				break;
 			case 0x41: //a
 				if (GetAsyncKeyState(0x57)) //w
 				{
-					pos.z += 0.15 * forward.z * cos(XM_PI / 4);
-					pos.x += 0.15 * forward.x * cos(XM_PI / 4);
-					pos.z -= 0.15 * rightf.z * cos(XM_PI / 4);
-					pos.x -= 0.15 * rightf.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * forward.z * cos(XM_PI / 4);
+					pos.x += moveSpeed * forward.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * rightf.z * cos(XM_PI / 4);
+					pos.x -= moveSpeed * rightf.x * cos(XM_PI / 4);
 				}
 				else if (GetAsyncKeyState(0x53)) //s
 				{
-					pos.z -= 0.15 * forward.z * cos(XM_PI / 4);
-					pos.x -= 0.15 * forward.x * cos(XM_PI / 4);
-					pos.z -= 0.15 * rightf.z * cos(XM_PI / 4);
-					pos.x -= 0.15 * rightf.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * forward.z * cos(XM_PI / 4);
+					pos.x -= moveSpeed * forward.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * rightf.z * cos(XM_PI / 4);
+					pos.x -= moveSpeed * rightf.x * cos(XM_PI / 4);
 				}
 				else
 				{
-					pos.z -= 0.15 * rightf.z;
-					pos.x -= 0.15 * rightf.x;
+					pos.z -= moveSpeed * rightf.z;
+					pos.x -= moveSpeed * rightf.x;
 				}
 				if (GetAsyncKeyState(VK_SPACE)) // space
 				{
-					pos.y += 0.15;
+					pos.y += moveSpeed;
 				}
 				else if (GetAsyncKeyState(0x60)) //z
 				{
-					pos.y -= 0.15;
+					pos.y -= moveSpeed;
 				}
 				break;
 			case 0x53: //s
 				if (GetAsyncKeyState(0x41)) //a
 				{
-					pos.z -= 0.15 * forward.z * cos(XM_PI / 4);
-					pos.x -= 0.15 * forward.x * cos(XM_PI / 4);
-					pos.z -= 0.15 * rightf.z * cos(XM_PI / 4);
-					pos.x -= 0.15 * rightf.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * forward.z * cos(XM_PI / 4);
+					pos.x -= moveSpeed * forward.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * rightf.z * cos(XM_PI / 4);
+					pos.x -= moveSpeed * rightf.x * cos(XM_PI / 4);
 				}
 				else if (GetAsyncKeyState(0x44)) //d
 				{
-					pos.z -= 0.15 * forward.z * cos(XM_PI / 4);
-					pos.x -= 0.15 * forward.x * cos(XM_PI / 4);
-					pos.z += 0.15 * rightf.z * cos(XM_PI / 4);
-					pos.x += 0.15 * rightf.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * forward.z * cos(XM_PI / 4);
+					pos.x -= moveSpeed * forward.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * rightf.z * cos(XM_PI / 4);
+					pos.x += moveSpeed * rightf.x * cos(XM_PI / 4);
 				}
 				else
 				{
-					pos.z -= 0.15 * forward.z;
-					pos.x -= 0.15 * forward.x;
+					pos.z -= moveSpeed * forward.z;
+					pos.x -= moveSpeed * forward.x;
 				}
 				if (GetAsyncKeyState(VK_SPACE)) // space
 				{
-					pos.y += 0.15;
+					pos.y += moveSpeed;
 				}
 				else if (GetAsyncKeyState(0x60)) //z
 				{
-					pos.y -= 0.15;
+					pos.y -= moveSpeed;
 				}
 				break;
 			case 0x44: //d
 				if (GetAsyncKeyState(0x57)) //w
 				{
-					pos.z += 0.15 * forward.z * cos(XM_PI / 4);
-					pos.x += 0.15 * forward.x * cos(XM_PI / 4);
-					pos.z += 0.15 * rightf.z * cos(XM_PI / 4);
-					pos.x += 0.15 * rightf.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * forward.z * cos(XM_PI / 4);
+					pos.x += moveSpeed * forward.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * rightf.z * cos(XM_PI / 4);
+					pos.x += moveSpeed * rightf.x * cos(XM_PI / 4);
 				}
 				else if (GetAsyncKeyState(0x53)) //s
 				{
-					pos.z -= 0.15 * forward.z * cos(XM_PI / 4);
-					pos.x -= 0.15 * forward.x * cos(XM_PI / 4);
-					pos.z += 0.15 * rightf.z * cos(XM_PI / 4);
-					pos.x += 0.15 * rightf.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * forward.z * cos(XM_PI / 4);
+					pos.x -= moveSpeed * forward.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * rightf.z * cos(XM_PI / 4);
+					pos.x += moveSpeed * rightf.x * cos(XM_PI / 4);
 				}
 				else
 				{
-					pos.z += 0.15 * rightf.z;
-					pos.x += 0.15 * rightf.x;
+					pos.z += moveSpeed * rightf.z;
+					pos.x += moveSpeed * rightf.x;
 				}
 				if (GetAsyncKeyState(VK_SPACE)) // space
 				{
-					pos.y += 0.15;
+					pos.y += moveSpeed;
 				}
 				else if (GetAsyncKeyState(0x60)) //z
 				{
-					pos.y -= 0.15;
+					pos.y -= moveSpeed;
 				}
 				break;
 			case VK_ESCAPE: //esc
 				msg->message = WM_QUIT;
 				break;
 			case VK_SPACE: //space
-					pos.y += 0.15;
+					pos.y += moveSpeed;
 				break;
 			case 0x5A:  //z
-					pos.y -= 0.15;
+					pos.y -= moveSpeed;
 				break;
 			case 0x31:	//1	//Normalmap on
 				this->keyData.normalMap = XMLoadFloat3(&XMFLOAT3(0, 0, 0));

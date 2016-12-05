@@ -30,6 +30,7 @@ private:
 	bool lockLight;
 	XMVECTOR lockedLight;
 	int flightMode;
+	float moveSpeed;
 
 };
 

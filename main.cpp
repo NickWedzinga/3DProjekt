@@ -207,8 +207,8 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		SetViewport(); //3. Sätt viewport
 		
 		cube.LoadObject(gDevice);	//4. Ersätter triangleData
-		ground->CreatePlane(XMFLOAT3(0, -5, 0), 20, 0, 20, gDevice);
-		wall->CreatePlane(XMFLOAT3(0, 0, 10), 20, 10, 0, gDevice);
+		ground->CreatePlane(XMFLOAT3(0, -5, 0), 40, 0, 20, gDevice);
+		wall->CreatePlane(XMFLOAT3(0, 0, 10), 40, 10, 0, gDevice);
 
 		lights->Init(1, gDevice);
 		CreateTerrain();
@@ -324,7 +324,6 @@ HWND InitWindow(HINSTANCE hInstance)
 
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
-	//Hur fungerar denna?
 	if (TwEventWin(hWnd, message, wParam, lParam)) // send event message to AntTweakBar
 		return 0; // event has been handled by AntTweakBar
 	

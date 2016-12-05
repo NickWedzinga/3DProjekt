@@ -37,11 +37,11 @@ void Lights::Init(unsigned int lights, ID3D11Device* gDevice)
 		//}
 		int i = 1 ;
 		//this->lights.position = XMFLOAT3(i * 2 - 4, /*i +*/ 5, -3);
-		this->lights.position = XMFLOAT3(0, /*i +*/ 3, -5);
+		this->lights.position = XMFLOAT3(10, /*i +*/ 10, -10);
 		this->lights.intensity = XMFLOAT3(i + 1, i + 1, i + 1);
 		this->lights.color = XMFLOAT3(i - 1, i, i + 1);
 		XMStoreFloat3(&this->lights.direction, XMLoadFloat3(&XMFLOAT3(0, 0, 0)) - XMLoadFloat3(&this->lights.position));
-		this->lights.Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(70), WIDTH / HEIGHT, NEAR, 8);
+		this->lights.Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(70), WIDTH / HEIGHT, NEAR, 40);
 		this->lights.View = XMMatrixLookToLH(XMLoadFloat3(&this->lights.position), XMLoadFloat3(&this->lights.direction), XMLoadFloat3(&XMFLOAT3(0.0f, 1.0f, 0.0f)));
 		this->lights.distance = XMFLOAT3(8, 8, 8);
 
@@ -112,7 +112,7 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 {
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
-	textureDesc.Width = float(WIDTH);
+	textureDesc.Width = WIDTH;
 	textureDesc.Height = HEIGHT;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
