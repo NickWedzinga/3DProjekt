@@ -9,18 +9,23 @@ class QuadTree
 private:
 	struct Node
 	{
-		std::vector<int> index;
+		std::vector<uint> index;
 	};
 public:
 	QuadTree(int levels);
 	~QuadTree();
-
-private:
-	void CreateQuadTree();
 	int FindParent(int nodeIndex);
 	void FindChildren(int nodeIndex, int* children);
+	uint GetFirstLeaf();
+	uint GetNumOfNodes();
+	uint GetNumOfLeaves();
+	void pushVertexIndex(uint treeIndex, uint index);
+	
+private:
+	void CreateQuadTree();
 
 	int levels;
+	int firstLeaf;
 	std::vector<Node> tree;
 };
 

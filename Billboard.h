@@ -3,6 +3,7 @@
 #define BILLBOARD_H
 
 #include "mesh.h"
+#include "QuadTree.h"
 
 class Billboard : public Mesh
 {
@@ -18,6 +19,8 @@ private:
 	XMMATRIX rotationMatrix;
 	ID3D11Buffer* bBBuffer = nullptr;
 	float width, height;
+	QuadTree* quadTree;
+
 	void InitShaders(ID3D11Device * gDevice);
 };
 

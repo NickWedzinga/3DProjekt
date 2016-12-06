@@ -20,6 +20,7 @@
 #define FOV 80.0f
 #define NEAR 0.1f
 #define FAR 200.0f
+typedef unsigned int uint;
 
 using namespace DirectX;
 
