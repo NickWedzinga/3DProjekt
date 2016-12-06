@@ -318,3 +318,8 @@ void Camera::CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection)
 	camDirection = XMLoadFloat3(&camDir);
 	ViewMatrix = XMMatrixLookToLH(cam, camDirection, up);
 }
+
+void Camera::NormalizePlane()
+{
+
+}

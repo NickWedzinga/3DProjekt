@@ -99,6 +99,7 @@
     <ClCompile Include="Lights.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="Plane.cpp" />
+    <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OBJLoader.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="Lights.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="Plane.h" />
+    <ClInclude Include="QuadTree.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="OBJLoader.h" />
   </ItemGroup>

@@ -11,7 +11,7 @@ Terrain::Terrain(int ID)
 	this->indexBuffer = 0;
 	this->terrainHeight = 0;
 	this->terrainWidth = 0;
-	this->scaleFactor = 0.8;
+	this->scaleFactor = 1;
 }
 
 Terrain::~Terrain()

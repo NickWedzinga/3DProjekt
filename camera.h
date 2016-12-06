@@ -25,6 +25,7 @@ public:
 
 private:
 	void CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection);
+	void NormalizePlane();
 	XMFLOAT3 pos;
 	XMFLOAT2 mouse;
 	XMFLOAT3 camDir;

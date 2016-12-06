@@ -3,9 +3,10 @@
 //--------------------------------------------------------------------------------------
 
 //Things to do!!!!
-//Bilboard backside, too many vertices
+//Bilboard backside, too many vertices	Funderar om det har något att göra med att vi ger skickar bara in mittpunkten till billboarden
 //Specular
-//Shadowmapping, things
+//Shadowmapping, things		PCF(Percentage-Closer Filtering) är när man kollar på pixlarna runt om kring och shadar med hjälp av de, vi gör inte detta.
+//Kolla på hur vi ändrar upplösning på shadow mappen.
 //Frustrum
 //Memoryleaks
 //Fatta koden
@@ -20,6 +21,7 @@
 #include "includes.h"
 #include "Lights.h"
 #include "Plane.h"
+#include "QuadTree.h"
 
 HWND InitWindow(HINSTANCE hInstance);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -54,6 +56,7 @@ Object cube(2);
 Plane* ground = new Plane(3);
 Plane* wall = new Plane(4);
 Terrain* terrain = new Terrain(5);
+QuadTree* quadTree = new QuadTree(4);	//Not ID
 Billboard* billboard = new Billboard(6);
 vector<Object*> cubes;
 
@@ -170,12 +173,15 @@ void Render()
 	billboard->Render(gDeviceContext);
 
 	//Pipeline 4	//Cube
+
+	cube.Render(gDeviceContext);
+
 	gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
 	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 
-	cube.Render(gDeviceContext);
+	
 
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
@@ -296,6 +302,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		delete lights;
 		delete ground;
 		delete wall;
+		delete quadTree;
 
 	}
 
