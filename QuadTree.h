@@ -10,8 +10,8 @@ private:
 	struct Node
 	{
 		std::vector<uint> index;
-		XMFLOAT2 bottomLeft;
-		XMFLOAT2 topRight;
+		XMINT2 bottomLeft;
+		XMINT2 topRight;
 	};
 public:
 	QuadTree(int levels);

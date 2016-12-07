@@ -28,23 +28,23 @@ void QuadTree::setTreeCoordinates(uint index, uint level)
 	uint nuIndex = index;
 	if (index == 0)
 	{
-		tree[0].bottomLeft = XMFLOAT2(0, 0);
-		tree[0].topRight = XMFLOAT2(TWIDTH - 1, THEIGHT - 1);
+		tree[0].bottomLeft = XMINT2(0, 0);
+		tree[0].topRight = XMINT2(TWIDTH - 1, THEIGHT - 1);
 		nuIndex = 1;
 	}
 	if (levels != 0)
 	{
 		uint parent = FindParent(nuIndex);
-		XMFLOAT2 min = tree[parent].bottomLeft;
-		XMFLOAT2 max = tree[parent].topRight;
+		XMINT2 min = tree[parent].bottomLeft;
+		XMINT2 max = tree[parent].topRight;
 		uint iter = 0;
 		for (uint i = 0; i < 2; ++i)
 		{
 			for (uint j = 0; j < 2; ++j)
 			{
-				tree[nuIndex + iter].bottomLeft = XMFLOAT2(min.x + (max.x / 2) * j, min.y + (max.y / 2) * i);
-				tree[nuIndex + iter].topRight = XMFLOAT2(((max.x + 1) / 2) * (j + 1) - 1, ((max.y + 1) / 2) * (i + 1) - 1);
-				if (level != levels)
+				tree[nuIndex + iter].bottomLeft = XMINT2(min.x + ((((max.x - min.x)) / 2) - 1) * j, min.y + ((((max.y - min.y) + 1) / 2) - 1)* i);
+				tree[nuIndex + iter].topRight = XMINT2(((max.x + 1) / 2) * (j + 1) - 1, ((max.y + 1) / 2) * (i + 1) - 1);
+				if (level != levels - 1)
 					setTreeCoordinates((nuIndex + iter) * 4 + 1, level + 1);
 				++iter;
 			}
