@@ -276,29 +276,29 @@ void Camera::CreatePlanes(XMMATRIX &proj, XMMATRIX &view)
 	temp[1].z = viewProj._34 - viewProj._31;
 	temp[1].w = viewProj._44 - viewProj._41;
 
-	//Top clipping plane
-	temp[2].x = viewProj._14 - viewProj._12;
-	temp[2].y = viewProj._24 - viewProj._22;
-	temp[2].z = viewProj._34 - viewProj._32;
-	temp[2].w = viewProj._44 - viewProj._42;
-
-	//Bottom clipping plane
-	temp[3].x = viewProj._14 + viewProj._12;
-	temp[3].y = viewProj._24 + viewProj._22;
-	temp[3].z = viewProj._34 + viewProj._32;
-	temp[3].w = viewProj._44 + viewProj._42;
-
 	//Near clipping plane
-	temp[4].x = viewProj._13;
-	temp[4].y = viewProj._23;
-	temp[4].z = viewProj._33;
-	temp[4].w = viewProj._43;
+	temp[2].x = viewProj._13;
+	temp[2].y = viewProj._23;
+	temp[2].z = viewProj._33;
+	temp[2].w = viewProj._43;
 
 	//Far clipping plane
-	temp[5].x = viewProj._14 - viewProj._13;
-	temp[5].y = viewProj._24 - viewProj._23;
-	temp[5].z = viewProj._34 - viewProj._33;
-	temp[5].w = viewProj._44 - viewProj._43;
+	temp[3].x = viewProj._14 - viewProj._13;
+	temp[3].y = viewProj._24 - viewProj._23;
+	temp[3].z = viewProj._34 - viewProj._33;
+	temp[3].w = viewProj._44 - viewProj._43;
+
+	//Top clipping plane
+	temp[4].x = viewProj._14 - viewProj._12;
+	temp[4].y = viewProj._24 - viewProj._22;
+	temp[4].z = viewProj._34 - viewProj._32;
+	temp[4].w = viewProj._44 - viewProj._42;
+
+	//Bottom clipping plane
+	temp[5].x = viewProj._14 + viewProj._12;
+	temp[5].y = viewProj._24 + viewProj._22;
+	temp[5].z = viewProj._34 + viewProj._32;
+	temp[5].w = viewProj._44 + viewProj._42;
 
 	
 
@@ -307,44 +307,6 @@ void Camera::CreatePlanes(XMMATRIX &proj, XMMATRIX &view)
 		this->plane[i] = XMLoadFloat4(&temp[i]);
 		this->plane[i] = XMVector4Normalize(this->plane[i]);
 	}
-}
-
-void Camera::Culling(QuadTree* quadTree)
-{
-
-	
-	/*
-	bottomright = (topright.x, bottomleft.y)
-	topleft = (bottomleft.x, topright.y)
-
-	for( i = tree[0]; i < 341; i++)
-		if(DIstanceToPoint(plane[0]
-		if(bottomleft > planes[0] && bottomleft < planes[1] && bottomleft > planes[4] && bottomleft < planes[5]
-			bottomleft är innanför frustum
-		else if (bottomright > planes[0] && bottomright < planes[1] && bottomright > planes[4] && bottomright < planes[5]
-			bottomright är innanför frustum
-		else if (topleft > planes[0] && topleft < planes[1] && topleft > planes[4] && topleft < planes[5]
-			topleft är innanför frustum
-		else if (topright > planes[0] && topright < planes[1] && topright > planes[4] && topright < planes[5]
-			topright är innanför frustum
-	*/
-	/*
-	IsInside(0)
-
-
-	{
-		bottomright = (topright.x, bottomleft.y)
-		topleft = (bottomleft.x, topright.y)
-
-	}
-	*/
-}
-
-float Camera::DistanceToPint(XMVECTOR plane, XMINT2 point)
-{
-	XMFLOAT4 temp;
-	XMStoreFloat4(&temp, plane);
-	return temp.x*point.x + temp.z*point.y + temp.w;
 }
 
 void Camera::CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection)
@@ -356,9 +318,4 @@ void Camera::CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection)
 	XMVECTOR up = XMLoadFloat3(&at1);
 	camDirection = XMLoadFloat3(&camDir);
 	ViewMatrix = XMMatrixLookToLH(cam, camDirection, up);
-}
-
-void Camera::NormalizePlane()
-{
-
 }

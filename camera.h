@@ -15,9 +15,6 @@ public:
 	void Init(XMMATRIX &view, XMVECTOR &camDirection);
 	void initKeyBuffer(ID3D11Device* gDevice);
 	void CreatePlanes(XMMATRIX &proj, XMMATRIX &view);
-	void Culling(QuadTree* quadTree);
-	uint InsideFrutum();
-	float DistanceToPint(XMVECTOR plane, XMINT2 point);
 
 	XMFLOAT3 getPos();
 	void setPos(XMFLOAT3 pos);
@@ -28,7 +25,7 @@ public:
 
 private:
 	void CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection);
-	void NormalizePlane();
+
 	XMFLOAT3 pos;
 	XMFLOAT2 mouse;
 	XMFLOAT3 camDir;

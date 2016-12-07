@@ -3,6 +3,8 @@
 #define QUADTREE_H
 
 #include "includes.h"
+#include "Billboard.h"
+
 
 class QuadTree
 {
@@ -24,10 +26,11 @@ public:
 	XMINT2 GetBottomLeft(uint index);
 	XMINT2 GetTopRight(uint index);
 	void pushVertexIndex(uint treeIndex, uint index);
+	void Culling(uint index, XMVECTOR planes[6], Billboard* billboard);
 	
 private:
 	void setTreeCoordinates(uint start, uint level);
-	
+	float DistanceToPoint(XMVECTOR plane, XMINT2 point);
 
 	int levels;
 	int firstLeaf;

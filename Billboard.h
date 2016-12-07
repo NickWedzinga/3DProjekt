@@ -14,6 +14,7 @@ public:
 	void Render(ID3D11DeviceContext* gDeviceContext);
 	void Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext);
 	void InitBBBuffer(ID3D11Device* gDevice);
+	vector<vertices> unused;
 private:
 	XMFLOAT3 position;
 	XMMATRIX rotationMatrix;
