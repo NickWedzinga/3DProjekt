@@ -21,6 +21,8 @@ public:
 	uint GetFirstLeaf();
 	uint GetNumOfNodes();
 	uint GetNumOfLeaves();
+	XMINT2 GetBottomLeft(uint index);
+	XMINT2 GetTopRight(uint index);
 	void pushVertexIndex(uint treeIndex, uint index);
 	
 private:

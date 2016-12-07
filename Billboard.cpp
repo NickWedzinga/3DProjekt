@@ -2,11 +2,9 @@
 #include <iostream>
 #include <time.h>
 
-Billboard::Billboard(int ID)
+Billboard::Billboard(int ID, QuadTree* quadTree)
 {
 	srand(time(NULL));
-	uint levels = 4;
-	quadTree = new QuadTree(levels);
 	uint firstLeaf = quadTree->GetFirstLeaf(), sqrtLeaves = sqrt(quadTree->GetNumOfLeaves()), numLeafs = quadTree->GetNumOfLeaves();
 	VertexData vertex;
 	vertex.ID = ID;
@@ -16,7 +14,7 @@ Billboard::Billboard(int ID)
 		for (uint j = 0; j < sqrtLeaves; ++j)
 		{
 			uint x = sqrtLeaves * j, z = sqrtLeaves * i;
-			for (uint k = 0; k < 1024 / numLeafs; ++k)
+			for (uint k = 0; k < 256 / numLeafs; ++k) // means we can't have fewer billboards than leaves
 			{
 				vertex.normal = XMFLOAT3(0, 0, 0);
 				vertex.position = XMFLOAT3((rand() % 256 / sqrtLeaves + x), rand() % 100 + 15, (rand() % 256 / sqrtLeaves + z));
@@ -33,7 +31,6 @@ Billboard::Billboard(int ID)
 Billboard::~Billboard()
 {
 	bBBuffer->Release();
-	delete quadTree;
 }
 
 void Billboard::Init(XMFLOAT3 camPos, ID3D11Device* gDevice)

@@ -3,6 +3,7 @@
 #define CAMERA_H
 
 #include "includes.h"
+#include "QuadTree.h"
 #include <Windowsx.h>
 
 class Camera
@@ -14,7 +15,9 @@ public:
 	void Init(XMMATRIX &view, XMVECTOR &camDirection);
 	void initKeyBuffer(ID3D11Device* gDevice);
 	void CreatePlanes(XMMATRIX &proj, XMMATRIX &view);
-	void Culling();
+	void Culling(QuadTree* quadTree);
+	uint InsideFrutum();
+	float DistanceToPint(XMVECTOR plane, XMINT2 point);
 
 	XMFLOAT3 getPos();
 	void setPos(XMFLOAT3 pos);

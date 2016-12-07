@@ -55,8 +55,9 @@ Lights* lights = new Lights;
 Object cube(2);
 Plane* ground = new Plane(3);
 Plane* wall = new Plane(4);
+QuadTree* quadTree = new QuadTree(4);	//Not ID
 Terrain* terrain = new Terrain(5);
-Billboard* billboard = new Billboard(6);
+Billboard* billboard = new Billboard(6, quadTree);
 vector<Object*> cubes;
 
 
@@ -301,7 +302,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		delete lights;
 		delete ground;
 		delete wall;
-
+		delete quadTree;
 	}
 
 	return (int) msg.wParam;

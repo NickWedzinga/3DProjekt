@@ -8,7 +8,7 @@
 class Billboard : public Mesh
 {
 public:
-	Billboard(int ID);
+	Billboard(int ID, QuadTree* quadTree);
 	~Billboard();
 	void Init(XMFLOAT3 camPos, ID3D11Device* gDevice);
 	void Render(ID3D11DeviceContext* gDeviceContext);
@@ -19,7 +19,6 @@ private:
 	XMMATRIX rotationMatrix;
 	ID3D11Buffer* bBBuffer = nullptr;
 	float width, height;
-	QuadTree* quadTree;
 
 	void InitShaders(ID3D11Device * gDevice);
 };
