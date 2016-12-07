@@ -8,7 +8,7 @@ Camera::Camera()
 	camDir = XMFLOAT3(0, 0, 0);
 	lockLight = false;
 	flightMode = 0;
-	moveSpeed = 0.5f;
+	moveSpeed = 0.8f;
 }
 
 Camera::~Camera()

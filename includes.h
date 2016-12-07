@@ -20,6 +20,8 @@
 #define FOV 80.0f
 #define NEAR 0.1f
 #define FAR 200.0f
+#define THEIGHT 256
+#define TWIDTH 256
 typedef unsigned int uint;
 
 using namespace DirectX;

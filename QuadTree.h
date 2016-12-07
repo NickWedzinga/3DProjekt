@@ -10,11 +10,13 @@ private:
 	struct Node
 	{
 		std::vector<uint> index;
+		XMFLOAT2 bottomLeft;
+		XMFLOAT2 topRight;
 	};
 public:
 	QuadTree(int levels);
 	~QuadTree();
-	int FindParent(int nodeIndex);
+	uint FindParent(int nodeIndex);
 	void FindChildren(int nodeIndex, int* children);
 	uint GetFirstLeaf();
 	uint GetNumOfNodes();
@@ -22,7 +24,8 @@ public:
 	void pushVertexIndex(uint treeIndex, uint index);
 	
 private:
-	void CreateQuadTree();
+	void setTreeCoordinates(uint start, uint level);
+	
 
 	int levels;
 	int firstLeaf;
