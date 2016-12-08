@@ -5,7 +5,7 @@
 #include "includes.h"
 #include "Billboard.h"
 
-class Camera;
+class Camera;	//Because circular includes, forward declaration of Camera because Camera has QuadTree included.
 
 class QuadTree
 {
@@ -28,7 +28,9 @@ public:
 	XMINT2 GetTopRight(uint index);
 	void pushVertexIndex(uint treeIndex, uint index);
 	void Culling(uint index, Camera* camera, Billboard* billboard);
-	
+	int getLevels();
+	void FillLeaves(int levels, XMINT2 min, XMINT2 max);
+
 private:
 	void setTreeCoordinates(uint start, uint level);
 	float DistanceToPoint(XMVECTOR plane, XMINT2 point);

@@ -21,12 +21,13 @@ Billboard::Billboard(int ID, QuadTree* quadTree)
 				vertex.position = XMFLOAT3((rand() % 256 / sqrtLeaves + x), rand() % 100 + 15, (rand() % 256 / sqrtLeaves + z));
 				vertex.UV = XMFLOAT2(0.5, 0.5);
 
-				quadTree->pushVertexIndex(firstLeaf + i  * sqrtLeaves + j, i * pow(sqrtLeaves, 2) + j * sqrtLeaves + k);
+				//quadTree->pushVertexIndex(firstLeaf + i  * sqrtLeaves + j, i * pow(sqrtLeaves, 2) + j * sqrtLeaves + k);
 
 				vertices.push_back(vertex);
 			}
 		}
 	}
+	quadTree->FillLeaves(quadTree->getLevels(), quadTree->GetBottomLeft(0), quadTree->GetTopRight(0), );
 }
 
 Billboard::~Billboard()
@@ -61,7 +62,7 @@ void Billboard::Render(ID3D11DeviceContext * gDeviceContext)
 	UINT32 stride;
 	UINT32 offset;
 
-	stride = sizeof(vertices[0]);
+	stride = sizeof(used[0]);
 	offset = 0;
 	gDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
@@ -104,6 +105,11 @@ void Billboard::InitBBBuffer(ID3D11Device* gDevice)
 	InitData.SysMemSlicePitch = 0;
 
 	gDevice->CreateBuffer(&cbDesc, &InitData, &bBBuffer);
+}
+
+void Billboard::MoveToUsed(uint index)
+{
+	used.push_back(vertices[index]);
 }
 
 

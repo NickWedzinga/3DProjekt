@@ -132,6 +132,12 @@ void QuadTree::Culling(uint index,Camera* camera, Billboard* billboard)
 		if (distance[0] >= 0 && distance[1] >= 0 && distance[2] >= 0 && distance[3] >= 0)
 			oneCornerInside = true;
 	}
+
+	if (!oneCornerInside)
+	{
+
+	}
+
 	if (tree[index].bottomLeft.x <= camPos.x && tree[index].topRight.x >= camPos.x && tree[index].bottomLeft.y <= camPos.z && tree[index].topRight.y >= camPos.z)
 	{
 		frustumInsideNode = true;
@@ -154,6 +160,43 @@ void QuadTree::Culling(uint index,Camera* camera, Billboard* billboard)
 			for (uint i = 0; i < size; ++i)
 			{
 				billboard->used.push_back(billboard->vertices[tree[index].index[i]]);
+			}
+		}
+	}
+}
+
+int QuadTree::getLevels()
+{
+	return levels;
+}
+
+void QuadTree::FillLeaves(int levels, XMINT2 min, XMINT2 max)
+{
+	XMINT2 nuMin;
+	XMINT2 nuMax;
+	if (levels != 0)
+	{
+		for (int i = 0; i < 2; ++i)
+		{
+			for (int j = 0; j < 2; ++j)
+			{
+				nuMin = XMINT2(min.x + (max.x / 2)*j, min.y + (max.y / 2)*i);
+				nuMax = XMINT2(min.x + ((max.x / 2) - 1)*i, min.y + ((max.y / 2) - 1)*j);
+				FillLeaves(levels - 1, nuMin, nuMax);
+			}
+		}
+	}
+	else
+	{
+		for (uint i = 0; i < 2; i++)
+		{
+			for (uint j = 0; j < 2; j++)
+			{
+				for (uint k = 0; i < 16; k++)
+				{
+					int index = k + 16 * j + 256 * i + min.y * 256 + min.x;
+					//Måste lägga in vertices[index] i used. Men kan inte få tag på vertices här och kan inte kalla på funktioner från Billboard.
+				}
 			}
 		}
 	}
