@@ -1,4 +1,5 @@
 #include "QuadTree.h"
+#include "camera.h"
 
 QuadTree::QuadTree(int levels)
 {
@@ -60,23 +61,23 @@ float QuadTree::DistanceToPoint(XMVECTOR plane, XMINT2 point)
 }
 
 
-uint QuadTree::FindParent(int nodeIndex)
+uint QuadTree::FindParent(uint nodeIndex)
 {
 	return ((nodeIndex + 3)/4) - 1;
 }
 
-void QuadTree::FindChildren(int nodeIndex, int* children) //remember to check children for nullptr when calling
+void QuadTree::FindChildren(uint nodeIndex, int* children) //remember to check children for nullptr when calling
 {
 	if (nodeIndex < firstLeaf)
 	{
 		for (int i = 1; i < 5; i++)
 		{
-			children[i] = nodeIndex * 4 + i;
+			children[i - 1] = nodeIndex * 4 + i;
 		}
 	}
 	else
 	{
-		children = nullptr;
+		children[0] = -1;
 	}
 }
 
@@ -110,10 +111,15 @@ void QuadTree::pushVertexIndex(uint treeIndex, uint index)
 	tree[treeIndex].index.push_back(index);
 }
 
-void QuadTree::Culling(uint index, XMVECTOR planes[6], Billboard* billboard)
+void QuadTree::Culling(uint index,Camera* camera, Billboard* billboard)
 {
-	bool oneCornerInside = true, bool frustumInsideNode = false;
-	float distance[16];
+	if (index == 0)
+	{
+		billboard->used.clear();
+	}
+	XMFLOAT3 camPos = camera->getPos();
+	bool oneCornerInside = false, frustumInsideNode = false;
+	float distance[4];
 	XMINT2 corners[4];
 	corners[0] = GetBottomLeft(index);						//Bottom left
 	corners[1] = GetTopRight(index);						//Top right
@@ -125,56 +131,35 @@ void QuadTree::Culling(uint index, XMVECTOR planes[6], Billboard* billboard)
 	{
 		for (uint j = 0; j < 4; ++j)
 		{
-			distance[i * 4 + j] = DistanceToPoint(planes[i], corners[j]);
-			if (distance[i] < 0)
-				oneCornerInside = false;
+			distance[j] = DistanceToPoint(camera->plane[j], corners[i]);
 		}
+		if (distance[0] >= 0 && distance[1] >= 0 && distance[2] >= 0 && distance[3] >= 0)
+			oneCornerInside = true;
+	}
+	if (tree[index].bottomLeft.x <= camPos.x && tree[index].topRight.x >= camPos.x && tree[index].bottomLeft.y <= camPos.z && tree[index].topRight.y >= camPos.z)
+	{
+		frustumInsideNode = true;
 	}
 
 	if (oneCornerInside || frustumInsideNode)
 	{
 		int children[4];
 		FindChildren(index, children);
-		if (children != nullptr)
+		if (children[0] != -1)
 		{
 			for (uint i = 0; i < 4; ++i)
 			{
-				Culling(children[i], planes, billboard); //this is where the recursion occurs + magic
+				Culling(children[i], camera, billboard); //this is where the recursion occurs + magic
+			}
+		}
+		else
+		{
+			uint size = tree[index].index.size();
+			for (uint i = 0; i < size; ++i)
+			{
+				billboard->used.push_back(billboard->vertices[tree[index].index[i]]);
 			}
 		}
 	}
-	else
-	{
-		uint size = tree[index].index.size()
-		for(uint i; i < size; ++i)
-		billboard->unused.push_back(billboard); //FIXA HÄR: göra get/set-vertices i mesh, ta bort vertiser från mesh
-	}
-
-
-	/*
-	
-
-	for( i = tree[0]; i < 341; i++)
-	if(DIstanceToPoint(plane[0], bottomleft) > 0 &&
-	if(bottomleft > planes[0] && bottomleft < planes[1] && bottomleft > planes[4] && bottomleft < planes[5]
-	bottomleft är innanför frustum
-	else if (bottomright > planes[0] && bottomright < planes[1] && bottomright > planes[4] && bottomright < planes[5]
-	bottomright är innanför frustum
-	else if (topleft > planes[0] && topleft < planes[1] && topleft > planes[4] && topleft < planes[5]
-	topleft är innanför frustum
-	else if (topright > planes[0] && topright < planes[1] && topright > planes[4] && topright < planes[5]
-	topright är innanför frustum
-	*/
-	/*
-	IsInside(0)
-
-
-	{
-	bottomright = (topright.x, bottomleft.y)
-	topleft = (bottomleft.x, topright.y)
-
-	}
-	*/
-
 }
 

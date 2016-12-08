@@ -3,7 +3,7 @@
 #define BILLBOARD_H
 
 #include "mesh.h"
-#include "QuadTree.h"
+class QuadTree;	//Because circular includes, forward declaration off QuadTree because QuadTree has billboard included.
 
 class Billboard : public Mesh
 {
@@ -14,7 +14,7 @@ public:
 	void Render(ID3D11DeviceContext* gDeviceContext);
 	void Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext);
 	void InitBBBuffer(ID3D11Device* gDevice);
-	vector<vertices> unused;
+	vector<VertexData> used;
 private:
 	XMFLOAT3 position;
 	XMMATRIX rotationMatrix;

@@ -5,6 +5,7 @@
 #include "includes.h"
 #include "Billboard.h"
 
+class Camera;
 
 class QuadTree
 {
@@ -18,15 +19,15 @@ private:
 public:
 	QuadTree(int levels);
 	~QuadTree();
-	uint FindParent(int nodeIndex);
-	void FindChildren(int nodeIndex, int* children);
+	uint FindParent(uint nodeIndex);
+	void FindChildren(uint nodeIndex, int* children);
 	uint GetFirstLeaf();
 	uint GetNumOfNodes();
 	uint GetNumOfLeaves();
 	XMINT2 GetBottomLeft(uint index);
 	XMINT2 GetTopRight(uint index);
 	void pushVertexIndex(uint treeIndex, uint index);
-	void Culling(uint index, XMVECTOR planes[6], Billboard* billboard);
+	void Culling(uint index, Camera* camera, Billboard* billboard);
 	
 private:
 	void setTreeCoordinates(uint start, uint level);

@@ -149,13 +149,14 @@ void Update()
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
 
 	camera->CreatePlanes(cData.ProjMatrix, cData.ViewMatrix);
+	quadTree->Culling(0, camera, billboard);
 	billboard->Update(camera->getPos(), gDeviceContext);
 }
 
 void Render()
 {
 	SetViewport();
-
+	
 	deferred.SetRenderTargets(gDeviceContext, gDepthStencilView);
 	//Pipeline 1	//Terrain
 	terrain->Render(gDeviceContext);

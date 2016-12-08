@@ -1,6 +1,7 @@
 #include "Billboard.h"
 #include <iostream>
 #include <time.h>
+#include "QuadTree.h"
 
 Billboard::Billboard(int ID, QuadTree* quadTree)
 {
@@ -14,7 +15,7 @@ Billboard::Billboard(int ID, QuadTree* quadTree)
 		for (uint j = 0; j < sqrtLeaves; ++j)
 		{
 			uint x = sqrtLeaves * j, z = sqrtLeaves * i;
-			for (uint k = 0; k < 256 / numLeafs; ++k) // means we can't have fewer billboards than leaves
+			for (uint k = 0; k < 4096 / numLeafs; ++k) // means we can't have fewer billboards than leaves
 			{
 				vertex.normal = XMFLOAT3(0, 0, 0);
 				vertex.position = XMFLOAT3((rand() % 256 / sqrtLeaves + x), rand() % 100 + 15, (rand() % 256 / sqrtLeaves + z));
@@ -65,18 +66,21 @@ void Billboard::Render(ID3D11DeviceContext * gDeviceContext)
 	gDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 	gDeviceContext->PSSetShaderResources(0, 1, &textureView);
-	gDeviceContext->Draw(vertices.size(), 0);
+	gDeviceContext->Draw(used.size(), 0);
 
 }
 
 void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
 {
-	for (unsigned int i = 0; i < vertices.size(); ++i)
+	for (unsigned int i = 0; i < vertices.size(); ++i)	//update is delayed 1 frame
 	{
 		vertices[i].position.y -= 0.08f;
 		if (vertices[i].position.y < 0)
 			vertices[i].position.y = 100;
-		gDeviceContext->UpdateSubresource(vertexBuffer, 0/*i*/, NULL, &vertices[0/*i*/], sizeof(VertexData), sizeof(vertices));
+	}
+	for (unsigned int i = 0; i < used.size(); ++i)
+	{
+		gDeviceContext->UpdateSubresource(vertexBuffer, 0/*i*/, NULL, &used[0/*i*/], sizeof(VertexData), sizeof(used));
 	}
 }
 
