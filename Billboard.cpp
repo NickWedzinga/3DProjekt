@@ -41,9 +41,9 @@ void Billboard::Init(XMFLOAT3 camPos, ID3D11Device* gDevice)
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	memset(&vertexBufferDesc, 0, sizeof(vertexBufferDesc));
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	vertexBufferDesc.ByteWidth = sizeof(VertexData)*vertices.size();
-	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
@@ -78,9 +78,13 @@ void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
 		if (vertices[i].position.y < 0)
 			vertices[i].position.y = 100;
 	}
-	for (unsigned int i = 0; i < used.size(); ++i)
+	if (used.size() != 0)
 	{
-		gDeviceContext->UpdateSubresource(vertexBuffer, 0/*i*/, NULL, &used[0/*i*/], sizeof(VertexData), sizeof(used));
+		gDeviceContext->UpdateSubresource(vertexBuffer, 0, NULL, &used[0], sizeof(VertexData), sizeof(VertexData) * used.size());
+		/*D3D11_MAPPED_SUBRESOURCE mappedResource;
+		HRESULT hr = gDeviceContext->Map(vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		memcpy(mappedResource.pData, &used[0], used.size());
+		gDeviceContext->Unmap(vertexBuffer, 0);*/
 	}
 }
 

@@ -5,7 +5,6 @@
 //Things to do!!!!
 //Bilboard backside, too many vertices	Funderar om det har något att göra med att vi ger skickar bara in mittpunkten till billboarden
 //Specular
-//Shadowmapping, things		PCF(Percentage-Closer Filtering) är när man kollar på pixlarna runt om kring och shadar med hjälp av de, vi gör inte detta.
 //Kolla på hur vi ändrar upplösning på shadow mappen.
 //Frustrum
 //Memoryleaks
@@ -149,6 +148,7 @@ void Update()
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
 
 	camera->CreatePlanes(cData.ProjMatrix, cData.ViewMatrix);
+	billboard->used.clear();
 	quadTree->Culling(0, camera, billboard);
 	billboard->Update(camera->getPos(), gDeviceContext);
 }

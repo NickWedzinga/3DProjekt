@@ -57,7 +57,7 @@ float QuadTree::DistanceToPoint(XMVECTOR plane, XMINT2 point)
 {
 	XMFLOAT4 temp;
 	XMStoreFloat4(&temp, plane);
-	return temp.x*point.x + temp.z*point.y + temp.w;
+	return temp.x*point.x + temp.y * 0 + temp.z*point.y + temp.w;
 }
 
 
@@ -113,18 +113,14 @@ void QuadTree::pushVertexIndex(uint treeIndex, uint index)
 
 void QuadTree::Culling(uint index,Camera* camera, Billboard* billboard)
 {
-	if (index == 0)
-	{
-		billboard->used.clear();
-	}
 	XMFLOAT3 camPos = camera->getPos();
 	bool oneCornerInside = false, frustumInsideNode = false;
 	float distance[4];
 	XMINT2 corners[4];
 	corners[0] = GetBottomLeft(index);						//Bottom left
-	corners[1] = GetTopRight(index);						//Top right
-	corners[2] = XMINT2(corners[1].x, corners[0].y);		//Bottom right
-	corners[3] = XMINT2(corners[0].x, corners[1].y);		//Top left
+	corners[3] = GetTopRight(index);						//Top right
+	corners[1] = XMINT2(corners[3].x, corners[0].y);		//Bottom right
+	corners[2] = XMINT2(corners[0].x, corners[3].y);		//Top left
 
 
 	for (uint i = 0; i < 4; ++i)
@@ -149,7 +145,7 @@ void QuadTree::Culling(uint index,Camera* camera, Billboard* billboard)
 		{
 			for (uint i = 0; i < 4; ++i)
 			{
-				Culling(children[i], camera, billboard); //this is where the recursion occurs + magic
+				Culling(children[i], camera, billboard); //this is where the recursion occurs + magic (just a joke, Francisco)
 			}
 		}
 		else
