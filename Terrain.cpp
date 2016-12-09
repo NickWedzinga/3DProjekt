@@ -17,6 +17,7 @@ Terrain::Terrain(int ID)
 Terrain::~Terrain()
 {
 	indexBuffer->Release();
+	delete heightMap;
 }
 
 void Terrain::Initialize(ID3D11Device* gDevice)
@@ -145,8 +146,6 @@ float Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
 
 void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 {
-	
-	unsigned long* indices;
 	int index, i, j;
 	float leftX, rightX, upperZ, bottomZ;
 

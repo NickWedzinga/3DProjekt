@@ -32,7 +32,7 @@ private:
 	int terrainWidth, terrainHeight;
 	int vertexCount;
 	HeightMapCord* heightMap;
-	ID3D11Buffer /**vertexBuffer,*/ *indexBuffer;
+	ID3D11Buffer* indexBuffer;
 	float scaleFactor;
 	
 };

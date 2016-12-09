@@ -27,26 +27,7 @@ DeferredRendering::~DeferredRendering()
 void DeferredRendering::CreateLightBuffer()
 {
 	XMFLOAT3 lightDir = XMFLOAT3(0.0f, 0.0f, -5.0f);
-	//lData.lightPos = XMLoadFloat3(&lightDir);
 }
-
-/*void DeferredRendering::Lightbuffer(ID3D11Device* gDevice)
-{
-	D3D11_BUFFER_DESC lightBufferDesc;
-	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	lightBufferDesc.ByteWidth = sizeof(LightBuffer);
-	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	lightBufferDesc.MiscFlags = 0;
-	lightBufferDesc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA InitLightData;
-	InitLightData.pSysMem = &lData;
-	InitLightData.SysMemPitch = 0;
-	InitLightData.SysMemSlicePitch = 0;
-
-	gDevice->CreateBuffer(&lightBufferDesc, &InitLightData, &gLightBuffer);
-}*/
 
 void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 {
@@ -111,6 +92,7 @@ int DeferredRendering::Picking(ID3D11DeviceContext* gDeviceContext)
 	intDataPointer = (int*)mappedResource.pData;
 	int pickID = intDataPointer[0];
 	gDeviceContext->Unmap(idRes, 0);
+	idRes->Release();
 	return pickID;
 }
 
@@ -148,8 +130,6 @@ void DeferredRendering::Render(ID3D11DeviceContext* gDeviceContext, ID3D11Buffer
 	gDeviceContext->PSSetShaderResources(0, 3, gSRVA);
 
 	gDeviceContext->PSSetConstantBuffers(1, 1, &lights);
-
-	//gDeviceContext->IASetVertexBuffers(0, 0, NULL, 0, 0);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 }

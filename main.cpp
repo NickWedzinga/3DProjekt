@@ -3,11 +3,10 @@
 //--------------------------------------------------------------------------------------
 
 //Things to do!!!!
-//Bilboard backside, too many vertices	Funderar om det har något att göra med att vi ger skickar bara in mittpunkten till billboarden
 //Specular
 //Kolla på hur vi ändrar upplösning på shadow mappen.
-//Frustrum
-//Memoryleaks
+//Frustrum, nästan
+//Memoryleaks, Har antagligen inga
 //Fatta koden
 
 
@@ -33,9 +32,6 @@ ID3D11DeviceContext* gDeviceContext = nullptr;
 ID3D11RenderTargetView* gBackbufferRTV = nullptr;
 ID3D11DepthStencilView* gDepthStencilView = nullptr;
 
-XMMATRIX view;
-XMMATRIX proj;
-
 using namespace DirectX;
 using namespace std;
 
@@ -43,8 +39,6 @@ TwBar *gMyBar;
 float background[3]{0, 0, 0};					
 
 int gID = -1;
-
-
 
 DeferredRendering deferred;
 
@@ -56,14 +50,16 @@ Plane* wall = new Plane(4);
 QuadTree* quadTree = new QuadTree(4);	//Not ID
 Terrain* terrain = new Terrain(5);
 Billboard* billboard = new Billboard(6, quadTree);
-vector<Object*> cubes;
+//vector<Object*> cubes;
+
+void zbuffer();
 
 void initBuffers()
 {
+	zbuffer();
 	camera->Init(gDevice);
 	deferred.CreateLightBuffer();
 	billboard->InitBBBuffer(gDevice);
-	
 }
 
 void zbuffer()
@@ -85,11 +81,6 @@ void zbuffer()
 
 	hr = gDevice->CreateTexture2D(&depthDesc, NULL, &gDepthStencilBuffer);
 	hr = gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &gDepthStencilView);
-}
-
-void CreateTerrain()
-{
-	terrain->Initialize(gDevice);
 }
 
 void SetViewport()
@@ -151,8 +142,6 @@ void Render()
 	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 
-	
-
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
 	//Pipeline 5 Shadows
@@ -197,7 +186,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		wall->CreatePlane(XMFLOAT3(0, 0, 10), 40, 10, 0, gDevice);
 
 		lights->Init(1, &cube, gDevice);
-		CreateTerrain();
+		terrain->Initialize(gDevice);
 		initBuffers();
 		//deferred.Lightbuffer(gDevice);
 		cube.materialCB(gDevice);
@@ -215,22 +204,14 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 		gMyBar = TwNewBar("KekCity");
 		TwAddVarRW(gMyBar, "ID: ", TW_TYPE_INT32, &gID, "min=-5 max=300 step=1");
-		//TwAddVarRW(gMyBar, "Background color", TW_TYPE_COLOR3F, &background, "");
-		//TwAddVarRW(gMyBar, "RotationX", TW_TYPE_FLOAT, &angleX, "min=0.00001 max=360 step=0.1");
-		//TwAddVarRW(gMyBar, "RotationY", TW_TYPE_FLOAT, &angleY, "min=0.00001 max=360 step=0.1");
-		//TwAddVarRW(gMyBar, "RotationZ", TW_TYPE_FLOAT, &angleZ, "min = 0.00001 max = 360 step = 0.1");
 
 		//5. Skapa vertex- och pixel-shaders
 		billboard->Init(camera->getPos(), gDevice);
 		deferred.InitializeLightShader(gDevice);
 		terrain->InitializeTerrainShaders(gDevice);
 		cube.InitializeObjectShaders(gDevice);
-
-		zbuffer(); //mad bufferz
 		
 		ShowWindow(wndHandle, nCmdShow);
-
-		//cube.moveMesh(XMFLOAT3(15, 15, 10), gDeviceContext);
 
 		while (WM_QUIT != msg.message)
 		{
@@ -253,12 +234,6 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 			}
 		}
 
-		cube.vertexBuffer->Release();
-		//gWorldViewProjBuffer->Release(); ??
-		//gVertexLayout->Release();
-		//gVertexShader->Release();
-		//gPixelShader->Release();
-		//gGeometryShader->Release(); ??
 		gBackbufferRTV->Release();
 		gSwapChain->Release();
 		gDevice->Release();
@@ -281,7 +256,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 HWND InitWindow(HINSTANCE hInstance)
 {
 	WNDCLASSEX wcex = { 0 };
-	wcex.cbSize = sizeof(WNDCLASSEX); 
+	wcex.cbSize			= sizeof(WNDCLASSEX); 
 	wcex.style          = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc    = WndProc;
 	wcex.hInstance      = hInstance;
@@ -306,7 +281,6 @@ HWND InitWindow(HINSTANCE hInstance)
 		nullptr);
 
 	return handle;
-
 }
 
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )

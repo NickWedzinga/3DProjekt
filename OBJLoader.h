@@ -6,9 +6,6 @@
 #include <sstream>
 #include <fstream>
 
-
-
-
 class Object : public Mesh
 {
 private:

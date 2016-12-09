@@ -121,7 +121,7 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 		XMStoreFloat3(&camPos, camera->cData.camPos);
 	}
 
-	bool oneCornerInside = false, frustumInsideNode = false;
+	bool oneCornerInside = false;/*, frustumInsideNode = false;*/
 	float distance[4];
 	XMINT2 corners[4];
 	corners[0] = GetBottomLeft(index);						//Bottom left
@@ -142,27 +142,27 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 
 	if (!oneCornerInside)
 	{
-		XMFLOAT3 outlines[4];
-		outlines[0] = XMFLOAT3(float(corners[1].x - corners[0].x), 0, float(corners[1].y - corners[0].y)); //bottom left -> bottom right
-		outlines[1] = XMFLOAT3(float(corners[3].x - corners[1].x), 0, float(corners[3].y - corners[1].y)); //bottom right -> top right
-		outlines[2] = XMFLOAT3(float(corners[2].x - corners[3].x), 0, float(corners[2].y - corners[3].y)); //top right -> top left
-		outlines[3] = XMFLOAT3(float(corners[0].x - corners[2].x), 0, float(corners[0].y - corners[2].y)); //top left -> bottom left
-		//test for intersection with planes, TODO: CHECK FRUSTUM SIZE
-		for (uint i = 0; i < 4; ++i)
-		{
-			for (uint j = 0; j < 4; ++j)
-			{
+		camera->SetFrustumCoordinates();
 
+
+		for (int i = 0; i < 8; ++i)
+		{
+			XMFLOAT3 corner;
+			XMStoreFloat3(&corner, camera->nearAndFarVertices[i]);
+			if (corner.x > GetBottomLeft(index).x && corner.x < GetTopRight(index).x && corner.z > GetBottomLeft(index).y && corner.z < GetTopRight(index).y)
+			{
+				oneCornerInside = true;
+				break;
 			}
 		}
 	}
 
-	if (tree[index].bottomLeft.x <= camPos.x && tree[index].topRight.x >= camPos.x && tree[index].bottomLeft.y <= camPos.z && tree[index].topRight.y >= camPos.z)
+	/*if ((tree[index].bottomLeft.x <= camPos.x && tree[index].topRight.x >= camPos.x && tree[index].bottomLeft.y <= camPos.z && tree[index].topRight.y >= camPos.z) && !oneCornerInside)
 	{
 		frustumInsideNode = true;
-	}
+	}*/
 
-	if (oneCornerInside || frustumInsideNode)
+	if (oneCornerInside/* || frustumInsideNode*/)
 	{
 		int children[4];
 		FindChildren(index, children);

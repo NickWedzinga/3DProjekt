@@ -8,14 +8,11 @@ Lights::Lights()
 
 Lights::~Lights()
 {
-	vertexShader2->Release();
-	//geometryShader->Release();
-	//pixelShader->Release();
-	//lightsDS->Release();
+	vertexShader->Release();
+	lightsDS->Release();
 	lightBuffer->Release();
 	for (int i = 0; i < 1; i++)
 	{
-		//lRTV[i]->Release();
 		lSRV[i]->Release();
 		lT[i]->Release();
 	}
@@ -60,24 +57,6 @@ void Lights::Init(unsigned int lights, Object* cube, ID3D11Device* gDevice)
 
 		gDevice->CreateBuffer(&lightBufferDesc, &InitLightData, &lightBuffer);
 		InitShaders(gDevice);
-
-		/*HRESULT hr;
-		ID3D11Texture2D* lightsSB = nullptr;
-		D3D11_TEXTURE2D_DESC depthDesc;
-		depthDesc.Width = WIDTH;
-		depthDesc.Height = HEIGHT;
-		depthDesc.MipLevels = 1;
-		depthDesc.ArraySize = 1;
-		depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		depthDesc.SampleDesc.Count = 1;
-		depthDesc.SampleDesc.Quality = 0;
-		depthDesc.Usage = D3D11_USAGE_DEFAULT;
-		depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-		depthDesc.CPUAccessFlags = 0;
-		depthDesc.MiscFlags = 0;
-
-		hr = gDevice->CreateTexture2D(&depthDesc, NULL, &lightsSB);
-		hr = gDevice->CreateDepthStencilView(lightsSB, NULL, &lightsDS);*/
 	}
 
 	CreateRenderTargets(gDevice);
@@ -85,26 +64,11 @@ void Lights::Init(unsigned int lights, Object* cube, ID3D11Device* gDevice)
 
 void Lights::InitShaders(ID3D11Device * gDevice)
 {
-	ID3D10Blob* pVS = nullptr;
-	ID3D10Blob* pGS = nullptr;
-	ID3D10Blob* pPS = nullptr;
 	HRESULT hr;
-
-	//D3DCompileFromFile(L"VertexShaderShadows.hlsl", nullptr, nullptr, "VS_main", "vs_5_0", 0, 0, &pVS, nullptr);
-	//D3DCompileFromFile(L"GeometryShaderShadows.hlsl", nullptr, nullptr, "main", "gs_5_0", 0, 0, &pGS, nullptr);
-	//D3DCompileFromFile(L"PixelShaderShadows.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &pPS, nullptr);
-
-	//hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader);
-	//hr = gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &geometryShader);
-	//hr = gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &pixelShader);
-
-	//pVS->Release();
-	//pGS->Release();
-	//pPS->Release();
-
+	ID3D10Blob* pVS = nullptr;
 	pVS = nullptr;
 	D3DCompileFromFile(L"VertexShaderShadows.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &pVS, nullptr);
-	hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader2);
+	hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader);
 	pVS->Release();
 }
 
@@ -125,14 +89,6 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 
 	for (int i = 0; i < 1/*this->lights.noLights.x*/; i++)
 		gDevice->CreateTexture2D(&textureDesc, NULL, &lT[0]);
-
-	//D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
-	//renderTargetViewDesc.Format = textureDesc.Format;
-	//renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	//renderTargetViewDesc.Texture2D.MipSlice = 0;
-
-	//for (int i = 0; i < 1/*this->lights.noLights.x*/; i++)
-	//	gDevice->CreateRenderTargetView(lT[i], &renderTargetViewDesc, &lRTV[i]);
 
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthDesc;
@@ -158,11 +114,9 @@ void Lights::Render(ID3D11DeviceContext* gDeviceContext)
 	gDeviceContext->ClearDepthStencilView(lightsDS, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	gDeviceContext->OMSetRenderTargets(0, nullptr, lightsDS);
 
-	gDeviceContext->VSSetShader(vertexShader2, nullptr, 0);
+	gDeviceContext->VSSetShader(vertexShader, nullptr, 0);
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->PSSetShader(nullptr, nullptr, 0);
-	//gDeviceContext->GSSetShader(geometryShader, nullptr, 0);
-	//gDeviceContext->PSSetShader(pixelShader, nullptr, 0);
 
 	gDeviceContext->VSSetConstantBuffers(0, 1, &lightBuffer);
 }
