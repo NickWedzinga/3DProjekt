@@ -9,13 +9,14 @@ Billboard::Billboard(int ID, QuadTree* quadTree)
 	uint firstLeaf = quadTree->GetFirstLeaf(), sqrtLeaves = sqrt(quadTree->GetNumOfLeaves()), numLeafs = quadTree->GetNumOfLeaves();
 	VertexData vertex;
 	vertex.ID = ID;
+	uint bbsPerNode = 4096 / numLeafs;
 
 	for (uint i = 0; i < sqrtLeaves; ++i)
 	{
 		for (uint j = 0; j < sqrtLeaves; ++j)
 		{
 			uint x = sqrtLeaves * j, z = sqrtLeaves * i;
-			for (uint k = 0; k < 4096 / numLeafs; ++k) // means we can't have fewer billboards than leaves
+			for (uint k = 0; k < bbsPerNode; ++k) // means we can't have fewer billboards than leaves
 			{
 				vertex.normal = XMFLOAT3(0, 0, 0);
 				vertex.position = XMFLOAT3((rand() % 256 / sqrtLeaves + x), rand() % 100 + 15, (rand() % 256 / sqrtLeaves + z));
@@ -27,7 +28,7 @@ Billboard::Billboard(int ID, QuadTree* quadTree)
 			}
 		}
 	}
-	quadTree->FillLeaves(quadTree->getLevels(), quadTree->GetBottomLeft(0), quadTree->GetTopRight(0), );
+	quadTree->FillLeaves(0, bbsPerNode);
 }
 
 Billboard::~Billboard()
@@ -81,11 +82,11 @@ void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
 	}
 	if (used.size() != 0)
 	{
-		gDeviceContext->UpdateSubresource(vertexBuffer, 0, NULL, &used[0], sizeof(VertexData), sizeof(VertexData) * used.size());
-		/*D3D11_MAPPED_SUBRESOURCE mappedResource;
+		//gDeviceContext->UpdateSubresource(vertexBuffer, 0, NULL, &used[0], sizeof(VertexData), sizeof(used));
+		D3D11_MAPPED_SUBRESOURCE mappedResource; //map/unmap recommended for doing every frame
 		HRESULT hr = gDeviceContext->Map(vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-		memcpy(mappedResource.pData, &used[0], used.size());
-		gDeviceContext->Unmap(vertexBuffer, 0);*/
+		memcpy(mappedResource.pData, &used[0], used.size() * sizeof(VertexData));
+		gDeviceContext->Unmap(vertexBuffer, 0);
 	}
 }
 

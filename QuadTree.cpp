@@ -43,7 +43,7 @@ void QuadTree::setTreeCoordinates(uint index, uint level)	//0, 0
 		{
 			for (uint j = 0; j < 2; ++j)
 			{
-				tree[nuIndex + iter].bottomLeft = XMINT2(min.x + ((max.x - min.x) / 2) * j, min.y + ((max.y - min.y) / 2) * i);
+				tree[nuIndex + iter].bottomLeft = XMINT2(min.x + ((max.x - min.x + 1) / 2) * j, min.y + ((max.y - min.y + 1) / 2) * i);
 				tree[nuIndex + iter].topRight = XMINT2(max.x - ((max.x - min.x + 1) / 2) * (1 - j), max.y - ((max.y - min.y + 1) / 2) * (1 - i));
 				if (level != levels - 1)
 					setTreeCoordinates((nuIndex + iter) * 4 + 1, level + 1);
@@ -111,7 +111,7 @@ void QuadTree::pushVertexIndex(uint treeIndex, uint index)
 	tree[treeIndex].index.push_back(index);
 }
 
-void QuadTree::Culling(uint index,Camera* camera, Billboard* billboard)
+void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 {
 	XMFLOAT3 camPos = camera->getPos();
 	bool oneCornerInside = false, frustumInsideNode = false;
@@ -135,7 +135,12 @@ void QuadTree::Culling(uint index,Camera* camera, Billboard* billboard)
 
 	if (!oneCornerInside)
 	{
-
+		XMFLOAT3 outlines[4];
+		outlines[0] = XMFLOAT3(float(corners[1].x - corners[0].x), 0, float(corners[1].y - corners[0].y)); //bottom left -> bottom right
+		outlines[1] = XMFLOAT3(float(corners[3].x - corners[1].x), 0, float(corners[3].y - corners[1].y)); //bottom right -> top right
+		outlines[2] = XMFLOAT3(float(corners[2].x - corners[3].x), 0, float(corners[2].y - corners[3].y)); //top right -> top left
+		outlines[3] = XMFLOAT3(float(corners[0].x - corners[2].x), 0, float(corners[0].y - corners[2].y)); //top left -> bottom left
+		//test for intersection with planes, TODO: CHECK FRUSTUM SIZE
 	}
 
 	if (tree[index].bottomLeft.x <= camPos.x && tree[index].topRight.x >= camPos.x && tree[index].bottomLeft.y <= camPos.z && tree[index].topRight.y >= camPos.z)
@@ -170,31 +175,25 @@ int QuadTree::getLevels()
 	return levels;
 }
 
-void QuadTree::FillLeaves(int levels, XMINT2 min, XMINT2 max)
+void QuadTree::FillLeaves(int index, uint bbsPerNode)
 {
-	XMINT2 nuMin;
-	XMINT2 nuMax;
-	if (levels != 0)
+	int children[4];
+	FindChildren(index, children);
+	XMINT2 min = GetBottomLeft(index);
+	for (int i = 0; i < 2; ++i)
 	{
-		for (int i = 0; i < 2; ++i)
+		for (int j = 0; j < 2; ++j)
 		{
-			for (int j = 0; j < 2; ++j)
+			if (index < (firstLeaf - pow(4, levels - 1)))
 			{
-				nuMin = XMINT2(min.x + (max.x / 2)*j, min.y + (max.y / 2)*i);
-				nuMax = XMINT2(min.x + ((max.x / 2) - 1)*i, min.y + ((max.y / 2) - 1)*j);
-				FillLeaves(levels - 1, nuMin, nuMax);
+				FillLeaves(children[i * 2 + j], bbsPerNode);
 			}
-		}
-	}
-	else
-	{
-		for (uint i = 0; i < 2; i++)
-		{
-			for (uint j = 0; j < 2; j++)
+			else
 			{
-				for (uint k = 0; i < 16; k++)
+				for (uint k = 0; k < bbsPerNode; k++)
 				{
-					int index = k + 16 * j + 256 * i + min.y * 256 + min.x;
+					uint indexPos = k + bbsPerNode * j + sqrt(GetNumOfLeaves()) * bbsPerNode * i + min.y * bbsPerNode + min.x;
+					tree[children[i * 2 + j]].index.push_back(indexPos);
 					//Måste lägga in vertices[index] i used. Men kan inte få tag på vertices här och kan inte kalla på funktioner från Billboard.
 				}
 			}

@@ -34,6 +34,9 @@ ID3D11RenderTargetView* gBackbufferRTV = nullptr;
 ID3D11DepthStencilView* gDepthStencilView = nullptr;
 ID3D11Buffer* gWorldViewProjBuffer = nullptr;
 
+XMMATRIX view;
+XMMATRIX proj;
+
 using namespace DirectX;
 using namespace std;
 
@@ -68,6 +71,15 @@ void CreateWorldMatrix()
 void CreateProjMatrix()
 {
 	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH/HEIGHT, NEAR, FAR);
+	proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH / HEIGHT, NEAR, 50);
+	XMFLOAT3 cam1 = XMFLOAT3(0, 5, -10);
+	XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
+	XMFLOAT3 camDir = XMFLOAT3(0, 0, 1);
+
+	XMVECTOR cam = XMLoadFloat3(&cam1);
+	XMVECTOR up = XMLoadFloat3(&at1);
+	XMVECTOR camDirection = XMLoadFloat3(&camDir);
+	view = XMMatrixLookToLH(cam, camDirection, up);
 }
 
 void constantBuffer()
@@ -147,7 +159,7 @@ void Update()
 	memcpy(mappedResource2.pData, &camera->keyData, sizeof(camera->keyData));
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
 
-	camera->CreatePlanes(cData.ProjMatrix, cData.ViewMatrix);
+	camera->CreatePlanes(cData.ProjMatrix, cData.ViewMatrix/*proj, view*/);
 	billboard->used.clear();
 	quadTree->Culling(0, camera, billboard);
 	billboard->Update(camera->getPos(), gDeviceContext);

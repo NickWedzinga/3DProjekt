@@ -30,34 +30,32 @@ void GS_main(point GS_IN input[1], inout TriangleStream< GSOutput > output)
 {
 	GSOutput element;
 
-	float3 bbToCam = camPos - input[0].pos;
-	bbToCam = normalize(bbToCam);
+	float3 camToBB = input[0].pos - camPos; //swap order to show that frustum culling works
+	camToBB = normalize(camToBB);
 	float3 up = float3(0.0f, 1.0f, 0.0f);
-	float3 left = cross(bbToCam, up);
+	float3 left = cross(camToBB, up);
 	left = normalize(left);
-	up = cross(left, bbToCam);
+	up = cross(left, camToBB); //-left funkar inte för up blir uppochner
 	up = normalize(up);
 	float scaleFactor = 0.5;
-	float4 pos[6];
-	pos[0] = input[0].pos + float4(left, 0.0f) * scaleFactor+ float4(up, 0.0f) * scaleFactor; //top left
-	pos[1] = input[0].pos - float4(left, 0.0f) * scaleFactor- float4(up, 0.0f) * scaleFactor; //bottom right
-	pos[2] = input[0].pos + float4(left, 0.0f) * scaleFactor- float4(up, 0.0f) * scaleFactor; //bottom left
-	pos[3] = input[0].pos + float4(left, 0.0f) * scaleFactor+ float4(up, 0.0f) * scaleFactor; //top left
-	pos[4] = input[0].pos - float4(left, 0.0f) * scaleFactor+ float4(up, 0.0f) * scaleFactor; //top right
-	pos[5] = input[0].pos - float4(left, 0.0f) * scaleFactor- float4(up, 0.0f) * scaleFactor; //bottom right
+	float4 pos[4];
 
-	float2 UV[6];
-	UV[0] = float2(0, 0); //top left
+	pos[0] = input[0].pos - float4(left, 0.0f) * scaleFactor + float4(up, 0.0f) * scaleFactor; //top right
+	pos[1] = input[0].pos - float4(left, 0.0f) * scaleFactor - float4(up, 0.0f) * scaleFactor; //bottom right
+	pos[2] = input[0].pos + float4(left, 0.0f) * scaleFactor + float4(up, 0.0f) * scaleFactor; //top left
+	pos[3] = input[0].pos + float4(left, 0.0f) * scaleFactor - float4(up, 0.0f) * scaleFactor; //bottom left
+
+	float2 UV[4];
+
+	UV[0] = float2(1, 0); //top right
 	UV[1] = float2(1, 1); //bottom right
-	UV[2] = float2(0, 1); //bottom left
-	UV[3] = float2(0, 0); //top left
-	UV[4] = float2(1, 0); //top right
-	UV[5] = float2(1, 1); //bottom right
+	UV[2] = float2(0, 0); //top left
+	UV[3] = float2(0, 1); //bottom left
 
-	element.normal = mul(ProjMatrix, mul(ViewMatrix, mul(WorldMatrix, bbToCam)));
+	element.normal = mul(ProjMatrix, mul(ViewMatrix, mul(WorldMatrix, camToBB)));
 	element.ID = input[0].ID;
 
-	for (uint i = 0; i < 6; ++i)
+	for (uint i = 0; i < 4; ++i)
 	{
 		pos[i].w = 1.0f;
 		float4 poss = pos[i];

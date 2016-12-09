@@ -29,7 +29,7 @@ public:
 	void pushVertexIndex(uint treeIndex, uint index);
 	void Culling(uint index, Camera* camera, Billboard* billboard);
 	int getLevels();
-	void FillLeaves(int levels, XMINT2 min, XMINT2 max);
+	void FillLeaves(int index, uint bbsPerNode);
 
 private:
 	void setTreeCoordinates(uint start, uint level);

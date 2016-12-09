@@ -19,7 +19,7 @@
 #define YPOS 600.0f
 #define FOV 80.0f
 #define NEAR 0.1f
-#define FAR 50.0f
+#define FAR 100.0f
 #define THEIGHT 256
 #define TWIDTH 256
 typedef unsigned int uint;
