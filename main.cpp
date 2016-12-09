@@ -32,7 +32,6 @@ ID3D11Device* gDevice = nullptr;
 ID3D11DeviceContext* gDeviceContext = nullptr;
 ID3D11RenderTargetView* gBackbufferRTV = nullptr;
 ID3D11DepthStencilView* gDepthStencilView = nullptr;
-ID3D11Buffer* gWorldViewProjBuffer = nullptr;
 
 XMMATRIX view;
 XMMATRIX proj;
@@ -43,15 +42,12 @@ using namespace std;
 TwBar *gMyBar;
 float background[3]{0, 0, 0};					
 
-float angleX = 0;
-float angleY = 0;
-float angleZ = 0;
 int gID = -1;
 
 
 
 DeferredRendering deferred;
-CONSTANT_BUFFER cData;
+
 Camera* camera = new Camera;
 Lights* lights = new Lights;
 Object cube(2);
@@ -62,49 +58,12 @@ Terrain* terrain = new Terrain(5);
 Billboard* billboard = new Billboard(6, quadTree);
 vector<Object*> cubes;
 
-
-void CreateWorldMatrix()
+void initBuffers()
 {
-	cData.WorldMatrix = XMMatrixRotationRollPitchYaw(angleX, angleY, angleZ);
-}
-
-void CreateProjMatrix()
-{
-	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH/HEIGHT, NEAR, FAR);
-	proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH / HEIGHT, NEAR, 50);
-	XMFLOAT3 cam1 = XMFLOAT3(0, 5, -10);
-	XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
-	XMFLOAT3 camDir = XMFLOAT3(0, 0, 1);
-
-	XMVECTOR cam = XMLoadFloat3(&cam1);
-	XMVECTOR up = XMLoadFloat3(&at1);
-	XMVECTOR camDirection = XMLoadFloat3(&camDir);
-	view = XMMatrixLookToLH(cam, camDirection, up);
-}
-
-void constantBuffer()
-{
-	CreateWorldMatrix();
-	camera->Init(cData.ViewMatrix, cData.camDirection);
-	CreateProjMatrix();
+	camera->Init(gDevice);
 	deferred.CreateLightBuffer();
-	camera->initKeyBuffer(gDevice);
 	billboard->InitBBBuffer(gDevice);
-
-	D3D11_BUFFER_DESC cbDesc;
-	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
-	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbDesc.MiscFlags = 0;
-	cbDesc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = &cData;
-	InitData.SysMemPitch = 0;
-	InitData.SysMemSlicePitch = 0;
-
-	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gWorldViewProjBuffer);
+	
 }
 
 void zbuffer()
@@ -147,22 +106,20 @@ void SetViewport()
 
 void Update()
 {
-	CreateWorldMatrix();
-
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	HRESULT hr2 = gDeviceContext->Map(gWorldViewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &cData, sizeof(cData));
-	gDeviceContext->Unmap(gWorldViewProjBuffer, 0);
+	HRESULT hr2 = gDeviceContext->Map(camera->gWorldViewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &camera->cData, sizeof(camera->cData));
+	gDeviceContext->Unmap(camera->gWorldViewProjBuffer, 0);
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource2;
 	gDeviceContext->Map(camera->keyDataBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource2);
 	memcpy(mappedResource2.pData, &camera->keyData, sizeof(camera->keyData));
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
-
-	camera->CreatePlanes(cData.ProjMatrix, cData.ViewMatrix/*proj, view*/);
+	
+	camera->CreatePlanes();
 	billboard->used.clear();
 	quadTree->Culling(0, camera, billboard);
-	billboard->Update(camera->getPos(), gDeviceContext);
+	billboard->Update(gDeviceContext);
 }
 
 void Render()
@@ -173,7 +130,7 @@ void Render()
 	//Pipeline 1	//Terrain
 	terrain->Render(gDeviceContext);
 
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
+	gDeviceContext->GSSetConstantBuffers(0, 1, &camera->gWorldViewProjBuffer);
 
 	gDeviceContext->Draw(terrain->vertices.size(), 0);
 	
@@ -190,7 +147,7 @@ void Render()
 	cube.Render(gDeviceContext);
 
 	gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
+	gDeviceContext->GSSetConstantBuffers(0, 1, &camera->gWorldViewProjBuffer);
 	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 
@@ -212,7 +169,7 @@ void Render()
 	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
-	gDeviceContext->PSSetConstantBuffers(0, 1, &gWorldViewProjBuffer);
+	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->gWorldViewProjBuffer);
 	deferred.Render(gDeviceContext, lights->lightBuffer);
 	lights->SetShaderResources(gDeviceContext);
 
@@ -241,7 +198,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 		lights->Init(1, &cube, gDevice);
 		CreateTerrain();
-		constantBuffer();
+		initBuffers();
 		//deferred.Lightbuffer(gDevice);
 		cube.materialCB(gDevice);
 		cube.NormalTexture("Resources/Normalmaps/normalmap.bmp", gDevice);
@@ -285,7 +242,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 				{
 					gID = deferred.Picking(gDeviceContext);
 				}
-				camera->Update(&msg, cData, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
+				camera->Update(&msg, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
 			}
 			else
 			{

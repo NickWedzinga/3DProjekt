@@ -16,7 +16,7 @@ Camera::~Camera()
 	keyDataBuffer->Release();;
 }
 
-void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
+void Camera::Update(MSG* msg, float heightY)
 {
 	float x, y;
 	XMFLOAT3 rightf, forward;
@@ -184,7 +184,7 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 			case 0x33:	//3	//Lock light off
 				lockLight = false;
 				break;
-			case 0x34:	//4	//Lock light off
+			case 0x34:	//4	//Lock light on
 				lockLight = true;
 				lockedLight = XMLoadFloat3(&camDir);
 				break;
@@ -199,22 +199,24 @@ void Camera::Update(MSG* msg, CONSTANT_BUFFER &cBuffer, float heightY)
 		}
 	}
 	if (!lockLight)
-		cBuffer.camPos = XMLoadFloat3(&pos);
+		cData.camPos = XMLoadFloat3(&pos);
 	if (heightY != -1 && flightMode == 0)
 		pos.y = heightY + 2;
-	if (!lockLight)
-		CreateViewMatrix(cBuffer.ViewMatrix, cBuffer.camDirection);
-	else
-		CreateViewMatrix(cBuffer.ViewMatrix, lockedLight);
 
+	CreateViewMatrix();
 }
 
-void Camera::Init(XMMATRIX &view, XMVECTOR &camDirection)
+void Camera::Init(ID3D11Device* gDevice)
 {
 	pos = XMFLOAT3(0, 2, -10);
 	mouse = XMFLOAT2(320, 240);
 	camDir = XMFLOAT3(0, 0, 1);
-	CreateViewMatrix(view, camDirection);
+
+	CreateWorldMatrix();
+	CreateViewMatrix();
+	CreateProjectionMatrix();
+	initKeyBuffer(gDevice);
+	CreateConstantBuffer(gDevice);
 }
 
 XMFLOAT3 Camera::getPos()
@@ -257,9 +259,20 @@ void Camera::initKeyBuffer(ID3D11Device* gDevice)
 	gDevice->CreateBuffer(&cbDesc, &InitData, &keyDataBuffer);
 }
 
-void Camera::CreatePlanes(XMMATRIX &proj, XMMATRIX &view)
+void Camera::CreatePlanes()
 {
-	XMMATRIX viewProjMatrix = view * proj;
+	XMMATRIX view = cData.ViewMatrix;
+
+	if (lockLight)
+	{
+		XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
+
+		XMVECTOR up = XMLoadFloat3(&at1);
+		cData.camDirection = lockedLight;
+		view = XMMatrixLookToLH(cData.camPos, cData.camDirection, up);
+	}
+
+	XMMATRIX viewProjMatrix = view * cData.ProjMatrix;
 	XMFLOAT4X4 viewProj;
 	XMFLOAT4 temp[6];
 	XMStoreFloat4x4(&viewProj, viewProjMatrix);
@@ -309,13 +322,41 @@ void Camera::CreatePlanes(XMMATRIX &proj, XMMATRIX &view)
 	}
 }
 
-void Camera::CreateViewMatrix(XMMATRIX &ViewMatrix, XMVECTOR &camDirection)
+void Camera::CreateWorldMatrix()
+{
+	cData.WorldMatrix = XMMatrixRotationRollPitchYaw(0, 0, 0);
+}
+
+void Camera::CreateProjectionMatrix()
+{
+	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH / HEIGHT, NEAR, FAR);
+}
+
+void Camera::CreateConstantBuffer(ID3D11Device* gDevice)
+{
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = &cData;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gWorldViewProjBuffer);
+}
+
+void Camera::CreateViewMatrix()
 {
 	XMFLOAT3 cam1 = XMFLOAT3(pos.x, pos.y, pos.z);
 	XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
 
 	XMVECTOR cam = XMLoadFloat3(&cam1);
 	XMVECTOR up = XMLoadFloat3(&at1);
-	camDirection = XMLoadFloat3(&camDir);
-	ViewMatrix = XMMatrixLookToLH(cam, camDirection, up);
+	cData.camDirection = XMLoadFloat3(&camDir);
+	cData.ViewMatrix = XMMatrixLookToLH(cam, cData.camDirection, up);
 }

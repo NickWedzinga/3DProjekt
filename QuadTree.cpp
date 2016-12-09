@@ -113,7 +113,14 @@ void QuadTree::pushVertexIndex(uint treeIndex, uint index)
 
 void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 {
-	XMFLOAT3 camPos = camera->getPos();
+	XMFLOAT3 camPos;
+	if (!camera->lockLight)
+		camPos = camera->getPos();
+	else
+	{
+		XMStoreFloat3(&camPos, camera->cData.camPos);
+	}
+
 	bool oneCornerInside = false, frustumInsideNode = false;
 	float distance[4];
 	XMINT2 corners[4];
@@ -141,6 +148,13 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 		outlines[2] = XMFLOAT3(float(corners[2].x - corners[3].x), 0, float(corners[2].y - corners[3].y)); //top right -> top left
 		outlines[3] = XMFLOAT3(float(corners[0].x - corners[2].x), 0, float(corners[0].y - corners[2].y)); //top left -> bottom left
 		//test for intersection with planes, TODO: CHECK FRUSTUM SIZE
+		for (uint i = 0; i < 4; ++i)
+		{
+			for (uint j = 0; j < 4; ++j)
+			{
+
+			}
+		}
 	}
 
 	if (tree[index].bottomLeft.x <= camPos.x && tree[index].topRight.x >= camPos.x && tree[index].bottomLeft.y <= camPos.z && tree[index].topRight.y >= camPos.z)

@@ -72,7 +72,7 @@ void Billboard::Render(ID3D11DeviceContext * gDeviceContext)
 
 }
 
-void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
+void Billboard::Update(ID3D11DeviceContext* gDeviceContext)
 {
 	for (unsigned int i = 0; i < vertices.size(); ++i)	//update is delayed 1 frame
 	{
@@ -82,7 +82,6 @@ void Billboard::Update(XMFLOAT3 camPos, ID3D11DeviceContext* gDeviceContext)
 	}
 	if (used.size() != 0)
 	{
-		//gDeviceContext->UpdateSubresource(vertexBuffer, 0, NULL, &used[0], sizeof(VertexData), sizeof(used));
 		D3D11_MAPPED_SUBRESOURCE mappedResource; //map/unmap recommended for doing every frame
 		HRESULT hr = gDeviceContext->Map(vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 		memcpy(mappedResource.pData, &used[0], used.size() * sizeof(VertexData));
