@@ -33,7 +33,7 @@ public:
 
 private:
 	void setTreeCoordinates(uint start, uint level);
-	float DistanceToPoint(XMVECTOR plane, XMINT2 point);
+	float DistanceToPoint(XMVECTOR plane, XMINT3 point);
 
 	int levels;
 	int firstLeaf;

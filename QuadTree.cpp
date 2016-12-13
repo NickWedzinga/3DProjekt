@@ -53,11 +53,11 @@ void QuadTree::setTreeCoordinates(uint index, uint level)	//0, 0
 	}
 }
 
-float QuadTree::DistanceToPoint(XMVECTOR plane, XMINT2 point)
+float QuadTree::DistanceToPoint(XMVECTOR plane, XMINT3 point)
 {
 	XMFLOAT4 temp;
 	XMStoreFloat4(&temp, plane);
-	return temp.x*point.x + temp.y * 0 + temp.z*point.y + temp.w;
+	return temp.x * point.x + temp.y * point.y + temp.z * point.z + temp.w;
 }
 
 
@@ -134,7 +134,11 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 	{
 		for (uint j = 0; j < 4; ++j)
 		{
-			distance[j] = DistanceToPoint(camera->plane[j], corners[i]);
+			for (uint k = 0; k < 2; ++k)
+			{
+				XMINT3 tempCorner = XMINT3(corners[i].x, 115 * k, corners[i].y);
+				distance[j] = DistanceToPoint(camera->plane[j], tempCorner/*corners[i]*/);
+			}
 		}
 		if (distance[0] >= 0 && distance[1] >= 0 && distance[2] >= 0 && distance[3] >= 0)
 			oneCornerInside = true;
@@ -149,7 +153,7 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 		{
 			XMFLOAT3 corner;
 			XMStoreFloat3(&corner, camera->nearAndFarVertices[i]);
-			if (corner.x > GetBottomLeft(index).x && corner.x < GetTopRight(index).x && corner.z > GetBottomLeft(index).y && corner.z < GetTopRight(index).y)
+			if (corner.x > corners[0].x && corner.x < corners[3].x && corner.z > corners[0].y && corner.z < corners[3].y)
 			{
 				oneCornerInside = true;
 				break;

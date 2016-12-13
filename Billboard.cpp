@@ -1,4 +1,5 @@
 #include "Billboard.h"
+#include "camera.h"
 #include <iostream>
 #include <time.h>
 #include "QuadTree.h"
@@ -22,13 +23,25 @@ Billboard::Billboard(int ID, QuadTree* quadTree)
 				vertex.position = XMFLOAT3((rand() % 256 / sqrtLeaves + x), rand() % 100 + 15, (rand() % 256 / sqrtLeaves + z));
 				vertex.UV = XMFLOAT2(0.5, 0.5);
 
-				//quadTree->pushVertexIndex(firstLeaf + i  * sqrtLeaves + j, i * pow(sqrtLeaves, 2) + j * sqrtLeaves + k);
-
 				vertices.push_back(vertex);
 			}
 		}
 	}
 	quadTree->FillLeaves(0, bbsPerNode);
+}
+
+Billboard::Billboard(int ID)
+{
+	VertexData vertex;
+	vertex.ID = ID;
+	for (uint i = 0; i < 8; ++i)
+	{
+		vertex.normal = XMFLOAT3(0, 0, 0);
+		vertex.position = XMFLOAT3(0, 0, 0);
+		vertex.UV = XMFLOAT2(0.5, 0.5);
+
+		vertices.push_back(vertex);
+	}
 }
 
 Billboard::~Billboard()
@@ -87,6 +100,22 @@ void Billboard::Update(ID3D11DeviceContext* gDeviceContext)
 		memcpy(mappedResource.pData, &used[0], used.size() * sizeof(VertexData));
 		gDeviceContext->Unmap(vertexBuffer, 0);
 	}
+}
+
+void Billboard::Update(ID3D11DeviceContext* gDeviceContext, Camera* camera)
+{
+	if (used.size() != 0)
+		used.clear();
+	for (uint i = 0; i < 8; ++i)
+	{
+		XMStoreFloat3(&vertices[i].position, camera->nearAndFarVertices[i] /*- (25 * camera->cData.camDirection)*/);
+		used.push_back(vertices[i]);
+	}
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource; //map/unmap recommended for doing every frame
+	HRESULT hr = gDeviceContext->Map(vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &used[0], used.size() * sizeof(VertexData));
+	gDeviceContext->Unmap(vertexBuffer, 0);
 }
 
 void Billboard::InitBBBuffer(ID3D11Device* gDevice)

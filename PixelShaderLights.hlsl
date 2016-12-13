@@ -1,4 +1,8 @@
 #define epsilon 0.00005f	//0.00005f works
+/**
+	When shadowRes == 1, epsilon should be >= 0.00003f
+	When shadowRes == 10 epsilon should be >= 0.000003f
+*/
 
 Texture2D colorTex : register(t0);
 Texture2D normalTex : register(t1);
@@ -64,6 +68,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	//float4 light4;
 	//float4 light5;
 	float3 result;
+	float shadowRes = 1;
 
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
 	colors = colorTex.Sample(SampleTypePoint, input.UV);
@@ -85,15 +90,15 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 		float2 shadowmapCoord = float2(position.x * 0.5, position.y * -0.5f) + float2(0.5f, 0.5f); //from -1, 1 to 0, 1 DUBBELKOLLA
 
-		float dx = 1.0f / 960.0f; //divide by SMAP_WIDTH
-		float dy = 1.0f / 540.0f; //divide by SMAP_HEIGHT
+		float dx = 1.0f / (960.0f*shadowRes); //divide by SMAP_WIDTH
+		float dy = 1.0f / (540.0f*shadowRes); //divide by SMAP_HEIGHT
 
 		float s0 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord).x + epsilon < position.z) ? 0.0f : 1.0f; //DUBBELKOLLA, .x istället för .r?
 		float s1 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord + float2(dx, 0.0f)).x + epsilon < position.z) ? 0.0f : 1.0f;
 		float s2 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord + float2(0.0f, dy)).x + epsilon < position.z) ? 0.0f : 1.0f;
 		float s3 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord + float2(dx, dy)).x + epsilon < position.z) ? 0.0f : 1.0f;
 
-		float2 texelPos = float2(shadowmapCoord.x * 960.0f, shadowmapCoord.y * 540.0f); //.x, .y?
+		float2 texelPos = float2(shadowmapCoord.x * (960.0f*shadowRes), shadowmapCoord.y * (540.0f*shadowRes)); //.x, .y?
 
 		float2 lerps = frac(texelPos);
 

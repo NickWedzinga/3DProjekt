@@ -270,7 +270,7 @@ void Camera::CreatePlanes()
 		XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
 
 		XMVECTOR up = XMLoadFloat3(&at1);
-		cData.camDirection = lockedLight;
+		cData.camDirection = XMVector3Normalize(lockedLight);
 		view = XMMatrixLookToLH(cData.camPos, cData.camDirection, up);
 	}
 
@@ -336,30 +336,34 @@ void Camera::CreateProjectionMatrix()
 
 void Camera::SetFrustumCoordinates()
 {
+	XMFLOAT3 temp[8];
 	float fovYhalf = FOV / 2;
 
-	float halfHeightNear = NEAR * tan(fovYhalf);
+	float halfHeightNear = NEAR * std::tan(fovYhalf);
 	float halfWidthNear = (WIDTH / HEIGHT) * halfHeightNear;
 
-	float halfHeightFar = FAR * tan(fovYhalf);
+	float halfHeightFar = FAR * std::tan(fovYhalf);
 	float halfWidthFar = (WIDTH / HEIGHT) * halfHeightFar;
 
 	XMFLOAT3 nearOrigin = XMFLOAT3(0.0f, 0.0f, NEAR);
 	XMFLOAT3 farOrigin = XMFLOAT3(0.0f, 0.0f, FAR);
 
-	nearAndFarVertices[0] = XMLoadFloat3(&XMFLOAT3(-halfWidthNear, -halfHeightNear, nearOrigin.z));		//Bottom Left Near
-	nearAndFarVertices[1] = XMLoadFloat3(&XMFLOAT3(halfWidthNear, -halfHeightNear, nearOrigin.z));		//Bottom Right Near
-	nearAndFarVertices[2] = XMLoadFloat3(&XMFLOAT3(-halfWidthNear, halfHeightNear, nearOrigin.z));		//Top Left Near
-	nearAndFarVertices[3] = XMLoadFloat3(&XMFLOAT3(halfWidthNear, halfHeightNear, nearOrigin.z));		//Top Right Near
-	nearAndFarVertices[4] = XMLoadFloat3(&XMFLOAT3(-halfWidthFar, -halfHeightFar, farOrigin.z));		//Bottom Left Far
-	nearAndFarVertices[5] = XMLoadFloat3(&XMFLOAT3(halfWidthFar, -halfHeightFar, farOrigin.z));			//Bottom Right Far
-	nearAndFarVertices[6] = XMLoadFloat3(&XMFLOAT3(-halfWidthFar, halfHeightFar, farOrigin.z));			//Top Left Far
-	nearAndFarVertices[7] = XMLoadFloat3(&XMFLOAT3(halfWidthFar, halfHeightFar, farOrigin.z));			//Top Right Far
+	nearAndFarVertices[0] = XMLoadFloat3(&XMFLOAT3(-halfWidthNear, -halfHeightNear, nearOrigin.z));		//Near
+	nearAndFarVertices[1] = XMLoadFloat3(&XMFLOAT3(halfWidthNear, -halfHeightNear, nearOrigin.z));		//Near
+	nearAndFarVertices[2] = XMLoadFloat3(&XMFLOAT3(-halfWidthNear, halfHeightNear, nearOrigin.z));		//Near
+	nearAndFarVertices[3] = XMLoadFloat3(&XMFLOAT3(halfWidthNear, halfHeightNear, nearOrigin.z));		//Near
+	nearAndFarVertices[4] = XMLoadFloat3(&XMFLOAT3(-halfWidthFar, -halfHeightFar, farOrigin.z));		//Far
+	nearAndFarVertices[5] = XMLoadFloat3(&XMFLOAT3(halfWidthFar, -halfHeightFar, farOrigin.z));			//Far
+	nearAndFarVertices[6] = XMLoadFloat3(&XMFLOAT3(-halfWidthFar, halfHeightFar, farOrigin.z));			//Far
+	nearAndFarVertices[7] = XMLoadFloat3(&XMFLOAT3(halfWidthFar, halfHeightFar, farOrigin.z));			//Far
+
+	 XMMATRIX view = XMMatrixTranspose(cData.ViewMatrix);
 
 	for (uint i = 0; i < 8; i++)
 	{
-		 nearAndFarVertices[i] = XMVector3Transform(nearAndFarVertices[i], cData.ViewMatrix);
-		 nearAndFarVertices[i] += XMLoadFloat3(&pos);
+		 nearAndFarVertices[i] = XMVector3Transform(nearAndFarVertices[i], view);
+		 XMStoreFloat3(&temp[i], nearAndFarVertices[i]);
+		 nearAndFarVertices[i] += XMLoadFloat3(&pos);	
 	}
 }
 
@@ -396,6 +400,6 @@ void Camera::CreateViewMatrix()
 
 	XMVECTOR cam = XMLoadFloat3(&cam1);
 	XMVECTOR up = XMLoadFloat3(&at1);
-	cData.camDirection = XMLoadFloat3(&camDir);
+	cData.camDirection = XMVector3Normalize(XMLoadFloat3(&camDir));
 	cData.ViewMatrix = XMMatrixLookToLH(cam, cData.camDirection, up);
 }
