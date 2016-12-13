@@ -37,7 +37,7 @@ private:
 	void initKeyBuffer(ID3D11Device* gDevice);
 	void CreateWorldMatrix();
 	void CreateProjectionMatrix();
-
+	void getMinMaxCorners(XMFLOAT3* input, XMFLOAT2* output);
 	XMFLOAT3 pos;
 	XMFLOAT2 mouse;
 	XMFLOAT3 camDir;

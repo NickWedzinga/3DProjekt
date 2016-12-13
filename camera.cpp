@@ -274,9 +274,8 @@ void Camera::CreatePlanes()
 
 	if (lockLight)
 	{
-		XMFLOAT3 at1 = XMFLOAT3(0, 1, 0);
-
-		XMVECTOR up = XMLoadFloat3(&at1);
+		XMFLOAT3 upF = XMFLOAT3(0, 1, 0);	
+		XMVECTOR up = XMLoadFloat3(&upF);
 		cData.camDirection = XMVector3Normalize(lockedLight);
 		view = XMMatrixLookToLH(cData.camPos, cData.camDirection, up);
 	}
@@ -341,6 +340,30 @@ void Camera::CreateProjectionMatrix()
 	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH / HEIGHT, NEAR, FAR);
 }
 
+void Camera::getMinMaxCorners(XMFLOAT3 * input, XMFLOAT2 * output) //input is 4, output is 2
+{
+	output[0] = output[1] = XMFLOAT2(input[0].x, input[0].z);
+	for (uint i = 0; i < 3; i++)
+	{
+		if (input[i + 1].x < output[0].x)
+		{
+			output[0].x = input[i + 1].x;
+		}
+		else if (input[i + 1].x > output[1].x)
+		{
+			output[1].x = input[i + 1].x;
+		}
+		if (input[i + 1].z < output[0].y)
+		{
+			output[0].y = input[i + 1].z;
+		}
+		else if (input[i + 1].z > output[1].y)
+		{
+			output[1].y = input[i + 1].z;
+		}
+	}
+}
+
 void Camera::SetFrustumCoordinates()
 {
 	XMFLOAT3 temp[8];
@@ -355,22 +378,22 @@ void Camera::SetFrustumCoordinates()
 	XMFLOAT3 nearOrigin = XMFLOAT3(0.0f, 0.0f, NEAR);
 	XMFLOAT3 farOrigin = XMFLOAT3(0.0f, 0.0f, FAR);
 
-	nearAndFarVertices[0] = XMLoadFloat3(&XMFLOAT3(-halfWidthNear, -halfHeightNear, nearOrigin.z));		//Near
-	nearAndFarVertices[1] = XMLoadFloat3(&XMFLOAT3(halfWidthNear, -halfHeightNear, nearOrigin.z));		//Near
-	nearAndFarVertices[2] = XMLoadFloat3(&XMFLOAT3(-halfWidthNear, halfHeightNear, nearOrigin.z));		//Near
-	nearAndFarVertices[3] = XMLoadFloat3(&XMFLOAT3(halfWidthNear, halfHeightNear, nearOrigin.z));		//Near
-	nearAndFarVertices[4] = XMLoadFloat3(&XMFLOAT3(-halfWidthFar, -halfHeightFar, farOrigin.z));		//Far
-	nearAndFarVertices[5] = XMLoadFloat3(&XMFLOAT3(halfWidthFar, -halfHeightFar, farOrigin.z));			//Far
-	nearAndFarVertices[6] = XMLoadFloat3(&XMFLOAT3(-halfWidthFar, halfHeightFar, farOrigin.z));			//Far
-	nearAndFarVertices[7] = XMLoadFloat3(&XMFLOAT3(halfWidthFar, halfHeightFar, farOrigin.z));			//Far
+	nearAndFarVertices[0] = XMLoadFloat3(&XMFLOAT3(-halfWidthNear, -halfHeightNear, nearOrigin.z));		//Top Right Near
+	nearAndFarVertices[1] = XMLoadFloat3(&XMFLOAT3(halfWidthNear, -halfHeightNear, nearOrigin.z));		//Top Left Near
+	nearAndFarVertices[2] = XMLoadFloat3(&XMFLOAT3(-halfWidthNear, halfHeightNear, nearOrigin.z));		//Bottom Right Near
+	nearAndFarVertices[3] = XMLoadFloat3(&XMFLOAT3(halfWidthNear, halfHeightNear, nearOrigin.z));		//Bottom Left Near
+	nearAndFarVertices[4] = XMLoadFloat3(&XMFLOAT3(-halfWidthFar, -halfHeightFar, farOrigin.z));		//Top Right Far
+	nearAndFarVertices[5] = XMLoadFloat3(&XMFLOAT3(halfWidthFar, -halfHeightFar, farOrigin.z));			//Top Left Far
+	nearAndFarVertices[6] = XMLoadFloat3(&XMFLOAT3(-halfWidthFar, halfHeightFar, farOrigin.z));			//Bottom Right Far
+	nearAndFarVertices[7] = XMLoadFloat3(&XMFLOAT3(halfWidthFar, halfHeightFar, farOrigin.z));			//Bottom Left Far
 
 	 XMMATRIX view = XMMatrixTranspose(cData.ViewMatrix);
 
 	for (uint i = 0; i < 8; i++)
 	{
-		 nearAndFarVertices[i] = XMVector3Transform(nearAndFarVertices[i], view);
-		 XMStoreFloat3(&temp[i], nearAndFarVertices[i]);
-		 nearAndFarVertices[i] += XMLoadFloat3(&pos);	
+		nearAndFarVertices[i] = XMVector3Transform(nearAndFarVertices[i], view);
+		XMStoreFloat3(&temp[i], nearAndFarVertices[i]);
+		nearAndFarVertices[i] += XMLoadFloat3(&pos);	
 	}
 }
 
@@ -402,8 +425,9 @@ void Camera::CreateConstantBuffer(ID3D11Device* gDevice)
 
 bool Camera::rayPlaneIntersect(XMINT2* corners)
 {
-	XMFLOAT3 nuCorners[4];
-	XMFLOAT2 rays[4];
+	bool output = false;
+	XMFLOAT3 nuCorners[4], planeCorners[4];
+	XMFLOAT2 rays[4], minMaxCorners[2];
 	XMFLOAT4 planeNormal[6];
 	XMFLOAT3 normDotOri, normDotRay;
 	XMVECTOR currentCorner, currentRay;
@@ -425,14 +449,67 @@ bool Camera::rayPlaneIntersect(XMINT2* corners)
 			currentRay = XMLoadFloat3(&XMFLOAT3(rays[i].x, 0, rays[i].y));
 			XMStoreFloat3(&normDotRay, XMVector3Dot(plane[j], currentRay));
 			t = (-planeNormal[j].w - normDotOri.x) / normDotRay.x;
-
+			if (j == 0)
+			{
+				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[0]);
+				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[2]);
+				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[4]);
+				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[6]);
+				getMinMaxCorners(planeCorners, minMaxCorners);
+			}
+			if (j == 1)
+			{
+				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[1]);
+				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[3]);
+				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[5]);
+				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[7]);
+				getMinMaxCorners(planeCorners, minMaxCorners);
+			}
+			if (j == 2)
+			{
+				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[0]);
+				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[1]);
+				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[2]);
+				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[3]);
+				getMinMaxCorners(planeCorners, minMaxCorners);
+			}
+			if (j == 3)
+			{
+				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[4]);
+				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[5]);
+				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[6]);
+				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[7]);
+				getMinMaxCorners(planeCorners, minMaxCorners);
+			}
+			if (j == 4)
+			{
+				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[0]);
+				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[1]);
+				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[4]);
+				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[5]);
+				getMinMaxCorners(planeCorners, minMaxCorners);
+			}
+			if (j == 5)
+			{
+				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[2]);
+				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[3]);
+				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[6]);
+				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[7]);
+				getMinMaxCorners(planeCorners, minMaxCorners);
+			}
 			if (t >= 0 && t <= 1)
 			{
-				return true;
+				XMFLOAT3 hitPoint;
+				XMStoreFloat3(&hitPoint, currentCorner + t * currentRay);
+				if (minMaxCorners[0].x <= hitPoint.x, minMaxCorners[1].x >= hitPoint.x, minMaxCorners[0].y <= hitPoint.z, minMaxCorners[1].y >= hitPoint.z)
+				{
+					output = true;
+					break;
+				}
 			}
 		}
 	}
-	return false;
+	return output;
 }
 
 void Camera::CreateViewMatrix()

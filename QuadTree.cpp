@@ -152,7 +152,7 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 		{
 			XMFLOAT3 frustumCorner;
 			XMStoreFloat3(&frustumCorner, camera->nearAndFarVertices[i]);
-			if (camera->rayPlaneIntersect(corners));
+			if (camera->rayPlaneIntersect(corners))
 			{
 				oneCornerInside = true;
 				break;
