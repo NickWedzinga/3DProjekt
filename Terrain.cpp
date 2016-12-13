@@ -27,12 +27,6 @@ void Terrain::Initialize(ID3D11Device* gDevice)
 	return;
 }
 
-void Terrain::ShutDown()
-{
-	ShutDownBuffers();
-	return;
-}
-
 void Terrain::Render(ID3D11DeviceContext *gDeviceContext)
 {
 	gDeviceContext->VSSetShader(vertexShader, nullptr, 0);
@@ -244,22 +238,6 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 	indexData.SysMemSlicePitch = 0;
 	gDevice->CreateBuffer(&indexBufferDesc, &indexData, &indexBuffer);
 
-	return;
-}
-
-void Terrain::ShutDownBuffers()
-{
-	if (indexBuffer)
-	{
-		indexBuffer->Release();
-		indexBuffer = 0;
-	}
-
-	if (vertexBuffer)
-	{
-		vertexBuffer->Release();
-		vertexBuffer = 0;
-	}
 	return;
 }
 

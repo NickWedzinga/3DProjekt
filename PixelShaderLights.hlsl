@@ -62,7 +62,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float4 colors;
 	float4 normals;
 	float4 position;
-	float4 light1;
+	//float4 light1;
 	//float4 light2;
 	//float4 light3;
 	//float4 light4;
@@ -103,6 +103,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 		float2 lerps = frac(texelPos);
 
 		float shadowCoeff = lerp(lerp(s0, s1, lerps.x), lerp(s2, s3, lerps.x), lerps.y); //WHAT
+
 
 		if (colors.w < 4.2f) //no light calculations for terrain and billboarded particles
 		{

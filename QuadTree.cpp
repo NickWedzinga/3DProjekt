@@ -125,9 +125,9 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 	float distance[4];
 	XMINT2 corners[4];
 	corners[0] = GetBottomLeft(index);						//Bottom left
-	corners[3] = GetTopRight(index);						//Top right
-	corners[1] = XMINT2(corners[3].x, corners[0].y);		//Bottom right
-	corners[2] = XMINT2(corners[0].x, corners[3].y);		//Top left
+	corners[2] = GetTopRight(index);						//Top right
+	corners[1] = XMINT2(corners[2].x, corners[0].y);		//Bottom right
+	corners[3] = XMINT2(corners[0].x, corners[2].y);		//Top left
 
 
 	for (uint i = 0; i < 4; ++i)
@@ -148,12 +148,11 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 	{
 		camera->SetFrustumCoordinates();
 
-
 		for (int i = 0; i < 8; ++i)
 		{
-			XMFLOAT3 corner;
-			XMStoreFloat3(&corner, camera->nearAndFarVertices[i]);
-			if (corner.x > corners[0].x && corner.x < corners[3].x && corner.z > corners[0].y && corner.z < corners[3].y)
+			XMFLOAT3 frustumCorner;
+			XMStoreFloat3(&frustumCorner, camera->nearAndFarVertices[i]);
+			if (camera->rayPlaneIntersect(corners));
 			{
 				oneCornerInside = true;
 				break;

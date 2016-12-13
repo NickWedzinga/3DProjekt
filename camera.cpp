@@ -9,6 +9,7 @@ Camera::Camera()
 	lockLight = false;
 	flightMode = 0;
 	moveSpeed = 0.8f;
+	dontUpdate = false;
 }
 
 Camera::~Camera()
@@ -195,6 +196,12 @@ void Camera::Update(MSG* msg, float heightY)
 			case 0x36:	//6	//FlightMode on
 				flightMode = 1;
 				break;
+			case 0x37:
+				dontUpdate = false;
+				break;
+			case 0x38:
+				dontUpdate = true;
+				break;
 			break;
 			}
 		}
@@ -342,7 +349,7 @@ void Camera::SetFrustumCoordinates()
 	float halfHeightNear = NEAR * std::tan(fovYhalf);
 	float halfWidthNear = (WIDTH / HEIGHT) * halfHeightNear;
 
-	float halfHeightFar = FAR * std::tan(fovYhalf);
+	float halfHeightFar = (FAR * std::tan(fovYhalf));
 	float halfWidthFar = (WIDTH / HEIGHT) * halfHeightFar;
 
 	XMFLOAT3 nearOrigin = XMFLOAT3(0.0f, 0.0f, NEAR);
@@ -391,6 +398,41 @@ void Camera::CreateConstantBuffer(ID3D11Device* gDevice)
 	InitData.SysMemSlicePitch = 0;
 
 	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gWorldViewProjBuffer);
+}
+
+bool Camera::rayPlaneIntersect(XMINT2* corners)
+{
+	XMFLOAT3 nuCorners[4];
+	XMFLOAT2 rays[4];
+	XMFLOAT4 planeNormal[6];
+	XMFLOAT3 normDotOri, normDotRay;
+	XMVECTOR currentCorner, currentRay;
+	float t = 0;
+
+	for (uint i = 0; i < 6; ++i)
+	{
+		XMStoreFloat4(&planeNormal[i], plane[i]);
+	}
+	for (uint i = 0; i < 4; ++i)
+	{
+		nuCorners[i] = XMFLOAT3(corners[i].x, 0, corners[i].y);
+		rays[i] = XMFLOAT2(corners[(i + 1) % 4].x - corners[i].x, corners[(i + 1) % 4].y - corners[i].y);
+		
+		for (uint j = 0; j < 6; ++j)
+		{
+			currentCorner = XMLoadFloat3(&nuCorners[i]);
+			XMStoreFloat3(&normDotOri, XMVector3Dot(plane[j], currentCorner)); //FOR SOME REASON THIS FUCKING FUCK CAN'T RETURN A MOTHERFLIPPING FLOAT
+			currentRay = XMLoadFloat3(&XMFLOAT3(rays[i].x, 0, rays[i].y));
+			XMStoreFloat3(&normDotRay, XMVector3Dot(plane[j], currentRay));
+			t = (-planeNormal[j].w - normDotOri.x) / normDotRay.x;
+
+			if (t >= 0 && t <= 1)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void Camera::CreateViewMatrix()

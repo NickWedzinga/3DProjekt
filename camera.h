@@ -28,6 +28,8 @@ public:
 	CONSTANT_BUFFER cData;
 	bool lockLight;
 	XMVECTOR nearAndFarVertices[8];
+	bool rayPlaneIntersect(XMINT2* corners);
+	bool dontUpdate;
 
 private:
 	void CreateViewMatrix();

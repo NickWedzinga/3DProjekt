@@ -17,7 +17,6 @@ public:
 	~Terrain();
 
 	void Initialize(ID3D11Device* gDevice);
-	void ShutDown();
 	void Render(ID3D11DeviceContext* gDeviceContext);
 	void LoadHeightMap();
 	int getVertexCount();
@@ -26,7 +25,6 @@ public:
 
 private:
 	void InitializeBuffers(ID3D11Device* gDevice);
-	void ShutDownBuffers();
 	void RenderBuffers(ID3D11DeviceContext* gDeviceContext);
 
 	int terrainWidth, terrainHeight;

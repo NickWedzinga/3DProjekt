@@ -110,9 +110,11 @@ void Update()
 	
 	camera->CreatePlanes();
 	billboard->used.clear();
+	if(camera->dontUpdate)
+		frustum->Update(gDeviceContext, camera);
 	quadTree->Culling(0, camera, billboard);
 	billboard->Update(gDeviceContext);
-	frustum->Update(gDeviceContext, camera);
+
 }
 
 void Render()
@@ -141,7 +143,6 @@ void Render()
 	cube.Render(gDeviceContext);
 
 	gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
-	gDeviceContext->GSSetConstantBuffers(0, 1, &camera->gWorldViewProjBuffer);
 	gDeviceContext->PSSetConstantBuffers(0, 1, &camera->keyDataBuffer);
 	gDeviceContext->PSSetConstantBuffers(1, 1, &cube.gMaterialBuffer);
 
@@ -157,7 +158,7 @@ void Render()
 
 	//Pipeline 6 Deferred
 	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
+	//gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
 	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
@@ -212,6 +213,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		//5. Skapa vertex- och pixel-shaders
 		billboard->Init(camera->getPos(), gDevice);
 		frustum->Init(camera->getPos(), gDevice);
+		frustum->Update(gDeviceContext, camera);
 		deferred.InitializeLightShader(gDevice);
 		terrain->InitializeTerrainShaders(gDevice);
 		cube.InitializeObjectShaders(gDevice);

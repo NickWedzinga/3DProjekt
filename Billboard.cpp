@@ -136,13 +136,6 @@ void Billboard::InitBBBuffer(ID3D11Device* gDevice)
 	gDevice->CreateBuffer(&cbDesc, &InitData, &bBBuffer);
 }
 
-void Billboard::MoveToUsed(uint index)
-{
-	used.push_back(vertices[index]);
-}
-
-
-
 void Billboard::InitShaders(ID3D11Device * gDevice)
 {
 	ID3D10Blob* pGS = nullptr;

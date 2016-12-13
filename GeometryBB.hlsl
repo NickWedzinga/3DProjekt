@@ -39,7 +39,7 @@ void GS_main(point GS_IN input[1], inout TriangleStream< GSOutput > output)
 	up = normalize(up);
 	float scaleFactor = 0.5;
 	if (input[0].ID == 7)
-		scaleFactor = 0.05f;
+		scaleFactor = 0.1f;
 	float4 pos[4];
 
 	pos[0] = input[0].pos - float4(left, 0.0f) * scaleFactor + float4(up, 0.0f) * scaleFactor; //top right
