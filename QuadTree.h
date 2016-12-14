@@ -13,8 +13,10 @@ private:
 	struct Node
 	{
 		std::vector<uint> index;
-		XMINT2 bottomLeft;
-		XMINT2 topRight;
+		XMFLOAT3 bottomLeft;
+		XMFLOAT3 topRight;
+		XMFLOAT3 center;
+		XMFLOAT3 halfDiagonal;
 	};
 public:
 	QuadTree(int levels);
@@ -24,17 +26,18 @@ public:
 	uint GetFirstLeaf();
 	uint GetNumOfNodes();
 	uint GetNumOfLeaves();
-	XMINT2 GetBottomLeft(uint index);
-	XMINT2 GetTopRight(uint index);
+	XMFLOAT3 GetBottomLeft(uint index);
+	XMFLOAT3 GetTopRight(uint index);
+	XMFLOAT3 GetCenter(uint index);
 	void pushVertexIndex(uint treeIndex, uint index);
 	void Culling(uint index, Camera* camera, Billboard* billboard);
 	int getLevels();
 	void FillLeaves(int index, uint bbsPerNode);
+	bool HitBoundingBox(uint index, XMVECTOR* frustum);
 
 private:
 	void setTreeCoordinates(uint start, uint level);
 	float DistanceToPoint(XMVECTOR plane, XMINT3 point);
-
 	int levels;
 	int firstLeaf;
 	std::vector<Node> tree;
