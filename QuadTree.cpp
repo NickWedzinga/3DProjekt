@@ -48,7 +48,6 @@ void QuadTree::setTreeCoordinates(uint index, uint level)	//0, 0
 				tree[nuIndex + iter].bottomLeft = XMFLOAT3(min.x + ((max.x - min.x + 1) / 2) * j, 0.0f,  min.z + ((max.z - min.z + 1) / 2) * i);
 				tree[nuIndex + iter].topRight = XMFLOAT3(max.x - ((max.x - min.x + 1) / 2) * (1 - j), 115,  max.z - ((max.z - min.z + 1) / 2) * (1 - i));
 				tree[nuIndex + iter].center = XMFLOAT3(tree[nuIndex + iter].bottomLeft.x + (tree[nuIndex + iter].topRight.x - tree[nuIndex + iter].bottomLeft.x) / 2, 115 / 2, tree[nuIndex + iter].bottomLeft.z + (tree[nuIndex + iter].topRight.z - tree[nuIndex + iter].bottomLeft.z) / 2);
-				//fel halfDiagonal
 				tree[nuIndex + iter].halfDiagonal = XMFLOAT3(tree[nuIndex + iter].center.x - tree[nuIndex + iter].bottomLeft.x, tree[nuIndex + iter].center.y - tree[nuIndex + iter].bottomLeft.y, tree[nuIndex + iter].center.z - tree[nuIndex + iter].bottomLeft.z);
 				if (level != levels - 1)
 					setTreeCoordinates((nuIndex + iter) * 4 + 1, level + 1);
@@ -131,56 +130,6 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 		XMStoreFloat3(&camPos, camera->cData.camPos);
 	}
 
-	//bool oneCornerInside = false;/*, frustumInsideNode = false;*/
-	////float distance[4];
-	//XMFLOAT3 corners[8];
-	//corners[0] = GetBottomLeft(index);						//Bottom bottom left
-	//corners[6] = GetTopRight(index);						//Top top right
-	//corners[1] = XMFLOAT3(corners[6].x, 0, corners[0].z);	//Bottom bottom right
-	//corners[2] = XMFLOAT3(corners[6].x, 0, corners[6].z);	//Bottom top right
-	//corners[3] = XMFLOAT3(corners[0].x, 0, corners[6].z);	//Bottom top left
-	//corners[4] = XMFLOAT3(corners[0].x, 115, corners[0].z);	//Top bottom left
-	//corners[5] = XMFLOAT3(corners[6].x, 115, corners[0].z);	//Top bottom right
-	//corners[7] = XMFLOAT3(corners[0].x, 115, corners[6].y);		//Top top left
-
-
-	//for (uint i = 0; i < 4; ++i)
-	//{
-	//	for (uint j = 0; j < 4; ++j)
-	//	{
-	//		for (uint k = 0; k < 2; ++k)
-	//		{
-	//			XMINT3 tempCorner = XMINT3(corners[i].x, 115 * k, corners[i].y);
-	//			//distance[j] = DistanceToPoint(camera->plane[j], tempCorner/*corners[i]*/); Behövs inte längre
-	//		}
-	//	}
-	//	//if (distance[0] >= 0 && distance[1] >= 0 && distance[2] >= 0 && distance[3] >= 0) Behövs inte längre
-	//		//oneCornerInside = true;
-	//}
-
-	//if (!oneCornerInside)
-	//{
-	//	camera->SetFrustumCoordinates();
-
-	//	for (int i = 0; i < 8; ++i)
-	//	{
-	//		XMFLOAT3 frustumCorner;
-	//		XMStoreFloat3(&frustumCorner, camera->nearAndFarVertices[i]);
-	//		//if (camera->rayPlaneIntersect(corners)) Behövs inte längre
-	//		if (HitBoundingBox)
-	//		{
-	//			oneCornerInside = true;
-	//			break;
-	//		}
-	//	}
-	//}
-
-	/*if ((tree[index].bottomLeft.x <= camPos.x && tree[index].topRight.x >= camPos.x && tree[index].bottomLeft.y <= camPos.z && tree[index].topRight.y >= camPos.z) && !oneCornerInside) Behövs inte längre
-	{
-		frustumInsideNode = true;
-	}*/
-
-	//if (oneCornerInside)
 	if (HitBoundingBox(index, camera->plane))
 	{
 		int children[4];
@@ -235,7 +184,7 @@ void QuadTree::FillLeaves(int index, uint bbsPerNode)
 
 bool QuadTree::HitBoundingBox(uint index, XMVECTOR * frustumVec)
 {
-	bool result = false;
+	bool result = true;
 	float e = 0;
 	float s = 0;
 	XMFLOAT4 planeNor;
@@ -247,25 +196,12 @@ bool QuadTree::HitBoundingBox(uint index, XMVECTOR * frustumVec)
 		planeAbs = XMFLOAT3(sqrt(pow(planeNor.x, 2)), sqrt(pow(planeNor.y, 2)), sqrt(pow(planeNor.z, 2)));
 		e = tree[index].halfDiagonal.x * planeAbs.x + tree[index].halfDiagonal.y * planeAbs.y + tree[index].halfDiagonal.z * planeAbs.z;
 		s = tree[index].center.x * planeNor.x + tree[index].center.y * planeNor.y + tree[index].center.z * planeNor.z + planeNor.w;
-		//if (s > 0)
-		//	s = -s;
-		if (s - e > 0)
+		if (s + e < 0)
+		{
 			result = false;
-
-		else if (s + e < 0)
-		{
-			result = true;
 			break;
 		}
-
-		else
-		{
-			result = true;
-			break;
-		}
-		
 	}
-
 	return result;
 }
 

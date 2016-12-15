@@ -35,7 +35,7 @@ void Lights::Init(unsigned int lights, Object* cube, ID3D11Device* gDevice)
 		int i = 1 ;
 		//this->lights.position = XMFLOAT3(i * 2 - 4, /*i +*/ 5, -3);
 		this->lights.position = XMFLOAT3(10, /*i +*/ 10, -10);
-		this->lights.intensity = XMFLOAT3(i + 1, i + 1, i + 1);
+		this->lights.intensity = XMFLOAT3(0.1, 1, 1);
 		this->lights.color = XMFLOAT3(i - 1, i, i + 1);
 		XMStoreFloat3(&this->lights.direction, XMLoadFloat3(&cube->center) - XMLoadFloat3(&this->lights.position));
 		this->lights.Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(70), WIDTH / HEIGHT, NEAR, 40);

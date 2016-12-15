@@ -30,20 +30,6 @@ Billboard::Billboard(int ID, QuadTree* quadTree)
 	quadTree->FillLeaves(0, bbsPerNode);
 }
 
-Billboard::Billboard(int ID)
-{
-	VertexData vertex;
-	vertex.ID = ID;
-	for (uint i = 0; i < 8; ++i)
-	{
-		vertex.normal = XMFLOAT3(0, 0, 0);
-		vertex.position = XMFLOAT3(0, 0, 0);
-		vertex.UV = XMFLOAT2(0.5, 0.5);
-
-		vertices.push_back(vertex);
-	}
-}
-
 Billboard::~Billboard()
 {
 	bBBuffer->Release();
@@ -100,22 +86,6 @@ void Billboard::Update(ID3D11DeviceContext* gDeviceContext)
 		memcpy(mappedResource.pData, &used[0], used.size() * sizeof(VertexData));
 		gDeviceContext->Unmap(vertexBuffer, 0);
 	}
-}
-
-void Billboard::Update(ID3D11DeviceContext* gDeviceContext, Camera* camera)
-{
-	if (used.size() != 0)
-		used.clear();
-	for (uint i = 0; i < 8; ++i)
-	{
-		XMStoreFloat3(&vertices[i].position, camera->nearAndFarVertices[i] /*- (25 * camera->cData.camDirection)*/);
-		used.push_back(vertices[i]);
-	}
-
-	D3D11_MAPPED_SUBRESOURCE mappedResource; //map/unmap recommended for doing every frame
-	HRESULT hr = gDeviceContext->Map(vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &used[0], used.size() * sizeof(VertexData));
-	gDeviceContext->Unmap(vertexBuffer, 0);
 }
 
 void Billboard::InitBBBuffer(ID3D11Device* gDevice)

@@ -5,7 +5,6 @@
 //Things to do!!!!
 //Specular
 //Kolla på hur vi ändrar upplösning på shadow mappen.
-//Frustrum, nästan
 //Memoryleaks, Har antagligen inga
 //Fatta koden
 
@@ -50,7 +49,6 @@ Plane* wall = new Plane(4);
 QuadTree* quadTree = new QuadTree(4);	//Not ID
 Terrain* terrain = new Terrain(5);
 Billboard* billboard = new Billboard(6, quadTree);
-Billboard* frustum = new Billboard(7);
 //vector<Object*> cubes;
 
 void zbuffer();
@@ -110,8 +108,6 @@ void Update()
 	
 	camera->CreatePlanes();
 	billboard->used.clear();
-	if(camera->dontUpdate)
-		frustum->Update(gDeviceContext, camera);
 	quadTree->Culling(0, camera, billboard);
 	billboard->Update(gDeviceContext);
 
@@ -136,7 +132,6 @@ void Render()
 
 	//Pipeline 3	//Billboard
 	billboard->Render(gDeviceContext);
-	frustum->Render(gDeviceContext);
 
 	//Pipeline 4	//Cube
 
@@ -197,7 +192,6 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		cube.NormalTexture("Resources/Normalmaps/normalmap.bmp", gDevice);
 		terrain->Texture("Resources/Textures/firstheightmap.jpg", gDevice);
 		billboard->Texture("Resources/Textures/SPITHOTFIRE.jpg", gDevice);
-		frustum->Texture("Resources/Textures/sphere1asd.jpg", gDevice);
 		ground->Texture("Resources/Textures/grass.jpg", gDevice);
 		wall->Texture("Resources/Textures/brick_16.jpg", gDevice);
 
@@ -212,8 +206,6 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 		//5. Skapa vertex- och pixel-shaders
 		billboard->Init(camera->getPos(), gDevice);
-		frustum->Init(camera->getPos(), gDevice);
-		frustum->Update(gDeviceContext, camera);
 		deferred.InitializeLightShader(gDevice);
 		terrain->InitializeTerrainShaders(gDevice);
 		cube.InitializeObjectShaders(gDevice);
