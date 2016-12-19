@@ -1,4 +1,4 @@
-#define epsilon 0.00005f	//0.00005f works
+#define epsilon 0.005f	//0.00005f works
 /**
 When shadowRes == 1, epsilon should be >= 0.00003f
 When shadowRes == 10 epsilon should be >= 0.000003f
@@ -116,10 +116,10 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 		float shiny = 10.0f;
 		float diffuseAngle = 0;
 
-		diffuseAngle = dot(-normals.xyz, /*lightToPoint*/normalize(position.xyz - lightPos));
+		diffuseAngle = dot(-normals.xyz, /*lightToPoint*//*normalize(position.xyz - lightPos)*/normalize(lights[i].direction));
 
 		//Calculate Ambient Light
-		float LA = 0.7f;
+		float LA = 0.2f;
 
 		//Calculate Diffuse Light
 		float LD = saturate(diffuseAngle);

@@ -126,8 +126,8 @@ void Render()
 	gDeviceContext->Draw(terrain->vertices.size(), 0);
 	
 	//Pipeline 2	//Floors and walls
-	ground->Render(gDeviceContext);
-	wall->Render(gDeviceContext);
+	//ground->Render(gDeviceContext);
+	//wall->Render(gDeviceContext);
 	
 
 	//Pipeline 3	//Billboard
@@ -189,7 +189,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		initBuffers();
 		//deferred.Lightbuffer(gDevice);
 		cube.materialCB(gDevice);
-		cube.NormalTexture("Resources/Normalmaps/normalmap.bmp", gDevice);
+		cube.NormalTexture("Resources/Normalmaps/robot-norm.jpg", gDevice);
 		terrain->Texture("Resources/Textures/firstheightmap.jpg", gDevice);
 		billboard->Texture("Resources/Textures/SPITHOTFIRE.jpg", gDevice);
 		ground->Texture("Resources/Textures/grass.jpg", gDevice);

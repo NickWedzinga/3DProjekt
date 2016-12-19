@@ -19,7 +19,7 @@ Object::~Object()
 void Object::LoadObject(ID3D11Device* gDevice)
 {
 	this->center = XMFLOAT3(0, 0, 0);
-	string myFile("Resources/Objs/box.obj"), special, line2, mtl;
+	string myFile("Resources/Objs/robot.obj"), special, line2, mtl;
 	ifstream file(myFile);
 	istringstream inputString;
 	
@@ -45,7 +45,7 @@ void Object::LoadObject(ID3D11Device* gDevice)
 		else if (line2.substr(0, 3) == "vt ")
 		{
 			inputString >> special >> vtx2.x >> vtx2.y;
-			vtx2 = XMFLOAT2(1 - vtx2.x, 1 - vtx2.y);
+			vtx2 = XMFLOAT2(vtx2.x, 1 - vtx2.y);
 			vertices2.push_back(vtx2);
 		}
 		else if (line2.substr(0, 3) == "vn ")
