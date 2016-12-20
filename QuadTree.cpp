@@ -204,4 +204,3 @@ bool QuadTree::HitBoundingBox(uint index, XMVECTOR * frustumVec)
 	}
 	return result;
 }
-

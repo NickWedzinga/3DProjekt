@@ -1,4 +1,4 @@
-#define epsilon 0.005f	//0.00005f works
+#define epsilon 0.0025f	//0.00005f works
 /**
 When shadowRes == 1, epsilon should be >= 0.00003f
 When shadowRes == 10 epsilon should be >= 0.000003f
@@ -68,9 +68,10 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	//float4 light4;
 	//float4 light5;
 	float3 result;
-	float shadowRes = 1;
+	float shadowRes = 100;
 
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
+	//return normals;
 	colors = colorTex.Sample(SampleTypePoint, input.UV);
 	//Samples the middle pixel of the color texture and sends the w-value (ID) back to the CPU
 	pickingBuffer[0] = colorTex.Sample(SampleTypePoint, float2(0.5f, 0.5f)).w + 0.5f;
@@ -98,26 +99,27 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float s2 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord + float2(0.0f, dy)).x + epsilon < position.z) ? 0.0f : 1.0f;
 	float s3 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord + float2(dx, dy)).x + epsilon < position.z) ? 0.0f : 1.0f;
 
-	float2 texelPos = float2(shadowmapCoord.x * (960.0f*shadowRes), shadowmapCoord.y * (540.0f*shadowRes)); //.x, .y?
+	float2 texelPos = float2(shadowmapCoord.x * (960.0f*shadowRes), shadowmapCoord.y * (540.0f*shadowRes)); //.x, .y
 
 	float2 lerps = frac(texelPos);
 
 	float shadowCoeff = lerp(lerp(s0, s1, lerps.x), lerp(s2, s3, lerps.x), lerps.y); //WHAT
+	//return float4(shadowCoeff, 0, 0, 1);
+	//return float4(normalize(lights[i].direction).x, 0, 0, 1.0f);
 
-
-	if (colors.w < 4.2f) //no light calculations for terrain and billboarded particles
+	if (colors.w < 4.5f) //no light calculations for terrain and billboarded particles
 	{
 		colors.xyz = colors.xyz * shadowCoeff;
 		position = positionTex.Sample(SampleTypePoint, input.UV);
 		float3 lightPos = lights[i].lightPosition;
 
-		float3 lightToPoint = normalize(lights[i].direction)/*normalize(position.xyz - lightPos)*/;
-		float3 camToPoint = normalize(position.xyz - camPos);
-		float shiny = 10.0f;
+		float3 lightToPoint = normalize(float3(-1.0f, -1.0f, 1.0f)/*lights[i].direction*/)/*normalize(position.xyz - lightPos)*/;
+		float4 camToPoint = normalize(position - float4(camPos, 1.0f));
+		float shiny = 1.0f;
 		float diffuseAngle = 0;
 
-		diffuseAngle = dot(-normals.xyz, /*lightToPoint*//*normalize(position.xyz - lightPos)*/normalize(lights[i].direction));
-
+		diffuseAngle = dot(-normals.xyz, normalize(float3(-1.0f,-1.0f,1.0f)/*lights[i].direction*/)); //TODO: Fixa så att lights[i].direction kommer in rätt, blir 0,0,1
+		
 		//Calculate Ambient Light
 		float LA = 0.2f;
 
@@ -125,8 +127,17 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 		float LD = saturate(diffuseAngle);
 
 		//Calculate specular intensity
-		float4 r = float4(reflect(-lightToPoint, normals), 0.0f);
-		float LS = pow(saturate(dot(r, camToPoint)), shiny);
+		float LS;
+		if (LD >= 0.01f)
+		{
+			float4 r = float4(normalize(reflect(lightToPoint, normals)), 0.0f);
+			//return r;
+			LS = pow(saturate(dot(r, -camToPoint)), shiny);
+		}
+		else
+		{
+			LS = 0;
+		}
 
 		result = ((colors.xyz * LA) + (colors.xyz * LD) + (colors.xyz * LS)) * lights[i].intensity.x;
 	}

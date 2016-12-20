@@ -126,8 +126,8 @@ void Render()
 	gDeviceContext->Draw(terrain->vertices.size(), 0);
 	
 	//Pipeline 2	//Floors and walls
-	//ground->Render(gDeviceContext);
-	//wall->Render(gDeviceContext);
+	ground->Render(gDeviceContext);
+	wall->Render(gDeviceContext);
 	
 
 	//Pipeline 3	//Billboard
@@ -169,7 +169,7 @@ void Render()
 int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
 {
 	MSG msg = { 0 };
-	ShowCursor(false);
+	ShowCursor(true);
 	HWND wndHandle = InitWindow(hInstance); //1. Skapa fönster
 	
 	if (wndHandle)
@@ -181,8 +181,8 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		SetViewport(); //3. Sätt viewport
 		
 		cube.LoadObject(gDevice);	//4. Ersätter triangleData
-		ground->CreatePlane(XMFLOAT3(0, -5, 0), 40, 0, 20, gDevice);
-		wall->CreatePlane(XMFLOAT3(0, 0, 10), 40, 10, 0, gDevice);
+		ground->CreatePlane(XMFLOAT3(0, 0, 0), 80, 0, 20, gDevice);
+		wall->CreatePlane(XMFLOAT3(0, 10, 10), 80, 20, 0, gDevice);
 
 		lights->Init(1, &cube, gDevice);
 		terrain->Initialize(gDevice);

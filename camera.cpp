@@ -216,7 +216,7 @@ void Camera::Update(MSG* msg, float heightY)
 
 void Camera::Init(ID3D11Device* gDevice)
 {
-	pos = XMFLOAT3(0, 2, -10);
+	pos = XMFLOAT3(10, 10, -10);
 	mouse = XMFLOAT2(320, 240);
 	camDir = XMFLOAT3(0, 0, 1);
 

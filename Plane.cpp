@@ -14,6 +14,7 @@ void Plane::CreatePlane(XMFLOAT3 pos, int width, int height, int depth, ID3D11De
 	VertexData temp;
 	temp.ID = this->ID;
 	temp.normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	
 
 	//Triangle 1
 	//Upper left
@@ -58,6 +59,16 @@ void Plane::CreatePlane(XMFLOAT3 pos, int width, int height, int depth, ID3D11De
 	temp.position.z = pos.z - depth / 2;
 	temp.UV = XMFLOAT2(1.0f, 1.0f);
 	vertices.push_back(temp);
+
+	XMVECTOR vec1 = XMLoadFloat3(&vertices[0].position) - XMLoadFloat3(&vertices[1].position);
+	XMVECTOR vec2 = XMLoadFloat3(&vertices[0].position) - XMLoadFloat3(&vertices[2].position);
+	XMFLOAT3 nor;
+	XMStoreFloat3(&nor, XMVector3Normalize(XMVector3Cross(vec1, vec2)));
+
+	for (uint i = 0; i < 6; i++)
+	{
+		vertices[i].normal = nor;
+	}
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	memset(&vertexBufferDesc, 0, sizeof(vertexBufferDesc));

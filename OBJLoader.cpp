@@ -51,6 +51,9 @@ void Object::LoadObject(ID3D11Device* gDevice)
 		else if (line2.substr(0, 3) == "vn ")
 		{
 			inputString >> special >> vtx3.x >> vtx3.y >> vtx3.z;
+			vtx3.x = -vtx3.x;	//Change if normals are inverted
+			vtx3.y = -vtx3.y;
+			vtx3.z = -vtx3.z;
 			vertices3.push_back(vtx3);
 		}
 		else if (line2.substr(0, 2) == "f ")
@@ -167,9 +170,9 @@ void Object::InitializeObjectShaders(ID3D11Device* gDevice)
 	ID3D10Blob* pGS = nullptr;
 	ID3D10Blob* pPS = nullptr;
 
-	D3DCompileFromFile(L"Vertex.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, nullptr);
-	D3DCompileFromFile(L"Geometry.hlsl", nullptr, nullptr, "GS", "gs_4_0", 0, 0, &pGS, nullptr);
-	D3DCompileFromFile(L"Fragment.hlsl", nullptr, nullptr, "PS_main", "ps_4_0", 0, 0, &pPS, nullptr);
+	D3DCompileFromFile(L"Vertex.hlsl", nullptr, nullptr, "VS_main", "vs_5_0", 0, 0, &pVS, nullptr);
+	D3DCompileFromFile(L"Geometry.hlsl", nullptr, nullptr, "GS", "gs_5_0", 0, 0, &pGS, nullptr);
+	D3DCompileFromFile(L"Fragment.hlsl", nullptr, nullptr, "PS_main", "ps_5_0", 0, 0, &pPS, nullptr);
 
 	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader);
 	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &geometryShader);

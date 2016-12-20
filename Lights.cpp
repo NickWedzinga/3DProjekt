@@ -34,14 +34,16 @@ void Lights::Init(unsigned int lights, Object* cube, ID3D11Device* gDevice)
 		//}
 		int i = 1 ;
 		//this->lights.position = XMFLOAT3(i * 2 - 4, /*i +*/ 5, -3);
-		this->lights.position = XMFLOAT3(0, /*i +*/ 0, 0);
+		this->lights.position = XMFLOAT3(100, 100, -100);
 		this->lights.intensity = XMFLOAT3(0.1, 1, 1);
-		this->lights.color = XMFLOAT3(i - 1, i, i + 1);
+		this->lights.color = XMFLOAT3(1, 1, 1);
 		//XMStoreFloat3(&this->lights.direction, XMLoadFloat3(&cube->center) - XMLoadFloat3(&this->lights.position));
-		this->lights.direction = XMFLOAT3(0, -1, 1);
+		this->lights.direction = XMFLOAT3(-1, -1, 1);
 		//this->lights.Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(70), WIDTH / HEIGHT, NEAR, 400);
-		this->lights.Proj = XMMatrixOrthographicLH(WIDTH, HEIGHT, NEAR, FAR);
-		this->lights.View = XMMatrixLookToLH(XMLoadFloat3(&this->lights.position), XMLoadFloat3(&this->lights.direction), XMLoadFloat3(&XMFLOAT3(0.0f, 1.0f, 0.0f)));
+		this->lights.Proj = XMMatrixOrthographicLH(WIDTH, HEIGHT, NEAR, 300);
+		XMVECTOR right = XMVector3Cross(XMLoadFloat3(&XMFLOAT3(0, 1, 0)), XMLoadFloat3(&this->lights.direction));
+		XMVECTOR up = XMVector3Cross(XMLoadFloat3(&this->lights.direction), right);
+		this->lights.View = XMMatrixLookToLH(XMLoadFloat3(&this->lights.position), XMLoadFloat3(&this->lights.direction), up);
 		this->lights.distance = XMFLOAT3(40, 40, 40);
 
 		D3D11_BUFFER_DESC lightBufferDesc;

@@ -91,22 +91,22 @@
     <None Include="Vertex.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="VertexST.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
     <None Include="Fragment.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </None>
     <None Include="Geometry.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="GeometryST.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="PixelST.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
     <None Include="GeometryBB.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="VertexSTold.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="GeometrySTold.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="PixelSTold.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>
@@ -115,6 +115,15 @@
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="PixelShaderLights.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexST.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="GeometryST.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelST.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
