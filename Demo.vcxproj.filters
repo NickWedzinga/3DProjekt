@@ -100,11 +100,11 @@
     <None Include="GeometryBB.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </None>
+    <None Include="VertexShaderShadows.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexShaderShadows.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="PixelShaderLights.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>

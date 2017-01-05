@@ -17,7 +17,7 @@ cbuffer CONSTANT_BUFFER2 : register (b1)
 struct PS_IN
 {
 	float2 UV : UV;
-	float3 normal : NORMAL;
+	float4 normal : NORMAL;
 	float4 pos : SV_POSITION; //implicit use by pixel shaders, has to be world coords, even though it is 
 	float4 worldPos : POSITION;
 	float ID : ID;
@@ -47,10 +47,10 @@ PS_OUT PS_main(PS_IN input)
 	output.position = input.worldPos;
 
 	if(normalMap.x == 1)
-		output.normal = float4(input.normal, 1.0f);
+		output.normal = input.normal;
 	else
 	{
-		newNormal.xyz = (textur.x * input.tangent) + (textur.y * input.bitangent) + (textur.z * -input.normal);
+		newNormal.xyz = (textur.x * input.tangent) + (textur.y * input.bitangent) + (textur.z * -input.normal.xyz);
 		newNormal = normalize(newNormal);
 		output.normal = newNormal;
 	}

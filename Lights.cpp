@@ -21,7 +21,7 @@ void Lights::Init(unsigned int lights, Object* cube, ID3D11Device* gDevice)
 	this->lights.intensity = XMLoadFloat3(&XMFLOAT3(1, 1, 1));
 
 	this->lights.direction = XMLoadFloat3(&XMFLOAT3(0,0,0)) - this->lights.position;
-	this->lights.Proj = XMMatrixOrthographicLH(WIDTH, HEIGHT, NEAR, 300);
+	this->lights.Proj = XMMatrixOrthographicLH(WIDTH/8, HEIGHT/8, NEAR, 300);
 	XMVECTOR right = XMVector3Cross(XMLoadFloat3(&XMFLOAT3(0, 1, 0)), this->lights.direction);
 	XMVECTOR up = XMVector3Cross(this->lights.direction, right);
 	this->lights.View = XMMatrixLookToLH(this->lights.position, this->lights.direction, up);

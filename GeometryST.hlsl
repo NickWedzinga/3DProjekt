@@ -39,8 +39,6 @@ void GS_main(triangle GS_IN input[3], inout TriangleStream< GSOutput > output)
 		element.pos = poss;
 		float4 normal = input[i].normal;
 		normal = mul(WorldMatrix, normal);
-	/*	normal = mul(ViewMatrix, normal);
-		normal = mul(ProjMatrix, normal);*/
 		element.normal = normal;
 		element.UV = input[i].UV;
 		element.ID = input[i].ID;

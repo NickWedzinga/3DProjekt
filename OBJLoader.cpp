@@ -212,7 +212,7 @@ void Object::Render(ID3D11DeviceContext * gDeviceContext)
 	gDeviceContext->PSSetShader(pixelShader, nullptr, 0);
 
 	gDeviceContext->PSSetShaderResources(0, 1, &textureView); //Pipelina texturen
-	gDeviceContext->PSSetShaderResources(1, 1, &norTexView);
+	gDeviceContext->PSSetShaderResources(1, 1, &norTexView);  //Pipelina normal-texturen
 
 	UINT32 vertexSize = sizeof(vertices[0]);
 	UINT32 offset = 0;

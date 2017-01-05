@@ -145,8 +145,8 @@ void Render()
 	//Pipeline 5 Shadows
 	lights->Render(gDeviceContext);
 	
-	gDeviceContext->Draw(cube.vertices.size(), 0);
-	ground->Render(gDeviceContext);
+	gDeviceContext->Draw(cube.vertices.size(), 0); //only draw call, not binding old shaders
+	ground->Render(gDeviceContext); //practically draw calls
 	wall->Render(gDeviceContext);
 
 

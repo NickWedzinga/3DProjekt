@@ -10,7 +10,7 @@ cbuffer CONSTANT_BUFFER : register(b0)
 struct GS_IN
 {
 	float2 UV : UV;
-	float3 normal : NORMAL;
+	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
 	float ID : ID;
 };
@@ -18,7 +18,7 @@ struct GS_IN
 struct GS_OUT
 {
 	float2 UV : UV;
-	float3 normal : NORMAL;
+	float4 normal : NORMAL;
 	float4 pos : SV_POSITION;
 	float4 worldPos : POSITION;
 	float ID : ID;
@@ -44,9 +44,6 @@ float3 CalculatefaceNormal(GS_IN input[3])
 
 [maxvertexcount(36)]
 
-//-----------------------------------------------------------------------------------------
-// GeometryShader: GSScene
-//-----------------------------------------------------------------------------------------
 void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 {
 	GS_OUT Output;
@@ -58,7 +55,7 @@ void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 	if (angle <= 0.0f) //Backface Culling
 	{
 
-		//Normal mapping ----------------------------------------------------------------
+		//Normal mapping
 		float3 deltaPos1 = float3(0, 0, 0);
 		float3 deltaPos2 = float3(0, 0, 0);
 		float2 deltaUV1 = float2(0, 0);
