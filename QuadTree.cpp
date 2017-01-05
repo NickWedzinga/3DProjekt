@@ -117,7 +117,7 @@ XMFLOAT3 QuadTree::GetCenter(uint index)
 
 void QuadTree::pushVertexIndex(uint treeIndex, uint index)
 {
-	tree[treeIndex].index.push_back(index);
+	tree[treeIndex].indices.push_back(index);
 }
 
 void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
@@ -127,7 +127,7 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 		camPos = camera->getPos();
 	else
 	{
-		XMStoreFloat3(&camPos, camera->cData.camPos);
+		XMStoreFloat3(&camPos, camera->cData.camPos); //because cam buffer holds saved position if cam is locked
 	}
 
 	if (HitBoundingBox(index, camera->plane))
@@ -138,15 +138,15 @@ void QuadTree::Culling(uint index, Camera* camera, Billboard* billboard)
 		{
 			for (uint i = 0; i < 4; ++i)
 			{
-				Culling(children[i], camera, billboard); //this is where the recursion occurs + magic (just a joke, Francisco)
+				Culling(children[i], camera, billboard); //this is where the recursion occurs
 			}
 		}
 		else
 		{
-			uint size = tree[index].index.size();
+			uint size = tree[index].indices.size(); //tree holds a bunch of indexes for the billboard vertice vector; by the index we're currently looking at
 			for (uint i = 0; i < size; ++i)
 			{
-				billboard->used.push_back(billboard->vertices[tree[index].index[i]]);
+				billboard->used.push_back(billboard->vertices[tree[index].indices[i]]);
 			}
 		}
 	}
@@ -164,18 +164,18 @@ void QuadTree::FillLeaves(int index, uint bbsPerNode)
 	XMFLOAT3 min = GetBottomLeft(index);
 	for (int i = 0; i < 2; ++i)
 	{
-		for (int j = 0; j < 2; ++j)
+		for (int j = 0; j < 2; ++j) // 2*2 = 4
 		{
 			if (index < (firstLeaf - pow(4, levels - 1)))
 			{
-				FillLeaves(children[i * 2 + j], bbsPerNode);
+				FillLeaves(children[i * 2 + j], bbsPerNode); //recursion
 			}
 			else
 			{
 				for (uint k = 0; k < bbsPerNode; k++)
 				{
 					uint indexPos = k + bbsPerNode * j + sqrt(GetNumOfLeaves()) * bbsPerNode * i + min.z * bbsPerNode + min.x; // min.z var min.y tidigare
-					tree[children[i * 2 + j]].index.push_back(indexPos);
+					tree[children[i * 2 + j]].indices.push_back(indexPos);
 				}
 			}
 		}

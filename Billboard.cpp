@@ -73,7 +73,7 @@ void Billboard::Render(ID3D11DeviceContext * gDeviceContext)
 
 void Billboard::Update(ID3D11DeviceContext* gDeviceContext)
 {
-	for (unsigned int i = 0; i < vertices.size(); ++i)	//update is delayed 1 frame
+	for (unsigned int i = 0; i < vertices.size(); ++i)	//update is delayed 1 frame. Must be done on vertices, because used is cleared in QuadTree::Culling
 	{
 		vertices[i].position.y -= 0.08f;
 		if (vertices[i].position.y < 0)

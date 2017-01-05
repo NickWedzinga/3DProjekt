@@ -49,17 +49,6 @@ Plane* wall = new Plane(4);
 QuadTree* quadTree = new QuadTree(4);	//Not ID
 Terrain* terrain = new Terrain(5);
 Billboard* billboard = new Billboard(6, quadTree);
-//vector<Object*> cubes;
-
-void zbuffer();
-
-void initBuffers()
-{
-	zbuffer();
-	camera->Init(gDevice);
-	deferred.CreateLightBuffer();
-	billboard->InitBBBuffer(gDevice);
-}
 
 void zbuffer()
 {
@@ -80,6 +69,16 @@ void zbuffer()
 
 	hr = gDevice->CreateTexture2D(&depthDesc, NULL, &gDepthStencilBuffer);
 	hr = gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &gDepthStencilView);
+}
+
+void initBuffers()
+{
+	zbuffer();
+	camera->Init(gDevice);
+	billboard->InitBBBuffer(gDevice);
+	lights->Init(1, &cube, gDevice);
+	terrain->Initialize(gDevice);
+	cube.materialCB(gDevice);
 }
 
 void SetViewport()
@@ -107,7 +106,7 @@ void Update()
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
 	
 	camera->CreatePlanes();
-	billboard->used.clear();
+	billboard->used.clear(); //does not work if in qt->culling because culling is recursive
 	quadTree->Culling(0, camera, billboard);
 	billboard->Update(gDeviceContext);
 
@@ -115,7 +114,7 @@ void Update()
 
 void Render()
 {
-	SetViewport();
+	SetViewport();	//Need to set viewport because we cleard the Device context
 	
 	deferred.SetRenderTargets(gDeviceContext, gDepthStencilView);
 	//Pipeline 1	//Terrain
@@ -153,7 +152,6 @@ void Render()
 
 	//Pipeline 6 Deferred
 	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	//gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
 	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 
@@ -169,7 +167,7 @@ void Render()
 int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
 {
 	MSG msg = { 0 };
-	ShowCursor(true);
+	ShowCursor(false);
 	HWND wndHandle = InitWindow(hInstance); //1. Skapa fönster
 	
 	if (wndHandle)
@@ -184,11 +182,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		ground->CreatePlane(XMFLOAT3(0, 0, 0), 80, 0, 20, gDevice);
 		wall->CreatePlane(XMFLOAT3(0, 10, 10), 80, 20, 0, gDevice);
 
-		lights->Init(1, &cube, gDevice);
-		terrain->Initialize(gDevice);
 		initBuffers();
-		//deferred.Lightbuffer(gDevice);
-		cube.materialCB(gDevice);
 		cube.NormalTexture("Resources/Normalmaps/robot-norm.jpg", gDevice);
 		terrain->Texture("Resources/Textures/firstheightmap.jpg", gDevice);
 		billboard->Texture("Resources/Textures/SPITHOTFIRE.jpg", gDevice);
@@ -201,7 +195,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		TwInit(TW_DIRECT3D11, gDevice); // for Direct3D 11
 		TwWindowSize(WIDTH,HEIGHT);
 
-		gMyBar = TwNewBar("KekCity");
+		gMyBar = TwNewBar("IDChecker");
 		TwAddVarRW(gMyBar, "ID: ", TW_TYPE_INT32, &gID, "min=-5 max=300 step=1");
 
 		//5. Skapa vertex- och pixel-shaders
@@ -321,7 +315,7 @@ HRESULT CreateDirect3DContext(HWND wndHandle)
 		NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		NULL,//D3D11_CREATE_DEVICE_DEBUG,
+		NULL,//D3D11_CREATE_DEVICE_DEBUG,	//To make it work on school PC
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,

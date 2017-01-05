@@ -55,17 +55,17 @@ void Camera::Update(MSG* msg, float heightY)
 			case 0x57: //w
 				if (GetAsyncKeyState(0x41)) //a
 				{
-					pos.z += moveSpeed * forward.z * cos(XM_PI / 4);
-					pos.x += moveSpeed * forward.x * cos(XM_PI / 4);
-					pos.z -= moveSpeed * rightf.z * cos(XM_PI / 4);
-					pos.x -= moveSpeed * rightf.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * forward.z;
+					pos.x += moveSpeed * forward.x;
+					pos.z -= moveSpeed * rightf.z;
+					pos.x -= moveSpeed * rightf.x;
 				}
 				else if (GetAsyncKeyState(0x44)) //d
 				{
-					pos.z += moveSpeed * forward.z * cos(XM_PI / 4);
-					pos.x += moveSpeed * forward.x * cos(XM_PI / 4);
-					pos.z += moveSpeed * rightf.z * cos(XM_PI / 4);
-					pos.x += moveSpeed * rightf.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * forward.z;
+					pos.x += moveSpeed * forward.x;
+					pos.z += moveSpeed * rightf.z;
+					pos.x += moveSpeed * rightf.x;
 				}
 				else
 				{
@@ -84,17 +84,17 @@ void Camera::Update(MSG* msg, float heightY)
 			case 0x41: //a
 				if (GetAsyncKeyState(0x57)) //w
 				{
-					pos.z += moveSpeed * forward.z * cos(XM_PI / 4);
-					pos.x += moveSpeed * forward.x * cos(XM_PI / 4);
-					pos.z -= moveSpeed * rightf.z * cos(XM_PI / 4);
-					pos.x -= moveSpeed * rightf.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * forward.z;
+					pos.x += moveSpeed * forward.x;
+					pos.z -= moveSpeed * rightf.z;
+					pos.x -= moveSpeed * rightf.x;
 				}
 				else if (GetAsyncKeyState(0x53)) //s
 				{
-					pos.z -= moveSpeed * forward.z * cos(XM_PI / 4);
-					pos.x -= moveSpeed * forward.x * cos(XM_PI / 4);
-					pos.z -= moveSpeed * rightf.z * cos(XM_PI / 4);
-					pos.x -= moveSpeed * rightf.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * forward.z;
+					pos.x -= moveSpeed * forward.x;
+					pos.z -= moveSpeed * rightf.z;
+					pos.x -= moveSpeed * rightf.x;
 				}
 				else
 				{
@@ -113,17 +113,17 @@ void Camera::Update(MSG* msg, float heightY)
 			case 0x53: //s
 				if (GetAsyncKeyState(0x41)) //a
 				{
-					pos.z -= moveSpeed * forward.z * cos(XM_PI / 4);
-					pos.x -= moveSpeed * forward.x * cos(XM_PI / 4);
-					pos.z -= moveSpeed * rightf.z * cos(XM_PI / 4);
-					pos.x -= moveSpeed * rightf.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * forward.z;
+					pos.x -= moveSpeed * forward.x;
+					pos.z -= moveSpeed * rightf.z;
+					pos.x -= moveSpeed * rightf.x;
 				}
 				else if (GetAsyncKeyState(0x44)) //d
 				{
-					pos.z -= moveSpeed * forward.z * cos(XM_PI / 4);
-					pos.x -= moveSpeed * forward.x * cos(XM_PI / 4);
-					pos.z += moveSpeed * rightf.z * cos(XM_PI / 4);
-					pos.x += moveSpeed * rightf.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * forward.z;
+					pos.x -= moveSpeed * forward.x;
+					pos.z += moveSpeed * rightf.z;
+					pos.x += moveSpeed * rightf.x;
 				}
 				else
 				{
@@ -142,17 +142,17 @@ void Camera::Update(MSG* msg, float heightY)
 			case 0x44: //d
 				if (GetAsyncKeyState(0x57)) //w
 				{
-					pos.z += moveSpeed * forward.z * cos(XM_PI / 4);
-					pos.x += moveSpeed * forward.x * cos(XM_PI / 4);
-					pos.z += moveSpeed * rightf.z * cos(XM_PI / 4);
-					pos.x += moveSpeed * rightf.x * cos(XM_PI / 4);
+					pos.z += moveSpeed * forward.z;
+					pos.x += moveSpeed * forward.x;
+					pos.z += moveSpeed * rightf.z;
+					pos.x += moveSpeed * rightf.x;
 				}
 				else if (GetAsyncKeyState(0x53)) //s
 				{
-					pos.z -= moveSpeed * forward.z * cos(XM_PI / 4);
-					pos.x -= moveSpeed * forward.x * cos(XM_PI / 4);
-					pos.z += moveSpeed * rightf.z * cos(XM_PI / 4);
-					pos.x += moveSpeed * rightf.x * cos(XM_PI / 4);
+					pos.z -= moveSpeed * forward.z;
+					pos.x -= moveSpeed * forward.x;
+					pos.z += moveSpeed * rightf.z;
+					pos.x += moveSpeed * rightf.x;
 				}
 				else
 				{
@@ -225,7 +225,6 @@ void Camera::Init(ID3D11Device* gDevice)
 	CreateProjectionMatrix();
 	initKeyBuffer(gDevice);
 	CreateConstantBuffer(gDevice);
-	SetFrustumCoordinates();
 }
 
 XMFLOAT3 Camera::getPos()
@@ -364,47 +363,6 @@ void Camera::getMinMaxCorners(XMFLOAT3 * input, XMFLOAT2 * output) //input is 4,
 	}
 }
 
-void Camera::SetFrustumCoordinates()
-{
-	XMFLOAT3 temp[8];
-	float fovYhalf = FOV / 2;
-
-	float halfHeightNear = NEAR * std::tan(fovYhalf);
-	float halfWidthNear = (WIDTH / HEIGHT) * halfHeightNear;
-
-	float halfHeightFar = (FAR * std::tan(fovYhalf));
-	float halfWidthFar = (WIDTH / HEIGHT) * halfHeightFar;
-
-	XMFLOAT3 nearOrigin = XMFLOAT3(0.0f, 0.0f, NEAR);
-	XMFLOAT3 farOrigin = XMFLOAT3(0.0f, 0.0f, FAR);
-
-	nearAndFarVertices[0] = XMLoadFloat3(&XMFLOAT3(-halfWidthNear, -halfHeightNear, nearOrigin.z));		//Top Right Near
-	nearAndFarVertices[1] = XMLoadFloat3(&XMFLOAT3(halfWidthNear, -halfHeightNear, nearOrigin.z));		//Top Left Near
-	nearAndFarVertices[2] = XMLoadFloat3(&XMFLOAT3(-halfWidthNear, halfHeightNear, nearOrigin.z));		//Bottom Right Near
-	nearAndFarVertices[3] = XMLoadFloat3(&XMFLOAT3(halfWidthNear, halfHeightNear, nearOrigin.z));		//Bottom Left Near
-	nearAndFarVertices[4] = XMLoadFloat3(&XMFLOAT3(-halfWidthFar, -halfHeightFar, farOrigin.z));		//Top Right Far
-	nearAndFarVertices[5] = XMLoadFloat3(&XMFLOAT3(halfWidthFar, -halfHeightFar, farOrigin.z));			//Top Left Far
-	nearAndFarVertices[6] = XMLoadFloat3(&XMFLOAT3(-halfWidthFar, halfHeightFar, farOrigin.z));			//Bottom Right Far
-	nearAndFarVertices[7] = XMLoadFloat3(&XMFLOAT3(halfWidthFar, halfHeightFar, farOrigin.z));			//Bottom Left Far
-
-	 XMMATRIX view = XMMatrixTranspose(cData.ViewMatrix);
-
-	for (uint i = 0; i < 8; i++)
-	{
-		nearAndFarVertices[i] = XMVector3Transform(nearAndFarVertices[i], view);
-		XMStoreFloat3(&temp[i], nearAndFarVertices[i]);
-		nearAndFarVertices[i] += XMLoadFloat3(&pos);	
-	}
-}
-
-void Camera::UpdateFrustumCoordinates()
-{
-	for (uint i = 0; i < 4; i++)
-	{
-
-	}
-}
-
 void Camera::CreateConstantBuffer(ID3D11Device* gDevice)
 {
 	D3D11_BUFFER_DESC cbDesc;
@@ -422,95 +380,6 @@ void Camera::CreateConstantBuffer(ID3D11Device* gDevice)
 
 	HRESULT hr = gDevice->CreateBuffer(&cbDesc, &InitData, &gWorldViewProjBuffer);
 }
-
-//bool Camera::rayPlaneIntersect(XMINT2* corners)
-//{
-//	bool output = false;
-//	XMFLOAT3 nuCorners[4], planeCorners[4];
-//	XMFLOAT2 rays[4], minMaxCorners[2];
-//	XMFLOAT4 planeNormal[6];
-//	XMFLOAT3 normDotOri, normDotRay;
-//	XMVECTOR currentCorner, currentRay;
-//	float t = 0;
-//
-//	for (uint i = 0; i < 6; ++i)
-//	{
-//		XMStoreFloat4(&planeNormal[i], plane[i]);
-//	}
-//	for (uint i = 0; i < 4; ++i)
-//	{
-//		nuCorners[i] = XMFLOAT3(corners[i].x, 0, corners[i].y);
-//		rays[i] = XMFLOAT2(corners[(i + 1) % 4].x - corners[i].x, corners[(i + 1) % 4].y - corners[i].y);
-//		
-//		for (uint j = 0; j < 6; ++j)
-//		{
-//			currentCorner = XMLoadFloat3(&nuCorners[i]);
-//			XMStoreFloat3(&normDotOri, XMVector3Dot(plane[j], currentCorner)); //FOR SOME REASON THIS FUCKING FUCK CAN'T RETURN A MOTHERFLIPPING FLOAT
-//			currentRay = XMLoadFloat3(&XMFLOAT3(rays[i].x, 0, rays[i].y));
-//			XMStoreFloat3(&normDotRay, XMVector3Dot(plane[j], currentRay));
-//			t = (-planeNormal[j].w - normDotOri.x) / normDotRay.x;
-//			if (j == 0)
-//			{
-//				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[0]);
-//				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[2]);
-//				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[4]);
-//				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[6]);
-//				getMinMaxCorners(planeCorners, minMaxCorners);
-//			}
-//			if (j == 1)
-//			{
-//				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[1]);
-//				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[3]);
-//				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[5]);
-//				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[7]);
-//				getMinMaxCorners(planeCorners, minMaxCorners);
-//			}
-//			if (j == 2)
-//			{
-//				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[0]);
-//				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[1]);
-//				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[2]);
-//				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[3]);
-//				getMinMaxCorners(planeCorners, minMaxCorners);
-//			}
-//			if (j == 3)
-//			{
-//				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[4]);
-//				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[5]);
-//				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[6]);
-//				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[7]);
-//				getMinMaxCorners(planeCorners, minMaxCorners);
-//			}
-//			if (j == 4)
-//			{
-//				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[0]);
-//				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[1]);
-//				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[4]);
-//				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[5]);
-//				getMinMaxCorners(planeCorners, minMaxCorners);
-//			}
-//			if (j == 5)
-//			{
-//				XMStoreFloat3(&planeCorners[0], nearAndFarVertices[2]);
-//				XMStoreFloat3(&planeCorners[1], nearAndFarVertices[3]);
-//				XMStoreFloat3(&planeCorners[2], nearAndFarVertices[6]);
-//				XMStoreFloat3(&planeCorners[3], nearAndFarVertices[7]);
-//				getMinMaxCorners(planeCorners, minMaxCorners);
-//			}
-//			if (t >= 0 && t <= 1)
-//			{
-//				XMFLOAT3 hitPoint;
-//				XMStoreFloat3(&hitPoint, currentCorner + t * currentRay);
-//				if (minMaxCorners[0].x <= hitPoint.x, minMaxCorners[1].x >= hitPoint.x, minMaxCorners[0].y <= hitPoint.z, minMaxCorners[1].y >= hitPoint.z)
-//				{
-//					output = true;
-//					break;
-//				}
-//			}
-//		}
-//	}
-//	return output;
-//}
 
 void Camera::CreateViewMatrix()
 {

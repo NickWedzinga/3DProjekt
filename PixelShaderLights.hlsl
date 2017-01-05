@@ -8,14 +8,10 @@ Texture2D colorTex : register(t0);
 Texture2D normalTex : register(t1);
 Texture2D positionTex : register(t2);
 Texture2D light1Tex : register(t3);
-//Texture2D light2Tex : register(t4);
-//Texture2D light3Tex : register(t5);
-//Texture2D light4Tex : register(t6);
-//Texture2D light5Tex : register(t7);
 
 SamplerState SampleTypePoint : register (s0);
 
-RWStructuredBuffer<uint> pickingBuffer : register(u1);
+RWStructuredBuffer<uint> pickingBuffer : register(u1); //because backbuffer is in u0.
 
 cbuffer CONSTANT_BUFFER : register (b0)
 {
@@ -28,27 +24,21 @@ cbuffer CONSTANT_BUFFER : register (b0)
 
 struct lightStruct
 {
-	matrix View;
-	matrix Proj;
-	float3 noLights;
 	float3 lightPosition;
 	float3 intensity;
-	float3 color;
 	float3 direction;
-	float3 lightDistance;
+	matrix View;
+	matrix Proj;
 };
 
 cbuffer lights : register (b1)
 {
-	lightStruct lights[1];
-	/*matrix View;
-	matrix Proj;
-	float3 noLights;
+	/*lightStruct lights[1];*/
 	float3 lightPosition;
 	float3 intensity;
-	float3 color;
 	float3 direction;
-	float3 lightDistance;*/
+	matrix View;
+	matrix Proj;
 };
 
 struct PixelInputType
@@ -62,31 +52,18 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float4 colors;
 	float4 normals;
 	float4 position;
-	//float4 light1;
-	//float4 light2;
-	//float4 light3;
-	//float4 light4;
-	//float4 light5;
 	float3 result;
 	float shadowRes = 100;
 
 	normals = normalTex.Sample(SampleTypePoint, input.UV);
-	//return normals;
 	colors = colorTex.Sample(SampleTypePoint, input.UV);
-	//Samples the middle pixel of the color texture and sends the w-value (ID) back to the CPU
 	pickingBuffer[0] = colorTex.Sample(SampleTypePoint, float2(0.5f, 0.5f)).w + 0.5f;
-	//light2 = light2Tex.Sample(SampleTypePoint, input.UV);
-	//light3 = light3Tex.Sample(SampleTypePoint, input.UV);
-	//light4 = light4Tex.Sample(SampleTypePoint, input.UV);
-	//light5 = light5Tex.Sample(SampleTypePoint, input.UV);
 	int i = 0;
-	//for (uint i = 0; i < lights[0].noLights.x; ++i)
-	//{
 	position = positionTex.Sample(SampleTypePoint, input.UV);
 
 	position.w = 1.0f;
-	position = mul(lights[i].View, position);
-	position = mul(lights[i].Proj, position);
+	position = mul(View, position);
+	position = mul(Proj, position);
 	position /= position.w; //convert to NDC
 
 	float2 shadowmapCoord = float2(position.x * 0.5, position.y * -0.5f) + float2(0.5f, 0.5f); //from -1, 1 to 0, 1 DUBBELKOLLA
@@ -104,34 +81,30 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	float2 lerps = frac(texelPos);
 
 	float shadowCoeff = lerp(lerp(s0, s1, lerps.x), lerp(s2, s3, lerps.x), lerps.y); //WHAT
-	//return float4(shadowCoeff, 0, 0, 1);
-	//return float4(normalize(lights[i].direction).x, 0, 0, 1.0f);
 
 	if (colors.w < 4.5f) //no light calculations for terrain and billboarded particles
 	{
 		colors.xyz = colors.xyz * shadowCoeff;
 		position = positionTex.Sample(SampleTypePoint, input.UV);
-		float3 lightPos = lights[i].lightPosition;
+		float3 lightPos = lightPosition;
 
-		float3 lightToPoint = normalize(float3(-1.0f, -1.0f, 1.0f)/*lights[i].direction*/)/*normalize(position.xyz - lightPos)*/;
+		float3 lightToPoint = normalize(direction);
 		float4 camToPoint = normalize(position - float4(camPos, 1.0f));
-		float shiny = 1.0f;
-		float diffuseAngle = 0;
-
-		diffuseAngle = dot(-normals.xyz, normalize(float3(-1.0f,-1.0f,1.0f)/*lights[i].direction*/)); //TODO: Fixa så att lights[i].direction kommer in rätt, blir 0,0,1
 		
 		//Calculate Ambient Light
 		float LA = 0.2f;
 
 		//Calculate Diffuse Light
+		float diffuseAngle = 0;
+		diffuseAngle = dot(-normals.xyz, lightToPoint);
 		float LD = saturate(diffuseAngle);
 
 		//Calculate specular intensity
 		float LS;
-		if (LD >= 0.01f)
+		float shiny = 1.0f;
+		if (LD >= 0.01f)  //if there is no diffuse, there is no specular
 		{
 			float4 r = float4(normalize(reflect(lightToPoint, normals)), 0.0f);
-			//return r;
 			LS = pow(saturate(dot(r, -camToPoint)), shiny);
 		}
 		else
@@ -139,13 +112,13 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 			LS = 0;
 		}
 
-		result = ((colors.xyz * LA) + (colors.xyz * LD) + (colors.xyz * LS)) * lights[i].intensity.x;
+		result = ((colors.xyz * LA) + (colors.xyz * LD) + (colors.xyz * LS)) * intensity.x;
+		//return float4(colors.xyz * LA, 0);
 	}
 	else
 	{
 		result = colors.xyz;
 	}
-	//}
 	return float4(result, 1.0f);
 }
 

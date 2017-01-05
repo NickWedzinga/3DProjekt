@@ -1,13 +1,10 @@
 cbuffer lights : register (b0)
 {
+	float3 lightPosition;
+	float3 intensity;
+	float3 direction;
 	matrix View;
 	matrix Proj;
-	float3 noLights;
-	float3 position;
-	float3 intensity;
-	float3 color;
-	float3 direction;
-	float3 distance;
 };
 
 struct VS_IN

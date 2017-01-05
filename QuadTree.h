@@ -12,7 +12,7 @@ class QuadTree
 private:
 	struct Node
 	{
-		std::vector<uint> index;
+		std::vector<uint> indices; //indices for the billboard vertex vector array
 		XMFLOAT3 bottomLeft;
 		XMFLOAT3 topRight;
 		XMFLOAT3 center;

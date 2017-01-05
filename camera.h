@@ -14,8 +14,6 @@ public:
 	void Update(MSG* msg, float heightY);
 	void Init(ID3D11Device* gDevice);
 	void CreatePlanes();
-	void UpdateFrustumCoordinates();
-	void SetFrustumCoordinates();
 
 	XMFLOAT3 getPos();
 	void setPos(XMFLOAT3 pos);
@@ -27,8 +25,6 @@ public:
 	XMVECTOR plane[6];
 	CONSTANT_BUFFER cData;
 	bool lockLight;
-	XMVECTOR nearAndFarVertices[8];
-	//bool rayPlaneIntersect(XMINT2* corners);
 	bool dontUpdate;
 
 private:

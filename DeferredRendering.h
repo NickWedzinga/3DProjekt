@@ -11,7 +11,6 @@ private:
 public:
 	DeferredRendering();
 	~DeferredRendering();
-	void CreateLightBuffer();
 	void CreateRenderTargets(ID3D11Device* gDevice);
 	void InitializeLightShader(ID3D11Device* gDevice);
 	int Picking(ID3D11DeviceContext* gDeviceContext);

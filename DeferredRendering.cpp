@@ -24,11 +24,6 @@ DeferredRendering::~DeferredRendering()
 
 }
 
-void DeferredRendering::CreateLightBuffer()
-{
-	XMFLOAT3 lightDir = XMFLOAT3(0.0f, 0.0f, -5.0f);
-}
-
 void DeferredRendering::CreateRenderTargets(ID3D11Device* gDevice)
 {
 	D3D11_TEXTURE2D_DESC textureDesc;
@@ -86,11 +81,11 @@ int DeferredRendering::Picking(ID3D11DeviceContext* gDeviceContext)
 	ID3D11Resource* idRes = nullptr;
 
 	int* intDataPointer = nullptr;
-	PickingBuffer->GetResource(&idRes);
+	PickingBuffer->GetResource(&idRes); //stores unordered accessview data in idRes
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	gDeviceContext->Map(idRes, 0, D3D11_MAP_READ, 0, &mappedResource);
-	intDataPointer = (int*)mappedResource.pData;
-	int pickID = intDataPointer[0];
+	gDeviceContext->Map(idRes, 0, D3D11_MAP_READ, 0, &mappedResource); //converts data from idres to mappedResource
+	intDataPointer = (int*)mappedResource.pData; //casts data in mappedResource to int*
+	int pickID = intDataPointer[0]; //takes actual int value from int*
 	gDeviceContext->Unmap(idRes, 0);
 	idRes->Release();
 	return pickID;

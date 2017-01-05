@@ -19,7 +19,11 @@ Object::~Object()
 void Object::LoadObject(ID3D11Device* gDevice)
 {
 	this->center = XMFLOAT3(0, 0, 0);
-	string myFile("Resources/Objs/robot.obj"), special, line2, mtl;
+	string myFile("Resources/Objs/robot.obj"),
+		special,	//Take unwanted characters
+		line,		//Contains any given line in the file
+		mtl;		//Contains material info
+
 	ifstream file(myFile);
 	istringstream inputString;
 	
@@ -34,21 +38,21 @@ void Object::LoadObject(ID3D11Device* gDevice)
 	UINT valueVT = 0;
 	UINT valueVN = 0;
 	char valueSlash = 0;
-	while (getline(file, line2))
+	while (getline(file, line))
 	{
-		inputString.str(line2);
-		if (line2.substr(0, 2) == "v ")
+		inputString.str(line);
+		if (line.substr(0, 2) == "v ")
 		{
 			inputString >> special >> vtx1.x >> vtx1.y >> vtx1.z;
 			vertices1.push_back(vtx1);
 		}
-		else if (line2.substr(0, 3) == "vt ")
+		else if (line.substr(0, 3) == "vt ")
 		{
 			inputString >> special >> vtx2.x >> vtx2.y;
-			vtx2 = XMFLOAT2(vtx2.x, 1 - vtx2.y);
+			vtx2 = XMFLOAT2(vtx2.x, 1 - vtx2.y);	//Maya is strange
 			vertices2.push_back(vtx2);
 		}
-		else if (line2.substr(0, 3) == "vn ")
+		else if (line.substr(0, 3) == "vn ")
 		{
 			inputString >> special >> vtx3.x >> vtx3.y >> vtx3.z;
 			vtx3.x = -vtx3.x;	//Change if normals are inverted
@@ -56,7 +60,7 @@ void Object::LoadObject(ID3D11Device* gDevice)
 			vtx3.z = -vtx3.z;
 			vertices3.push_back(vtx3);
 		}
-		else if (line2.substr(0, 2) == "f ")
+		else if (line.substr(0, 2) == "f ")
 		{
 			for (int j = 0; j < 3; j++)
 			{
@@ -83,7 +87,7 @@ void Object::LoadObject(ID3D11Device* gDevice)
 				vertices.push_back(temp);
 			}
 		}
-		else if (line2.substr(0, 7) == "mtllib ")
+		else if (line.substr(0, 7) == "mtllib ")
 		{
 			inputString >> special >> mtl;
 			MTLLoader(mtl, gDevice);
@@ -130,31 +134,31 @@ void Object::materialCB(ID3D11Device * gDevice)
 void Object::MTLLoader(string mtlfile, ID3D11Device* gDevice)
 {
 	//mtlfile was sent from OBJLOADER, mtlfile == "box.mtl"
-	string myfile(mtlfile), line2, special, material;
+	string myfile(mtlfile), line, special, texture;
 	XMFLOAT4 Kd, Ka, Ks;
 	ifstream file(myfile);
 	istringstream inputString2;
 
-	while (getline(file, line2))
+	while (getline(file, line))
 	{
-		inputString2.str(line2);
-		if (line2.substr(0, 3) == "map")
+		inputString2.str(line);
+		if (line.substr(0, 3) == "map")
 		{
-			inputString2 >> special >> material; //material == "cube_box.jpg"
+			inputString2 >> special >> texture; //material == "cube_box.jpg"
 
-			Texture(material, gDevice);
+			Texture(texture, gDevice);
 		}
-		else if (line2.substr(0, 3) == "Kd ") //En material, RGB Diffuse
+		else if (line.substr(0, 3) == "Kd ") //En material, RGB Diffuse
 		{
 			inputString2 >> special >> Kd.x >> Kd.y >> Kd.z;
 			materialData.KD = Kd;
 		}
-		else if (line2.substr(0, 3) == "Ka ")
+		else if (line.substr(0, 3) == "Ka ")
 		{
 			inputString2 >> special >> Ka.x >> Ka.y >> Ka.z;
 			materialData.KA = Ka;
 		}
-		else if (line2.substr(0, 3) == "Ks ")
+		else if (line.substr(0, 3) == "Ks ")
 		{
 			inputString2 >> special >> Ks.x >> Ks.y >> Ks.z;
 			materialData.KS = Ks;

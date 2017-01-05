@@ -43,7 +43,6 @@ void Terrain::LoadHeightMap()
 {
 	char* filename = "Resources/Heightmaps/firstheightmap.bmp";
 	FILE* filePtr;
-	//int error;
 	unsigned int count;
 	BITMAPFILEHEADER bitmapFileHeader;
 	BITMAPINFOHEADER bitmapInfoHeader;
@@ -51,7 +50,7 @@ void Terrain::LoadHeightMap()
 	unsigned char* bitmapImage;
 	unsigned char height;
 
-	fopen_s(&filePtr, filename, "rb");
+	fopen_s(&filePtr, filename, "rb");	//read binary
 	fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, filePtr);
 	fread(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, filePtr);
 
@@ -66,7 +65,7 @@ void Terrain::LoadHeightMap()
 	fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
 
 	//Reading the data in the file
-	count = fread(bitmapImage, 1, imageSize, filePtr);
+	fread(bitmapImage, 1, imageSize, filePtr);	//Reads the color value from the .bmp file and stores it in bitmapimage.
 
 	fclose(filePtr);
 	
@@ -79,7 +78,7 @@ void Terrain::LoadHeightMap()
 		{
 			index = (terrainHeight*j) + i;
 			height = bitmapImage[k];
-			heightMap[index].y = float(height)/ 8/*(256 / 2)*/;
+			heightMap[index].y = float(height)/ 8;		//8 is a scale value
 			k += 1;
 		}
 
