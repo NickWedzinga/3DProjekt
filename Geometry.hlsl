@@ -68,7 +68,10 @@ void GS(triangle GS_IN input[3], inout TriangleStream< GS_OUT > Outputstream)
 		deltaUV1 = input[0].UV - input[1].UV; //vektor i texturen
 		deltaUV2 = input[0].UV - input[2].UV; //vektor i texturen
 
-		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x); //denominator
+		//We know tangent and bitangent are in same plane as UV and Pos
+		//We define a vector Pos1 = UV1.x * T + UV1.y * B and Pos2 = UV2.x * T + UV2.y * B
+		//From this we can derive the following
+		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
 		tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r; //tangent calculation
 		bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x)*r; //bitangent calculation
 

@@ -17,14 +17,17 @@ Lights::~Lights()
 
 void Lights::Init(unsigned int lights, Object* cube, ID3D11Device* gDevice)
 {
-	this->lights.position = XMLoadFloat3(&XMFLOAT3(100, 100, -100));
+	this->lights.position = XMLoadFloat3(&XMFLOAT3(10, 5, -10));
 	this->lights.intensity = XMLoadFloat3(&XMFLOAT3(1, 1, 1));
 
 	this->lights.direction = XMLoadFloat3(&XMFLOAT3(0,0,0)) - this->lights.position;
-	this->lights.Proj = XMMatrixOrthographicLH(WIDTH/8, HEIGHT/8, NEAR, 300);
+	//this->lights.Proj = XMMatrixPerspectiveFovLH(XM_PI / 4.0f, SMWIDTH/SMHEIGHT, NEAR, 60);
+	//this->lights.Proj = XMMatrixTranspose(this->lights.Proj);
+	this->lights.Proj = XMMatrixOrthographicLH(SMWIDTH, SMHEIGHT, NEAR, 50);
 	XMVECTOR right = XMVector3Cross(XMLoadFloat3(&XMFLOAT3(0, 1, 0)), this->lights.direction);
 	XMVECTOR up = XMVector3Cross(this->lights.direction, right);
 	this->lights.View = XMMatrixLookToLH(this->lights.position, this->lights.direction, up);
+	//this->lights.View = XMMatrixTranspose(this->lights.View);
 
 	D3D11_BUFFER_DESC lightBufferDesc;
 	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -53,14 +56,26 @@ void Lights::InitShaders(ID3D11Device * gDevice)
 	D3DCompileFromFile(L"VertexShaderShadows.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &pVS, nullptr);
 	hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader);
 	pVS->Release();
+
+	//pVS = nullptr;
+	//D3DCompileFromFile(L"VertexShaderShadows.hlsl", nullptr, nullptr, "VS_main", "vs_5_0", 0, 0, &pVS, nullptr);
+	//hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &vertexShader);
+	//pVS->Release();
+
+	//ID3D10Blob* pPS = nullptr;
+	//D3DCompileFromFile(L"PixelShaderShadows.hlsl", nullptr, nullptr, "PS_main", "ps_5_0", 0, 0, &pPS, nullptr);
+	//hr = gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &pixelShader);
+	//pPS->Release();
+
+
 }
 
 void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 {
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
-	textureDesc.Width = WIDTH;
-	textureDesc.Height = HEIGHT;
+	textureDesc.Width = SMWIDTH*16;
+	textureDesc.Height = SMHEIGHT*16;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
 	textureDesc.Format = DXGI_FORMAT_R32_TYPELESS;
@@ -94,7 +109,7 @@ void Lights::Render(ID3D11DeviceContext* gDeviceContext)
 
 	gDeviceContext->VSSetShader(vertexShader, nullptr, 0);
 	gDeviceContext->GSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->PSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->PSSetShader(pixelShader, nullptr, 0);
 
 	gDeviceContext->VSSetConstantBuffers(0, 1, &lightBuffer);
 }

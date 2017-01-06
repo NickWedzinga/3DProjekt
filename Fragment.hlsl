@@ -40,17 +40,17 @@ PS_OUT PS_main(PS_IN input)
 	float4 newNormal = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 textur = txNormalDiffuse.Sample(sampAni, input.UV);
 	float4 color = txDiffuse.Sample(sampAni, input.UV);
-	textur = normalize((textur * 2.0f) - 1.0f);
+	textur = normalize((textur * 2.0f) - 1.0f); //go from [0,1] to [-1, 1]
 
 	output.color = color * KA + color * KD + color * KS;
 	output.color.w = input.ID;
 	output.position = input.worldPos;
 
 	if(normalMap.x == 1)
-		output.normal = input.normal;
+		output.normal = input.normal; //invert normal if robot
 	else
 	{
-		newNormal.xyz = (textur.x * input.tangent) + (textur.y * input.bitangent) + (textur.z * -input.normal.xyz);
+		newNormal.xyz = (textur.x * input.tangent) + (textur.y * input.bitangent) + (textur.z * input.normal.xyz); //invert normal if robot
 		newNormal = normalize(newNormal);
 		output.normal = newNormal;
 	}

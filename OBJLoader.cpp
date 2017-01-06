@@ -19,7 +19,7 @@ Object::~Object()
 void Object::LoadObject(ID3D11Device* gDevice)
 {
 	this->center = XMFLOAT3(0, 0, 0);
-	string myFile("Resources/Objs/robot.obj"),
+	string myFile("Resources/Objs/box.obj"),
 		special,	//Take unwanted characters
 		line,		//Contains any given line in the file
 		mtl;		//Contains material info
@@ -55,9 +55,9 @@ void Object::LoadObject(ID3D11Device* gDevice)
 		else if (line.substr(0, 3) == "vn ")
 		{
 			inputString >> special >> vtx3.x >> vtx3.y >> vtx3.z;
-			vtx3.x = -vtx3.x;	//Change if normals are inverted
-			vtx3.y = -vtx3.y;
-			vtx3.z = -vtx3.z;
+			//vtx3.x = -vtx3.x;	//Change if normals are inverted
+			//vtx3.y = -vtx3.y;
+			//vtx3.z = -vtx3.z;
 			vertices3.push_back(vtx3);
 		}
 		else if (line.substr(0, 2) == "f ")

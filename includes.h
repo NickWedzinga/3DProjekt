@@ -21,7 +21,10 @@
 #define NEAR 0.1f
 #define FAR 100.0f
 #define THEIGHT 256
-#define TWIDTH 256
+#define TWIDTH 256.0f
+#define SMWIDTH 960.0f
+#define SMHEIGHT 540.0f
+
 typedef unsigned int uint;
 
 using namespace DirectX;

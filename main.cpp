@@ -93,6 +93,18 @@ void SetViewport()
 	gDeviceContext->RSSetViewports(1, &vp);
 }
 
+void SetShadowViewport()
+{
+	D3D11_VIEWPORT vp;
+	vp.Width = (float)SMWIDTH*16;
+	vp.Height = (float)SMHEIGHT*16;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	gDeviceContext->RSSetViewports(1, &vp);
+}
+
 void Update()
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -143,6 +155,12 @@ void Render()
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
 	//Pipeline 5 Shadows
+	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	//gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	//gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
+	//gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+
+	SetShadowViewport();
 	lights->Render(gDeviceContext);
 	
 	gDeviceContext->Draw(cube.vertices.size(), 0); //only draw call, not binding old shaders
@@ -151,6 +169,7 @@ void Render()
 
 
 	//Pipeline 6 Deferred
+	SetViewport();
 	float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	gDeviceContext->OMSetRenderTargetsAndUnorderedAccessViews(1, &gBackbufferRTV, gDepthStencilView, 1, 1, &deferred.PickingBuffer, NULL);
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
@@ -179,11 +198,11 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		SetViewport(); //3. Sätt viewport
 		
 		cube.LoadObject(gDevice);	//4. Ersätter triangleData
-		ground->CreatePlane(XMFLOAT3(0, 0, 0), 80, 0, 20, gDevice);
-		wall->CreatePlane(XMFLOAT3(0, 10, 10), 80, 20, 0, gDevice);
+		ground->CreatePlane(XMFLOAT3(0, -5, 0), 80, 0, 20, gDevice);
+		wall->CreatePlane(XMFLOAT3(0, 5, 10), 80, 20, 0, gDevice);
 
 		initBuffers();
-		cube.NormalTexture("Resources/Normalmaps/robot-norm.jpg", gDevice);
+		cube.NormalTexture("Resources/Normalmaps/box.jpg", gDevice);
 		terrain->Texture("Resources/Textures/firstheightmap.jpg", gDevice);
 		billboard->Texture("Resources/Textures/SPITHOTFIRE.jpg", gDevice);
 		ground->Texture("Resources/Textures/grass.jpg", gDevice);

@@ -20,6 +20,7 @@ private:
 	ID3D11ShaderResourceView* lSRV;
 	ID3D11Texture2D* lT;
 	ID3D11VertexShader* vertexShader = nullptr;
+	ID3D11PixelShader* pixelShader = nullptr;
 	
 	void InitShaders(ID3D11Device* gDevice);
 	void CreateRenderTargets(ID3D11Device* gDevice);
