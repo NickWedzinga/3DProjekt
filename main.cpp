@@ -1,14 +1,3 @@
-//--------------------------------------------------------------------------------------
-// BTH - Stefan Petersson 2014.
-//--------------------------------------------------------------------------------------
-
-//Things to do!!!!
-//Specular
-//Kolla på hur vi ändrar upplösning på shadow mappen.
-//Memoryleaks, Har antagligen inga
-//Fatta koden
-
-
 #include <AntTweakBar.h>
 #include "OBJLoader.h"
 #include "DeferredRendering.h"
@@ -75,7 +64,6 @@ void initBuffers()
 {
 	zbuffer();
 	camera->Init(gDevice);
-	billboard->InitBBBuffer(gDevice);
 	lights->Init(1, &cube, gDevice);
 	terrain->Initialize(gDevice);
 	cube.materialCB(gDevice);

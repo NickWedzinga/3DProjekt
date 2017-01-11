@@ -123,9 +123,7 @@ float Terrain::getHeightMapY(DirectX::XMFLOAT2 cord)
 {
 	float height;
 	int x = cord.x/ scaleFactor;
-	//float decX = cord.x - x;
 	int z = cord.y/ scaleFactor;
-	//float decZ = cord.y - z;
 	
 	if (x < 0 || x > 256 || z < 0 || z > 256)
 		height = -1;
@@ -165,21 +163,18 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			//Upper left
 			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y, upperZ);
 			temp.UV = XMFLOAT2(leftX / terrainWidth, (terrainHeight - upperZ) / terrainHeight);
-			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom right
 			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, bottomZ);
 			temp.UV = XMFLOAT2(rightX / terrainWidth, (terrainHeight - bottomZ) / terrainHeight);
-			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom left
 			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y, bottomZ);
 			temp.UV = XMFLOAT2(leftX / terrainWidth, (terrainHeight - bottomZ) / terrainHeight);
-			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + leftX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 
@@ -187,21 +182,18 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 			//Upper left
 			temp.position = scaleFactor*XMFLOAT3(leftX, this->heightMap[int((terrainHeight*upperZ) + leftX)].y, upperZ);
 			temp.UV = XMFLOAT2(leftX / terrainWidth, (terrainHeight - upperZ) / terrainHeight);
-			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + leftX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Upper right
 			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*upperZ) + rightX)].y, upperZ);
 			temp.UV = XMFLOAT2(rightX / terrainWidth, (terrainHeight - upperZ) / terrainHeight);
-			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*upperZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*upperZ) + rightX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 
 			//Bottom right
 			temp.position = scaleFactor*XMFLOAT3(rightX, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y, bottomZ);
 			temp.UV = XMFLOAT2(rightX / terrainWidth, (terrainHeight - bottomZ) / terrainHeight);
-			//temp.UV = XMFLOAT2(this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32, this->heightMap[int((terrainHeight*bottomZ) + rightX)].y / 32);
 			vertices.push_back(temp);
 			index++;
 		}
@@ -237,7 +229,6 @@ void Terrain::InitializeBuffers(ID3D11Device* gDevice)
 	indexData.SysMemSlicePitch = 0;
 	gDevice->CreateBuffer(&indexBufferDesc, &indexData, &indexBuffer);
 
-	return;
 }
 
 void Terrain::RenderBuffers(ID3D11DeviceContext *gDeviceContext)
@@ -252,5 +243,4 @@ void Terrain::RenderBuffers(ID3D11DeviceContext *gDeviceContext)
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	gDeviceContext->IASetInputLayout(vertexLayout);
 
-	return;
 }

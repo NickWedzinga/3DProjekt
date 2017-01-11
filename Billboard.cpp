@@ -32,7 +32,6 @@ Billboard::Billboard(int ID, QuadTree* quadTree)
 
 Billboard::~Billboard()
 {
-	bBBuffer->Release();
 }
 
 void Billboard::Init(XMFLOAT3 camPos, ID3D11Device* gDevice)
@@ -86,24 +85,6 @@ void Billboard::Update(ID3D11DeviceContext* gDeviceContext)
 		memcpy(mappedResource.pData, &used[0], used.size() * sizeof(VertexData));
 		gDeviceContext->Unmap(vertexBuffer, 0);
 	}
-}
-
-void Billboard::InitBBBuffer(ID3D11Device* gDevice)
-{
-	D3D11_BUFFER_DESC cbDesc;
-	cbDesc.ByteWidth = sizeof(XMMATRIX);
-	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbDesc.MiscFlags = 0;
-	cbDesc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = &rotationMatrix;
-	InitData.SysMemPitch = 0;
-	InitData.SysMemSlicePitch = 0;
-
-	gDevice->CreateBuffer(&cbDesc, &InitData, &bBBuffer);
 }
 
 void Billboard::InitShaders(ID3D11Device * gDevice)
