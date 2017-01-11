@@ -41,26 +41,23 @@ void Object::LoadObject(ID3D11Device* gDevice)
 	while (getline(file, line))
 	{
 		inputString.str(line);
-		if (line.substr(0, 2) == "v ")
+		if (line.substr(0, 2) == "v ") //pos
 		{
 			inputString >> special >> vtx1.x >> vtx1.y >> vtx1.z;
 			vertices1.push_back(vtx1);
 		}
-		else if (line.substr(0, 3) == "vt ")
+		else if (line.substr(0, 3) == "vt ") //uv
 		{
 			inputString >> special >> vtx2.x >> vtx2.y;
-			vtx2 = XMFLOAT2(vtx2.x, 1 - vtx2.y);	//Maya is strange
+			vtx2 = XMFLOAT2(vtx2.x, 1 - vtx2.y);	//Because Maya uses different system
 			vertices2.push_back(vtx2);
 		}
-		else if (line.substr(0, 3) == "vn ")
+		else if (line.substr(0, 3) == "vn ") //normal
 		{
 			inputString >> special >> vtx3.x >> vtx3.y >> vtx3.z;
-			//vtx3.x = -vtx3.x;	//Change if normals are inverted
-			//vtx3.y = -vtx3.y;
-			//vtx3.z = -vtx3.z;
 			vertices3.push_back(vtx3);
 		}
-		else if (line.substr(0, 2) == "f ")
+		else if (line.substr(0, 2) == "f ") //after f three values follow ex: 1/2/1, means first v line, 2nd vt line, first vn line
 		{
 			for (int j = 0; j < 3; j++)
 			{
@@ -83,7 +80,6 @@ void Object::LoadObject(ID3D11Device* gDevice)
 					temp.UV = XMFLOAT2(0.0f, 0.0f);
 				}
 				temp.normal = vertices3.at(valueVN - 1);
-				//pushback
 				vertices.push_back(temp);
 			}
 		}
