@@ -3,7 +3,7 @@
 Camera::Camera()
 {
 	pos = XMFLOAT3(0, 0, 0);
-	mouse = XMFLOAT2(XPOS, YPOS);
+	mouse = XMFLOAT2(WIDTH / 2, HEIGHT / 2);
 	SetCursorPos(mouse.x, mouse.y);
 	camDir = XMFLOAT3(0, 0, 0);
 	lockLight = false;
@@ -44,7 +44,7 @@ void Camera::Update(MSG* msg, float heightY)
 			}
 			if (mouse.x > 3 * WIDTH / 4 || mouse.x < WIDTH / 4 || mouse.y > 3 * HEIGHT / 4 || mouse.y < HEIGHT / 4)
 			{
-				SetCursorPos(XPOS, YPOS);
+				SetCursorPos(WIDTH / 2, HEIGHT / 2);
 				mouse = XMFLOAT2(WIDTH / 2, HEIGHT / 2);
 			}
 			break;
@@ -342,30 +342,6 @@ void Camera::CreateWorldMatrix()
 void Camera::CreateProjectionMatrix()
 {
 	cData.ProjMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(FOV), WIDTH / HEIGHT, NEAR, FAR);
-}
-
-void Camera::getMinMaxCorners(XMFLOAT3 * input, XMFLOAT2 * output) //input is 4, output is 2
-{
-	output[0] = output[1] = XMFLOAT2(input[0].x, input[0].z);
-	for (uint i = 0; i < 3; i++)
-	{
-		if (input[i + 1].x < output[0].x)
-		{
-			output[0].x = input[i + 1].x;
-		}
-		else if (input[i + 1].x > output[1].x)
-		{
-			output[1].x = input[i + 1].x;
-		}
-		if (input[i + 1].z < output[0].y)
-		{
-			output[0].y = input[i + 1].z;
-		}
-		else if (input[i + 1].z > output[1].y)
-		{
-			output[1].y = input[i + 1].z;
-		}
-	}
 }
 
 void Camera::CreateConstantBuffer(ID3D11Device* gDevice)

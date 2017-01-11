@@ -55,7 +55,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 	position = mul(Proj, position);
 	position /= position.w; //convert to NDC
 
-	float2 shadowmapCoord = float2(position.x * 0.5, position.y * -0.5f) + float2(0.5f, 0.5f); //from -1, 1 to 0, 1
+	float2 shadowmapCoord = float2(position.x * 0.5, position.y * -0.5f /*inverts y*/) + float2(0.5f, 0.5f); //from -1->1 to 0->1 (UV), to read from shadow texture
 
 	//float dx = 1.0f / (960.0f*4); //divide by SMAP_WIDTH
 	//float dy = 1.0f / (540.0f*4); //divide by SMAP_HEIGHT

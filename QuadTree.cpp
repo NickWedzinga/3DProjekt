@@ -24,46 +24,40 @@ QuadTree::~QuadTree()
 
 }
 
-void QuadTree::setTreeCoordinates(uint index, uint level)	//0, 0
+void QuadTree::setTreeCoordinates(uint index, uint level)	//0, 0 on first call, other values when recursion
 {
 	uint nuIndex = index;
-	if (index == 0)
+	if (index == 0) //root
 	{
-		tree[0].bottomLeft = XMFLOAT3(0, 0, 0);
-		tree[0].topRight = XMFLOAT3(TWIDTH - 1, 115, THEIGHT - 1);
+		//set AABB coordinates for root
+		tree[0].bottomLeft = XMFLOAT3(0, 0, 0); 
+		tree[0].topRight = XMFLOAT3(TWIDTH - 1, 115/*height*/, THEIGHT - 1 /*actually depth*/);
 		tree[0].center = XMFLOAT3((TWIDTH - 1) / 2, 115 / 2, (THEIGHT - 1) / 2);
 		tree[0].halfDiagonal = XMFLOAT3(tree[0].center.x - tree[0].bottomLeft.x, 115 / 2, tree[0].center.z - tree[0].bottomLeft.z); //kanske ska vara bottomleft - center
 		nuIndex = 1;
 	}
 	if (levels != 0)
 	{
-		uint parent = FindParent(nuIndex);		//0
-		XMFLOAT3 min = tree[parent].bottomLeft;	//0,0
-		XMFLOAT3 max = tree[parent].topRight;		//255, 255
+		uint parent = FindParent(nuIndex);
+		XMFLOAT3 min = tree[parent].bottomLeft;
+		XMFLOAT3 max = tree[parent].topRight;
 		uint iter = 0;
-		for (uint i = 0; i < 2; ++i)
+		for (uint z = 0; z < 2; ++z)
 		{
-			for (uint j = 0; j < 2; ++j)
+			for (uint x = 0; x < 2; ++x)
 			{
-				tree[nuIndex + iter].bottomLeft = XMFLOAT3(min.x + ((max.x - min.x + 1) / 2) * j, 0.0f,  min.z + ((max.z - min.z + 1) / 2) * i);
-				tree[nuIndex + iter].topRight = XMFLOAT3(max.x - ((max.x - min.x + 1) / 2) * (1 - j), 115,  max.z - ((max.z - min.z + 1) / 2) * (1 - i));
+				//set AABB coordinates for branch/leaf
+				tree[nuIndex + iter].bottomLeft = XMFLOAT3(min.x + ((max.x - min.x + 1) / 2) * x, 0.0f,  min.z + ((max.z - min.z + 1) / 2) * z);
+				tree[nuIndex + iter].topRight = XMFLOAT3(max.x - ((max.x - min.x + 1) / 2) * (1 - x), 115,  max.z - ((max.z - min.z + 1) / 2) * (1 - z));
 				tree[nuIndex + iter].center = XMFLOAT3(tree[nuIndex + iter].bottomLeft.x + (tree[nuIndex + iter].topRight.x - tree[nuIndex + iter].bottomLeft.x) / 2, 115 / 2, tree[nuIndex + iter].bottomLeft.z + (tree[nuIndex + iter].topRight.z - tree[nuIndex + iter].bottomLeft.z) / 2);
 				tree[nuIndex + iter].halfDiagonal = XMFLOAT3(tree[nuIndex + iter].center.x - tree[nuIndex + iter].bottomLeft.x, tree[nuIndex + iter].center.y - tree[nuIndex + iter].bottomLeft.y, tree[nuIndex + iter].center.z - tree[nuIndex + iter].bottomLeft.z);
-				if (level != levels - 1)
+				if (level != levels - 1) //checks that we're not on a leaf
 					setTreeCoordinates((nuIndex + iter) * 4 + 1, level + 1);
 				++iter;
 			}
 		}
 	}
 }
-
-float QuadTree::DistanceToPoint(XMVECTOR plane, XMINT3 point)
-{
-	XMFLOAT4 temp;
-	XMStoreFloat4(&temp, plane);
-	return temp.x * point.x + temp.y * point.y + temp.z * point.z + temp.w;
-}
-
 
 uint QuadTree::FindParent(uint nodeIndex)
 {
@@ -182,7 +176,7 @@ void QuadTree::FillLeaves(int index, uint bbsPerNode)
 	}
 }
 
-bool QuadTree::HitBoundingBox(uint index, XMVECTOR * frustumVec)
+bool QuadTree::HitBoundingBox(uint index, XMVECTOR* frustumVec)
 {
 	bool result = true;
 	float e = 0;
@@ -194,8 +188,11 @@ bool QuadTree::HitBoundingBox(uint index, XMVECTOR * frustumVec)
 	{
 		XMStoreFloat4(&planeNor, frustumVec[i]);
 		planeAbs = XMFLOAT3(sqrt(pow(planeNor.x, 2)), sqrt(pow(planeNor.y, 2)), sqrt(pow(planeNor.z, 2)));
-		e = tree[index].halfDiagonal.x * planeAbs.x + tree[index].halfDiagonal.y * planeAbs.y + tree[index].halfDiagonal.z * planeAbs.z;
-		s = tree[index].center.x * planeNor.x + tree[index].center.y * planeNor.y + tree[index].center.z * planeNor.z + planeNor.w;
+
+		//we simply look at the length of e, whereas we also look at the direction of s
+		e = tree[index].halfDiagonal.x * planeAbs.x + tree[index].halfDiagonal.y * planeAbs.y + tree[index].halfDiagonal.z * planeAbs.z; //distance to point closest to plane  NOTE!!!! normals are abs
+		s = tree[index].center.x * planeNor.x + tree[index].center.y * planeNor.y + tree[index].center.z * planeNor.z + planeNor.w; //distance from center to plane NOTE!!!! normals are not abs
+																														//w here is d in the equation of the plane, since x = a, y = b, z = c in frustumVec
 		if (s + e < 0)
 		{
 			result = false;

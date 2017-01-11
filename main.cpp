@@ -281,10 +281,10 @@ HWND InitWindow(HINSTANCE hInstance)
 
 	HWND handle = CreateWindow(
 		L"BTH_D3D_DEMO",
-		L"BTH Direct3D Demo",
+		L"1/2: on/off normal map, 3/4: off/on camera locked, 5/6: off/on flight terrain, k/l: move light left/right",
 		WS_OVERLAPPEDWINDOW,
-		XPOS - WIDTH/2,
-		YPOS - HEIGHT/2,
+		0,
+		0,
 		rc.right - rc.left,
 		rc.bottom - rc.top,
 		nullptr,

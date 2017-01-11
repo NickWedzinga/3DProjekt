@@ -37,7 +37,6 @@ public:
 
 private:
 	void setTreeCoordinates(uint start, uint level);
-	float DistanceToPoint(XMVECTOR plane, XMINT3 point);
 	int levels;
 	int firstLeaf;
 	std::vector<Node> tree;

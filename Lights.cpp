@@ -103,10 +103,10 @@ void Lights::Render(ID3D11DeviceContext* gDeviceContext)
 
 void Lights::SetShaderResources(ID3D11DeviceContext * gDeviceContext)
 {
-	gDeviceContext->PSSetShaderResources(3, 1, &lSRV);
+	gDeviceContext->PSSetShaderResources(3, 1, &lSRV); //for deferred
 }
 
-void Lights::update(MSG* msg)
+void Lights::update(MSG* msg) //to move light left/right
 {
 	XMFLOAT3 movePos = XMFLOAT3(1, 0, 0);
 	switch (msg->wParam)
@@ -123,11 +123,7 @@ void Lights::update(MSG* msg)
 		}
 	}
 
-	XMFLOAT3 bajs;
-	XMStoreFloat3(&bajs, lights.position);
-
 	lights.direction = XMLoadFloat3(&XMFLOAT3(0, 0, 0)) - lights.position;
-
 	XMVECTOR right = XMVector3Cross(XMLoadFloat3(&XMFLOAT3(0, 1, 0)), lights.direction);
 	XMVECTOR up = XMVector3Cross(lights.direction, right);
 	lights.View = XMMatrixLookToLH(this->lights.position, lights.direction, up);

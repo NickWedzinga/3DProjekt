@@ -9,7 +9,10 @@ struct PixelInputType
 PixelInputType LightVertexShader(uint id : SV_VERTEXID)
 {
 	PixelInputType output;
+
+	//converts id value to UV & pos
 	output.UV = float2((id == 0 || id == 1), (id == 1 || id == 3));
 	output.pos = float4((id == 0 || id == 1)*2-1, (id == 0 || id == 2)*2-1, 0, 1);
+
 	return output;
 }

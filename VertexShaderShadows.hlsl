@@ -23,24 +23,10 @@ struct VS_OUT
 	int ID : ID;
 };
 
-VS_OUT VS_main(VS_IN input)
-{
-	VS_OUT output;
-
-	output.UV = input.UV;
-	output.normal = float4(input.normal, 0);
-	float4 temp = float4(input.pos, 1);
-	temp = mul(View, temp);
-	temp = mul(Proj, temp);
-	output.pos = temp;
-	output.ID = input.ID;
-
-	return output;
-}
-
 float4 main(VS_IN input) : SV_POSITION
 {
 	float4 temp = float4(input.pos, 1.0f);
+	//no world b/c world is identity
 	temp = mul(View, temp);
 	temp = mul(Proj, temp);
 	return temp;
