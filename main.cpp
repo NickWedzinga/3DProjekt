@@ -145,7 +145,6 @@ void Render()
 	billboard->Render(gDeviceContext);
 
 	//Pipeline 4	//Cube
-
 	cube.Render(gDeviceContext);
 
 	gDeviceContext->PSSetSamplers(0, 1, &cube.sampler);
@@ -155,11 +154,6 @@ void Render()
 	gDeviceContext->Draw(cube.vertices.size(), 0);
 
 	//Pipeline 5 Shadows
-	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	//gDeviceContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	//gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, gDepthStencilView);
-	//gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
-
 	SetShadowViewport();
 	lights->Render(gDeviceContext);
 	
