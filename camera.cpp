@@ -279,6 +279,11 @@ void Camera::CreatePlanes()
 		view = XMMatrixLookToLH(cData.camPos, cData.camDirection, up);
 	}
 
+	//if crash
+	/*cData.ProjMatrix = XMMatrixIdentity();
+	view = XMMatrixIdentity();*/
+
+	//always works without mult., suspect SDK is bugged on some machines
 	XMMATRIX viewProjMatrix = view * cData.ProjMatrix;
 	XMFLOAT4X4 viewProj;
 	XMFLOAT4 temp[6];

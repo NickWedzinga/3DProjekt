@@ -9,7 +9,7 @@
 class Lights
 {
 private:
-	struct lightData		//XMVECTORS ALL THE TIME, CAN'T USE XMFLOAT3!!!!!!
+	struct lightData
 	{
 		XMVECTOR position;
 		XMVECTOR intensity;
@@ -33,6 +33,7 @@ public:
 	void Init(unsigned int lights, Object* cube, ID3D11Device* gDevice);
 	void Render(ID3D11DeviceContext* gDeviceContext);
 	void SetShaderResources(ID3D11DeviceContext* gDeviceContext);
+	void update(MSG* msg);
 
 	ID3D11Buffer* lightBuffer = nullptr;
 };

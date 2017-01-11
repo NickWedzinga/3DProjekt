@@ -22,7 +22,7 @@ void Lights::Init(unsigned int lights, Object* cube, ID3D11Device* gDevice)
 
 	this->lights.direction = XMLoadFloat3(&XMFLOAT3(0,0,0)) - this->lights.position;
 
-	this->lights.Proj = XMMatrixOrthographicLH(SMWIDTH, SMHEIGHT, NEAR, 50);
+	this->lights.Proj = XMMatrixOrthographicLH(WIDTH, HEIGHT, NEAR, 100);
 	XMVECTOR right = XMVector3Cross(XMLoadFloat3(&XMFLOAT3(0, 1, 0)), this->lights.direction);
 	XMVECTOR up = XMVector3Cross(this->lights.direction, right);
 	this->lights.View = XMMatrixLookToLH(this->lights.position, this->lights.direction, up);
@@ -61,8 +61,8 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 {
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
-	textureDesc.Width = SMWIDTH*16;
-	textureDesc.Height = SMHEIGHT*16;
+	textureDesc.Width = SMWIDTH; //cannot be larger than 16384
+	textureDesc.Height = SMHEIGHT; //same as above
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
 	textureDesc.Format = DXGI_FORMAT_R32_TYPELESS;
@@ -78,7 +78,7 @@ void Lights::CreateRenderTargets(ID3D11Device* gDevice)
 	ZeroMemory(&depthDesc, sizeof(depthDesc));
 	depthDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	depthDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	depthDesc.Texture2D.MipSlice;
+	depthDesc.Texture2D.MipSlice = 0;
 	gDevice->CreateDepthStencilView(lT, &depthDesc, &lightsDS);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
@@ -104,4 +104,31 @@ void Lights::Render(ID3D11DeviceContext* gDeviceContext)
 void Lights::SetShaderResources(ID3D11DeviceContext * gDeviceContext)
 {
 	gDeviceContext->PSSetShaderResources(3, 1, &lSRV);
+}
+
+void Lights::update(MSG* msg)
+{
+	XMFLOAT3 movePos = XMFLOAT3(1, 0, 0);
+	switch (msg->wParam)
+	{
+		case 0x4B:
+		{
+			lights.position -= XMLoadFloat3(&movePos);
+			break;
+		}
+		case 0x4C:
+		{
+			lights.position += XMLoadFloat3(&movePos);
+			break;
+		}
+	}
+
+	XMFLOAT3 bajs;
+	XMStoreFloat3(&bajs, lights.position);
+
+	lights.direction = XMLoadFloat3(&XMFLOAT3(0, 0, 0)) - lights.position;
+
+	XMVECTOR right = XMVector3Cross(XMLoadFloat3(&XMFLOAT3(0, 1, 0)), lights.direction);
+	XMVECTOR up = XMVector3Cross(lights.direction, right);
+	lights.View = XMMatrixLookToLH(this->lights.position, lights.direction, up);
 }

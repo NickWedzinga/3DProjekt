@@ -57,8 +57,8 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	float2 shadowmapCoord = float2(position.x * 0.5, position.y * -0.5f) + float2(0.5f, 0.5f); //from -1, 1 to 0, 1
 
-	//float dx = 1.0f / (960.0f*16); //divide by SMAP_WIDTH
-	//float dy = 1.0f / (540.0f*16); //divide by SMAP_HEIGHT
+	//float dx = 1.0f / (960.0f*4); //divide by SMAP_WIDTH
+	//float dy = 1.0f / (540.0f*4); //divide by SMAP_HEIGHT
 
 	float s0 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord).x + epsilon < position.z) ? 0.0f : 1.0f;
 	/*float s1 = (light1Tex.Sample(SampleTypePoint, shadowmapCoord + float2(dx, 0.0f)).x + epsilon < position.z) ? 0.0f : 1.0f;
@@ -67,7 +67,7 @@ float4 LightPixelShader(PixelInputType input) : SV_Target0
 
 	//return float4(s0, 0, 0, 1);
 
-	//float2 texelPos = float2(shadowmapCoord.x * (960.0f*16), shadowmapCoord.y * (540.0f*16)); //.x, .y
+	//float2 texelPos = float2(shadowmapCoord.x * (960.0f*4), shadowmapCoord.y * (540.0f*4)); //.x, .y
 
 	//float2 lerps = frac(texelPos);
 

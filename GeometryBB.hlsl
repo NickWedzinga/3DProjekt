@@ -35,7 +35,7 @@ void GS_main(point GS_IN input[1], inout TriangleStream< GSOutput > output)
 	float3 up = float3(0.0f, 1.0f, 0.0f);
 	float3 left = cross(camToBB, up); //order of cross product gives left rather than right vec
 	left = normalize(left);
-	up = cross(left, camToBB); //-left funkar inte för up blir uppochner
+	up = cross(left, camToBB);
 	up = normalize(up);
 	float scaleFactor = 0.5;
 	if (input[0].ID == 7)

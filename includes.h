@@ -22,8 +22,8 @@
 #define FAR 100.0f
 #define THEIGHT 256
 #define TWIDTH 256.0f
-#define SMWIDTH 960.0f
-#define SMHEIGHT 540.0f
+#define SMWIDTH 960.0f * 16
+#define SMHEIGHT 540.0f * 16
 
 typedef unsigned int uint;
 

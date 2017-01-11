@@ -96,8 +96,8 @@ void SetViewport()
 void SetShadowViewport()
 {
 	D3D11_VIEWPORT vp;
-	vp.Width = (float)SMWIDTH*16;
-	vp.Height = (float)SMHEIGHT*16;
+	vp.Width = (float)SMWIDTH;
+	vp.Height = (float)SMHEIGHT;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
@@ -116,6 +116,11 @@ void Update()
 	gDeviceContext->Map(camera->keyDataBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource2);
 	memcpy(mappedResource2.pData, &camera->keyData, sizeof(camera->keyData));
 	gDeviceContext->Unmap(camera->keyDataBuffer, 0);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource3;
+	gDeviceContext->Map(lights->lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource3);
+	memcpy(mappedResource3.pData, &lights->lights, sizeof(lights->lights));
+	gDeviceContext->Unmap(lights->lightBuffer, 0);
 	
 	camera->CreatePlanes();
 	billboard->used.clear(); //does not work if in qt->culling because culling is recursive
@@ -230,6 +235,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 					gID = deferred.Picking(gDeviceContext);
 				}
 				camera->Update(&msg, terrain->getHeightMapY(XMFLOAT2(camera->getPos().x, camera->getPos().z)));
+				lights->update(&msg);
 			}
 			else
 			{
